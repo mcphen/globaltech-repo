@@ -27,6 +27,12 @@ class HomeController extends Controller
         ]);
     }
 
+    public function homePropect(){
+        return Inertia::render('Front/Prospect/Dashboard', [
+            'contactSettings' => $this->getContactSettings()
+        ]);
+    }
+
 
     public function about(){
         $about = About::first();

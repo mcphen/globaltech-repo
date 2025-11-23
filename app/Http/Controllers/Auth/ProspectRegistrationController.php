@@ -51,7 +51,7 @@ class ProspectRegistrationController extends Controller
             'user_id'    => $user->id,
             'first_name' => $validated['first_name'],
             'last_name'  => $validated['last_name'],
-            'email'      => $validated['email'],
+            //'email'      => $validated['email'],
             'phone'      => $validated['phone'] ?? null,
             'company'    => $validated['company'] ?? null,
             'consent_at' => now(),

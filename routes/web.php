@@ -57,10 +57,12 @@ Route::middleware(['auth'])->group(function () {
     })->name('front.profile.edit');
 });
 
-// Prospect dashboard (lead role) - no email verification required
-Route::get('/prospect/dashboard', function () {
-    return Inertia::render('Front/Prospect/Dashboard');
-})->middleware(['auth'])->name('prospect.dashboard');
+//Prospect dashboard (lead role) - no email verification required
+Route::get('/prospect/dashboard', [HomeController::class,'homePropect']
+)->middleware(['auth'])->name('prospect.dashboard');
+
+
+
 
 Route::get('dashboard', [VisitorTrackerController::class, 'dashboard'])
     ->middleware(['auth', 'verified'])

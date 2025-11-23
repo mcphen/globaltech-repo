@@ -120,14 +120,14 @@ onMounted(() => {
         <div class="bg-primary text-white py-2 hidden md:block">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between items-center">
                 <div class="flex items-center space-x-6">
-                    <div class="flex items-center">
+                    <!-- <div class="flex items-center">
                         <i class="bi bi-telephone mr-1 text-current"></i>
                         <span class="text-sm">{{ contactSettings.contact_phone }}</span>
-                    </div>
-                    <div class="flex items-center" v-if="contactSettings.contact_phone_fixed">
+                    </div> -->
+                    <!-- <div class="flex items-center" v-if="contactSettings.contact_phone_fixed">
                         <i class="bi bi-phone-fill mr-1 text-current"></i>
                         <span class="text-sm">{{ contactSettings.contact_phone_fixed }}</span>
-                    </div>
+                    </div> -->
                     <div class="flex items-center">
                         <i class="bi bi-envelope mr-1 text-current"></i>
                         <span class="text-sm">{{ contactSettings.contact_email }}</span>
