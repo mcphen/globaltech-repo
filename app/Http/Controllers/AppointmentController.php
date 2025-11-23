@@ -109,6 +109,8 @@ class AppointmentController extends Controller
         return Inertia::render('Front/Appointment/Create', [
             'services' => $services,
             'schedules' => $schedules,
+            'contactSettings' => $this->getContactSettings()
+
         ]);
     }
 
@@ -155,7 +157,6 @@ class AppointmentController extends Controller
                     $authUser->lead()->create([
                         'first_name' => $validated['first_name'],
                         'last_name'  => $validated['last_name'],
-                        'email'      => $validated['email'],
                         'phone'      => $validated['phone'] ?? null,
                     ]);
                     $authUser->refresh();
@@ -164,7 +165,6 @@ class AppointmentController extends Controller
                     $authUser->lead->update([
                         'first_name' => $validated['first_name'],
                         'last_name'  => $validated['last_name'],
-                        'email'      => $validated['email'],
                         'phone'      => $validated['phone'] ?? $authUser->lead->phone,
                     ]);
                 }

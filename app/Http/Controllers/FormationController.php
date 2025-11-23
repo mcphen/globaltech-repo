@@ -4,8 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Formation;
 use App\Models\Lead;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class FormationController extends Controller
@@ -237,28 +240,33 @@ class FormationController extends Controller
             'attentes' => 'nullable|string',
         ]);
 
-        // Find existing lead by email (and optionally phone), otherwise create
-        $lead = Lead::where('email', $validated['email'])
-            ->when(!empty($validated['phone']), function ($q) use ($validated) {
-                $q->orWhere('phone', $validated['phone']);
-            })
-            ->first();
+        // Ensure we have a User for this email, then ensure a linked Lead profile
+        $user = User::firstOrCreate(
+            ['email' => $validated['email']],
+            [
+                'name' => trim($validated['first_name'] . ' ' . $validated['last_name']),
+                'role' => User::ROLE_LEAD,
+                'password' => Str::random(32), // hashed by cast on User model
+            ]
+        );
 
-        if (!$lead) {
-            $lead = Lead::create([
+        // Ensure lead exists for this user; if not, create. Update latest info.
+        if (!$user->relationLoaded('lead')) {
+            $user->load('lead');
+        }
+        if (!$user->lead) {
+            $lead = $user->lead()->create([
                 'first_name' => $validated['first_name'],
-                'last_name' => $validated['last_name'],
-                'email' => $validated['email'],
-                'phone' => $validated['phone'] ?? null,
+                'last_name'  => $validated['last_name'],
+                'phone'      => $validated['phone'] ?? null,
             ]);
         } else {
-            // Update lead's latest info
-            $lead->update([
+            $user->lead->update([
                 'first_name' => $validated['first_name'],
-                'last_name' => $validated['last_name'],
-                'email' => $validated['email'],
-                'phone' => $validated['phone'] ?? $lead->phone,
+                'last_name'  => $validated['last_name'],
+                'phone'      => $validated['phone'] ?? $user->lead->phone,
             ]);
+            $lead = $user->lead;
         }
 
         // Attach lead to formation with attentes and default unpaid status (avoid duplicate via unique index)
@@ -270,16 +278,45 @@ class FormationController extends Controller
             ]
         ]);
 
-        return redirect()->back()->with('success', 'Votre participation a été enregistrée. Nous vous contacterons bientôt.');
+        // Authenticate the participant right away
+        Auth::login($user, true);
+
+        // Return JSON for axios calls, fallback to redirect for non-AJAX
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Votre participation a été enregistrée. Vous êtes maintenant connecté.',
+                'redirect' => route('prospect.dashboard'),
+            ], 201);
+        }
+
+        return redirect()->route('prospect.dashboard')
+            ->with('success', 'Votre participation a été enregistrée. Vous êtes maintenant connecté.');
     }
 
     // Admin detail page: show formation and participants
     public function adminShow(Formation $formation)
     {
-        // Load leads with pivot data
-        $formation->load(['leads' => function ($q) {
-            $q->select('leads.id', 'first_name', 'last_name', 'email', 'phone');
-        }]);
+        // Load leads with pivot data and their user (to get email)
+        $formation->load(['leads.user']);
+
+        // Map leads to include email from related user for the front-end shape
+        $mappedLeads = $formation->leads->map(function ($lead) {
+            return [
+                'id' => $lead->id,
+                'first_name' => $lead->first_name,
+                'last_name' => $lead->last_name,
+                'email' => optional($lead->user)->email ?? '',
+                'phone' => $lead->phone,
+                'pivot' => [
+                    'attentes' => $lead->pivot->attentes ?? null,
+                    'status' => $lead->pivot->status ?? null,
+                    'paid_at' => $lead->pivot->paid_at ?? null,
+                ],
+            ];
+        });
+        // Replace relation with mapped array for Inertia serialization
+        $formation->setRelation('leads', $mappedLeads);
 
         // Optionally, get counts
         $leadsCount = $formation->leads()->count();

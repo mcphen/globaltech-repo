@@ -18,6 +18,7 @@ use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\VisitorTrackerController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\FormationController;
+use App\Http\Controllers\LeadFormationController;
 
 
 Route::get('/', [HomeController::class,'index'])->name('home');
@@ -60,6 +61,17 @@ Route::middleware(['auth'])->group(function () {
 //Prospect dashboard (lead role) - no email verification required
 Route::get('/prospect/dashboard', [HomeController::class,'homePropect']
 )->middleware(['auth'])->name('prospect.dashboard');
+
+// Prospect training orders API
+Route::middleware(['auth'])->group(function () {
+    Route::get('/prospect/training-orders', [LeadFormationController::class, 'index'])
+        ->name('prospect.training-orders');
+});
+
+// Prospect profile page
+Route::middleware(['auth'])->group(function () {
+    Route::get('/prospect/profile', [HomeController::class,'prospectProfile'])->name('prospect.profile');
+});
 
 
 

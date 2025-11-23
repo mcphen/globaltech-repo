@@ -150,6 +150,12 @@ onMounted(() => {
                     <a :href="contactSettings.social_instagram" target="_blank" class="hover:text-white/80 transition-colors">
                         <i class="bi bi-instagram text-current text-lg"></i>
                     </a>
+
+                    <template v-if="!auth || !auth.user">
+                        <span class="mx-3 h-4 w-px bg-white/40"></span>
+                        <Link :href="route('login')" class="text-sm text-white hover:text-white/80 font-medium">Se connecter</Link>
+                        <Link :href="route('prospect.register')" class="ml-2 px-3 py-1.5 bg-secondary text-white rounded-md hover:bg-secondary-dark text-sm font-medium transition-colors">S’inscrire</Link>
+                    </template>
                 </div>
 
             </div>
@@ -158,7 +164,7 @@ onMounted(() => {
 
         <!-- Navigation -->
         <header class="w-full bg-white shadow-md sticky top-0 z-50">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="max-w-10xl mx-auto px-4 sm:px-6 lg:px-10">
                 <div class="flex justify-between h-20">
                     <div class="flex items-center">
                         <Link :href="route('home')" class="flex-shrink-0 flex items-center">
@@ -188,6 +194,12 @@ onMounted(() => {
                             Nos Activités
                         </Link>
 
+                        <Link
+                            :href="route('products')"
+                            class="px-3 py-2 text-gray-800 hover:text-secondary font-medium transition-colors"
+                        >
+                            Produits
+                        </Link>
 
                         <Link
                             :href="route('blog')"
@@ -207,7 +219,7 @@ onMounted(() => {
                         >
                             Contact
                         </Link>
-                        <Link
+                        <Link v-if="!auth || !auth.user"
                             :href="route('appointment.create')"
                             class="ml-3 px-6 py-2 bg-secondary text-white rounded-md hover:bg-secondary-dark transition-colors"
                         >
@@ -223,16 +235,11 @@ onMounted(() => {
                             <i class="bi bi-caret-down-fill text-xs text-gray-600"></i>
                         </button>
                         <div v-show="profileMenuOpen" class="absolute right-0 top-12 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-                            <Link :href="route('front.profile.edit')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil</Link>
+                            <Link :href="route('prospect.profile')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil</Link>
                             <Link method="post" :href="route('logout')" as="button" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Se déconnecter</Link>
                         </div>
                     </div>
 
-                    <!-- Right side: Auth links (desktop) for guests -->
-                    <div class="hidden md:flex items-center ml-4" v-if="!auth || !auth.user">
-                        <Link :href="route('login')" class="px-3 py-2 text-gray-800 hover:text-secondary font-medium transition-colors">Se connecter</Link>
-                        <Link :href="route('prospect.register')" class="ml-2 px-4 py-2 bg-secondary text-white rounded-md hover:bg-secondary-dark transition-colors">S’inscrire</Link>
-                    </div>
 
                     <!-- Mobile menu button -->
                     <div class="flex md:hidden items-center">
@@ -330,6 +337,14 @@ onMounted(() => {
                             </Link>
                         </div>
                     </div>
+
+                    <Link
+                        :href="route('products')"
+                        class="block px-4 py-2 text-base font-medium text-gray-700 hover:text-secondary hover:bg-primary-bg-light"
+                        @click="closeMobileMenu"
+                    >
+                        Produits
+                    </Link>
 
                     <Link
                         :href="route('portfolio')"

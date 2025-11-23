@@ -2,6 +2,8 @@
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
 import { computed, ref } from 'vue';
+import axios from 'axios';
+import Swal from 'sweetalert2';
 
 interface Formation {
   id: number;
@@ -38,6 +40,7 @@ const formatDate = (dateString?: string | null) => {
 };
 
 const showForm = ref(false);
+const isSubmitting = ref(false);
 const participateForm = useForm({
   first_name: '',
   last_name: '',
@@ -46,14 +49,61 @@ const participateForm = useForm({
   attentes: ''
 });
 
-function submitParticipation() {
-  participateForm.post(route('formations.participate', props.formation.id), {
-    preserveScroll: true,
-    onSuccess: () => {
-      showForm.value = false;
-      participateForm.reset();
+async function submitParticipation() {
+  try {
+    // Démarrer l'état de soumission
+    isSubmitting.value = true;
+    // Nettoyer les erreurs précédentes si l'API existe
+    if (typeof (participateForm as any).clearErrors === 'function') {
+      (participateForm as any).clearErrors();
     }
-  });
+
+    const payload = {
+      first_name: participateForm.first_name,
+      last_name: participateForm.last_name,
+      email: participateForm.email,
+      phone: participateForm.phone,
+      attentes: participateForm.attentes,
+    };
+
+    const resp = await axios.post(route('formations.participate', props.formation.id), payload);
+
+    await Swal.fire({
+      icon: 'success',
+      title: 'Participation enregistrée',
+      text: 'Votre participation a été enregistrée avec succès.',
+      confirmButtonText: 'OK',
+    });
+
+    // If backend suggests a redirect (and user has been authenticated), follow it
+    if (resp?.data?.redirect) {
+      window.location.href = resp.data.redirect as string;
+      return;
+    }
+
+    showForm.value = false;
+    participateForm.reset();
+  } catch (error: any) {
+    if (error?.response?.status === 422 && error.response.data?.errors) {
+      const errs = error.response.data.errors as Record<string, string[] | string>;
+      for (const [field, messages] of Object.entries(errs)) {
+        const message = Array.isArray(messages) ? messages[0] : messages;
+        if (typeof (participateForm as any).setError === 'function') {
+          (participateForm as any).setError(field, message);
+        }
+      }
+    } else {
+      console.error(error);
+      await Swal.fire({
+        icon: 'error',
+        title: 'Une erreur est survenue',
+        text: "Impossible d'enregistrer votre participation. Veuillez réessayer.",
+        confirmButtonText: 'Fermer',
+      });
+    }
+  } finally {
+    isSubmitting.value = false;
+  }
 }
 
 const publicUrl = computed<string>(() => route('formations.show', props.formation.id));
@@ -196,8 +246,8 @@ async function shareFormation() {
                   <p v-if="participateForm.errors.attentes" class="text-red-600 text-sm mt-1">{{ participateForm.errors.attentes }}</p>
                 </div>
               </div>
-              <button type="submit" :disabled="participateForm.processing" class="px-4 py-2 bg-primary text-white rounded w-full">
-                {{ participateForm.processing ? 'Envoi...' : 'Envoyer' }}
+              <button type="submit" :disabled="isSubmitting" class="px-4 py-2 bg-primary text-white rounded w-full">
+                {{ isSubmitting ? 'Envoi...' : 'Envoyer' }}
               </button>
             </form>
           </div>

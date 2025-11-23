@@ -20,7 +20,9 @@ class ProspectRegistrationController extends Controller
      */
     public function create(): Response
     {
-        return Inertia::render('auth/ProspectRegister');
+        return Inertia::render('auth/ProspectRegister',[
+            'contactSettings' => $this->getContactSettings()
+        ]);
     }
 
     /**

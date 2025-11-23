@@ -13,7 +13,6 @@ class Lead extends Model
         'user_id',
         'first_name',
         'last_name',
-        'email',
         'phone',
         'company',
         'consent_at',
