@@ -14,6 +14,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 
@@ -189,14 +190,12 @@ class AppointmentController extends Controller
                     $lead = $user->lead()->create([
                         'first_name' => $validated['first_name'],
                         'last_name'  => $validated['last_name'],
-                        'email'      => $validated['email'],
                         'phone'      => $validated['phone'] ?? null,
                     ]);
                 } else {
                     $user->lead->update([
                         'first_name' => $validated['first_name'],
                         'last_name'  => $validated['last_name'],
-                        'email'      => $validated['email'],
                         'phone'      => $validated['phone'] ?? $user->lead->phone,
                     ]);
                     $lead = $user->lead;
@@ -209,6 +208,9 @@ class AppointmentController extends Controller
                     // fail silently; consider logging
                     \Log::warning('Unable to send password reset link: ' . $e->getMessage());
                 }
+
+                // Automatically authenticate the guest now that the account exists
+                Auth::login($user, true);
             }
 
             // Transitional: still maintain a Client record for legacy code until we drop it
@@ -249,6 +251,14 @@ class AppointmentController extends Controller
                     \Log::error('Failed to send appointment email: ' . $e->getMessage());
                 }
             });
+
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Votre rendez-vous a été enregistré avec succès.',
+                    'redirect' => route('appointment.confirmation', $appointment->id),
+                ], 201);
+            }
 
             return redirect()->route('appointment.confirmation', $appointment->id)
                 ->with('success', 'Votre rendez-vous a été enregistré avec succès.');

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
-import { computed, ref } from 'vue';
+import { computed, ref, onMounted } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
@@ -49,6 +49,37 @@ const participateForm = useForm({
   attentes: ''
 });
 
+// Auth/participation status
+const isAuthenticated = ref(false);
+const alreadySelected = ref(false);
+const currentStatus = ref<string | null>(null);
+
+const disableIdentityFields = computed(() => isAuthenticated.value && !alreadySelected.value);
+
+onMounted(async () => {
+  try {
+    const resp = await axios.get(route('formations.participation-status', props.formation.id));
+    if (resp?.data) {
+      isAuthenticated.value = !!resp.data.authenticated;
+      if (resp.data.authenticated) {
+        alreadySelected.value = !!resp.data.selected;
+        currentStatus.value = resp.data.status ?? null;
+        const u = resp.data.user || {};
+        if (!alreadySelected.value) {
+          // prefill and lock identity fields
+          participateForm.first_name = u.first_name || '';
+          participateForm.last_name = u.last_name || '';
+          participateForm.email = u.email || '';
+          participateForm.phone = u.phone || '';
+        }
+      }
+    }
+  } catch (e) {
+    // 401/guests simply mean not authenticated
+    console.debug('participation-status failed/guest', e);
+  }
+});
+
 async function submitParticipation() {
   try {
     // Démarrer l'état de soumission
@@ -68,18 +99,35 @@ async function submitParticipation() {
 
     const resp = await axios.post(route('formations.participate', props.formation.id), payload);
 
+    // If backend suggests a redirect (guest flow), follow it immediately
+    if (resp?.data?.redirect) {
+      window.location.href = resp.data.redirect as string;
+      return;
+    }
+
+    // Authenticated flow: mark as selected and show status
+    if (resp?.data?.success) {
+      alreadySelected.value = true;
+      if (resp.data.status) currentStatus.value = resp.data.status as string;
+      await Swal.fire({
+        icon: 'success',
+        title: 'Participation enregistrée',
+        text: 'Votre participation a été enregistrée avec succès.',
+        confirmButtonText: 'OK',
+      });
+      showForm.value = false;
+      // Keep attentes in memory (no need to reset identity fields)
+      participateForm.attentes = '';
+      return;
+    }
+
+    // Fallback success UI
     await Swal.fire({
       icon: 'success',
       title: 'Participation enregistrée',
       text: 'Votre participation a été enregistrée avec succès.',
       confirmButtonText: 'OK',
     });
-
-    // If backend suggests a redirect (and user has been authenticated), follow it
-    if (resp?.data?.redirect) {
-      window.location.href = resp.data.redirect as string;
-      return;
-    }
 
     showForm.value = false;
     participateForm.reset();
@@ -209,35 +257,43 @@ async function shareFormation() {
             </ul>
 
             <div class="mt-6 space-y-3">
-              <button @click="showForm = !showForm" class="inline-block w-full text-center px-4 py-2 bg-secondary text-white rounded-md hover:bg-secondary-dark">
-                {{ showForm ? 'Fermer' : 'Participer' }}
-              </button>
+              <template v-if="alreadySelected">
+                <div class="p-4 border rounded bg-gray-50">
+                  <p class="text-sm text-gray-700">Vous avez déjà choisi cette formation.</p>
+                  <p class="mt-1 text-sm"><span class="font-medium">Statut:</span> <span class="uppercase">{{ currentStatus || '—' }}</span></p>
+                </div>
+              </template>
+              <template v-else>
+                <button @click="showForm = !showForm" class="inline-block w-full text-center px-4 py-2 bg-secondary text-white rounded-md hover:bg-secondary-dark">
+                  {{ showForm ? 'Fermer' : 'Participer' }}
+                </button>
+              </template>
               <button type="button" @click="shareFormation" class="inline-block w-full text-center px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-md">
                 Partager
               </button>
               <Link :href="route('contact')" class="inline-block w-full text-center px-4 py-2 border border-secondary text-secondary rounded-md hover:bg-secondary/10">Nous contacter</Link>
             </div>
 
-            <form v-if="showForm" @submit.prevent="submitParticipation" class="mt-4 space-y-3">
+            <form v-if="showForm && !alreadySelected" @submit.prevent="submitParticipation" class="mt-4 space-y-3">
               <div class="grid grid-cols-1 gap-3">
                 <div>
                   <label class="block text-sm font-medium mb-1">Prénom</label>
-                  <input v-model="participateForm.first_name" type="text" class="w-full px-3 py-2 border rounded" required />
+                  <input v-model="participateForm.first_name" type="text" class="w-full px-3 py-2 border rounded" :disabled="disableIdentityFields" required />
                   <p v-if="participateForm.errors.first_name" class="text-red-600 text-sm mt-1">{{ participateForm.errors.first_name }}</p>
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1">Nom</label>
-                  <input v-model="participateForm.last_name" type="text" class="w-full px-3 py-2 border rounded" required />
+                  <input v-model="participateForm.last_name" type="text" class="w-full px-3 py-2 border rounded" :disabled="disableIdentityFields" required />
                   <p v-if="participateForm.errors.last_name" class="text-red-600 text-sm mt-1">{{ participateForm.errors.last_name }}</p>
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1">Email</label>
-                  <input v-model="participateForm.email" type="email" class="w-full px-3 py-2 border rounded" required />
+                  <input v-model="participateForm.email" type="email" class="w-full px-3 py-2 border rounded" :disabled="disableIdentityFields" required />
                   <p v-if="participateForm.errors.email" class="text-red-600 text-sm mt-1">{{ participateForm.errors.email }}</p>
                 </div>
                 <div>
                   <label class="block text-sm font-medium mb-1">Téléphone</label>
-                  <input v-model="participateForm.phone" type="text" class="w-full px-3 py-2 border rounded" />
+                  <input v-model="participateForm.phone" type="text" class="w-full px-3 py-2 border rounded" :disabled="disableIdentityFields" />
                   <p v-if="participateForm.errors.phone" class="text-red-600 text-sm mt-1">{{ participateForm.errors.phone }}</p>
                 </div>
                 <div>

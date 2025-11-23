@@ -229,7 +229,7 @@ class FormationController extends Controller
         ]);
     }
 
-    // Handle participation form submission (public)
+    // Handle participation form submission (public or authenticated)
     public function participate(Request $request, Formation $formation)
     {
         $validated = $request->validate([
@@ -240,7 +240,59 @@ class FormationController extends Controller
             'attentes' => 'nullable|string',
         ]);
 
-        // Ensure we have a User for this email, then ensure a linked Lead profile
+        $authUser = Auth::user();
+
+        if ($authUser) {
+            // If user is authenticated, use their account and lead; do not override identity
+            $authUser->loadMissing('lead');
+            if (!$authUser->lead) {
+                $lead = $authUser->lead()->create([
+                    'first_name' => $validated['first_name'],
+                    'last_name'  => $validated['last_name'],
+                    'phone'      => $validated['phone'] ?? null,
+                ]);
+            } else {
+                // Optionally keep phone up to date if provided
+                if (!empty($validated['phone'])) {
+                    $authUser->lead->update([
+                        'phone' => $validated['phone'],
+                    ]);
+                }
+                $lead = $authUser->lead;
+            }
+
+            // Attach or update attentes on pivot
+            $existing = $lead->formations()->where('formation_id', $formation->id)->first();
+            $payload = [
+                'attentes' => $validated['attentes'] ?? ($existing?->pivot?->attentes ?? null),
+            ];
+            // Preserve status if exists; otherwise set unpaid by default
+            if ($existing && $existing->pivot && !empty($existing->pivot->status)) {
+                $payload['status'] = $existing->pivot->status;
+                $payload['paid_at'] = $existing->pivot->paid_at;
+            } else {
+                $payload['status'] = 'unpaid';
+                $payload['paid_at'] = null;
+            }
+
+            $lead->formations()->syncWithoutDetaching([
+                $formation->id => $payload,
+            ]);
+
+            // Return JSON indicating current status
+            if ($request->expectsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Votre participation a été enregistrée.',
+                    'selected' => true,
+                    'status' => $payload['status'],
+                ], 200);
+            }
+
+            return back()->with('success', 'Votre participation a été enregistrée.');
+        }
+
+        // GUEST flow: Ensure we have a User for this email, then ensure a linked Lead profile
         $user = User::firstOrCreate(
             ['email' => $validated['email']],
             [
@@ -292,6 +344,50 @@ class FormationController extends Controller
 
         return redirect()->route('prospect.dashboard')
             ->with('success', 'Votre participation a été enregistrée. Vous êtes maintenant connecté.');
+    }
+
+    // Return current authenticated user's participation status for a formation
+    public function participationStatus(Request $request, Formation $formation)
+    {
+        $user = Auth::user();
+        if (!$user) {
+            return response()->json(['authenticated' => false], 200);
+        }
+        $user->loadMissing('lead');
+        $lead = $user->lead;
+        $selected = false;
+        $status = null;
+        $attentes = null;
+        if ($lead) {
+            $relation = $lead->formations()->where('formation_id', $formation->id)->first();
+            if ($relation) {
+                $selected = true;
+                $status = $relation->pivot->status ?? null;
+                $attentes = $relation->pivot->attentes ?? null;
+            }
+        }
+
+        // Try to split first and last name from user name
+        $fullName = $user->name ?? '';
+        $fn = null; $ln = null;
+        if ($fullName) {
+            $parts = preg_split('/\s+/', trim($fullName));
+            $fn = $parts[0] ?? null;
+            $ln = isset($parts[1]) ? implode(' ', array_slice($parts, 1)) : null;
+        }
+
+        return response()->json([
+            'authenticated' => true,
+            'selected' => $selected,
+            'status' => $status,
+            'attentes' => $attentes,
+            'user' => [
+                'first_name' => $lead?->first_name ?? $fn,
+                'last_name' => $lead?->last_name ?? $ln,
+                'email' => $user->email,
+                'phone' => $lead?->phone,
+            ],
+        ]);
     }
 
     // Admin detail page: show formation and participants

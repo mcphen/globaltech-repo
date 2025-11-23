@@ -36,13 +36,14 @@ Route::get('/{id}/blog', [HomeController::class, 'blogShow'])->name('blog.show')
 // Public formations routes
 Route::get('/formations', [FormationController::class, 'frontIndex'])->name('formations');
 Route::get('/formations/{slug}', [FormationController::class, 'show'])->name('formations.show');
+Route::get('/formations/{formation}/participation-status', [FormationController::class, 'participationStatus'])->name('formations.participation-status');
 Route::post('/formations/{formation}/participate', [FormationController::class, 'participate'])->name('formations.participate');
 
 // Contact routes
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
-// Appointment booking routes
+// Appointment booking routes (public: guests can book and will be connected at the end)
 Route::get('/appointment', [AppointmentController::class, 'create'])->name('appointment.create');
 Route::post('/appointment', [AppointmentController::class, 'store'])->name('appointment.store');
 Route::get('/appointment/{appointment}/confirmation', [AppointmentController::class, 'confirmation'])->name('appointment.confirmation');
