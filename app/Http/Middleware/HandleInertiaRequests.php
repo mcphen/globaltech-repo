@@ -39,6 +39,18 @@ class HandleInertiaRequests extends Middleware
     {
         [$message, $author] = str(Inspiring::quotes()->random())->explode('-');
 
+        // Build shared cart data from session
+        $cart = session()->get('cart', []);
+        $subtotal = 0;
+        $count = 0;
+        foreach ($cart as $item) {
+            $qty = (int)($item['quantity'] ?? 1);
+            $price = (float)($item['price'] ?? 0);
+            $subtotal += $qty * $price;
+            $count += $qty;
+        }
+        $total = $subtotal; // No extra fees for now
+
         return [
             ...parent::share($request),
             'name' => config('app.name'),
@@ -51,6 +63,12 @@ class HandleInertiaRequests extends Middleware
                 'location' => $request->url(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'cart' => [
+                'items' => array_values($cart),
+                'count' => $count,
+                'subtotal' => $subtotal,
+                'total' => $total,
+            ],
         ];
     }
 }

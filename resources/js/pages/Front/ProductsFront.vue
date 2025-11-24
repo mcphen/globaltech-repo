@@ -97,6 +97,15 @@ onMounted(() => {
     script.textContent = JSON.stringify(productsJsonLd.value);
     document.head.appendChild(script);
 });
+
+// Add to cart
+const addToCart = (productId: number, quantity: number = 1) => {
+    router.post(route('cart.add', { id: productId }), { quantity }, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => router.reload({ only: ['cart'] })
+    });
+};
 </script>
 
 <template>
@@ -225,12 +234,26 @@ onMounted(() => {
                             <h3 class="text-lg font-medium text-gray-900 mb-2">{{ product.title }}</h3>
                             <p class="text-primary font-bold mb-2">{{ formatPrice(product.price) }}</p>
                             <p class="text-gray-600 text-sm mb-4 line-clamp-3">{{ product.description }}</p>
-                            <Link
-                                :href="route('appointment.create')"
-                                class="block w-full text-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
-                            >
-                                Prendre rendez-vous
-                            </Link>
+                            <div class="flex flex-col gap-2">
+                                <Link
+                                    :href="route('product.show', { id: product.id })"
+                                    class="w-full text-center px-4 py-2 bg-white text-primary border border-primary rounded-md hover:bg-gray-50 transition-colors"
+                                >
+                                    Voir plus
+                                </Link>
+                                <button
+                                    @click="addToCart(product.id)"
+                                    class="w-full text-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
+                                >
+                                    Ajouter au panier
+                                </button>
+                                <Link
+                                    :href="route('appointment.create')"
+                                    class="w-full text-center px-4 py-2 bg-secondary text-white rounded-md hover:opacity-90 transition-colors hidden"
+                                >
+                                    Prendre rendez-vous
+                                </Link>
+                            </div>
                         </div>
                     </div>
                 </div>

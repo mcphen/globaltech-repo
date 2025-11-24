@@ -47,11 +47,42 @@ interface ContactSettings {
 const page = usePage();
 const contactSettings = computed<ContactSettings>(() => page.props.contactSettings as ContactSettings);
 
+// Shared cart from Inertia props
+const cart = computed<any>(() => (page.props as any).cart ?? { items: [], count: 0, subtotal: 0, total: 0 });
+
 // Authenticated user (from shared Inertia props)
 const auth = computed<any>(() => (page.props as any).auth);
 
 // Profile dropdown state
 const profileMenuOpen = ref(false);
+
+// Cart dropdown state
+const cartMenuOpen = ref(false);
+const toggleCartMenu = () => {
+    cartMenuOpen.value = !cartMenuOpen.value;
+};
+const closeCartMenu = () => {
+    cartMenuOpen.value = false;
+};
+
+// Cart actions
+const removeFromCart = (id: number) => {
+    router.post(route('cart.remove', { id }), {}, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => router.reload({ only: ['cart'] })
+    });
+};
+const clearCart = () => {
+    router.post(route('cart.clear'), {}, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => router.reload({ only: ['cart'] })
+    });
+};
+const checkoutCart = () => {
+    router.post(route('cart.checkout'));
+};
 
 const toggleDropdown = (menu: keyof typeof dropdownStates.value) => {
     dropdownStates.value[menu] = !dropdownStates.value[menu];
@@ -227,16 +258,58 @@ onMounted(() => {
                         </Link>
                     </nav>
 
-                    <!-- Right side: Profile menu (desktop) -->
-                    <div class="hidden md:flex items-center ml-4 relative" v-if="auth && auth.user">
-                        <button @click="profileMenuOpen = !profileMenuOpen" class="flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-primary-bg-light">
-                            <i class="bi bi-person-circle text-xl text-gray-800"></i>
-                            <span class="text-gray-800 font-medium">{{ auth.user.name }}</span>
-                            <i class="bi bi-caret-down-fill text-xs text-gray-600"></i>
-                        </button>
-                        <div v-show="profileMenuOpen" class="absolute right-0 top-12 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
-                            <Link :href="route('prospect.profile')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil</Link>
-                            <Link method="post" :href="route('logout')" as="button" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Se déconnecter</Link>
+                    <!-- Right side: Cart + Profile (desktop) -->
+                    <div class="hidden md:flex items-center ml-4 space-x-4 relative">
+                        <!-- Cart Icon and dropdown -->
+                        <div class="relative">
+                            <button @click="toggleCartMenu" class="relative px-3 py-2 rounded-md hover:bg-primary-bg-light flex items-center">
+                                <i class="bi bi-cart3 text-xl text-gray-800"></i>
+                                <span v-if="cart.count > 0" class="ml-2 inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold leading-4 rounded-full bg-secondary text-white">
+                                    {{ cart.count }}
+                                </span>
+                            </button>
+                            <div v-show="cartMenuOpen" class="absolute right-0 top-12 w-80 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                                <div class="p-3 border-b flex items-center justify-between">
+                                    <span class="font-semibold">Panier</span>
+                                    <button v-if="cart.items.length" @click="clearCart" class="text-xs text-gray-600 hover:underline">Vider</button>
+                                </div>
+                                <div v-if="!cart.items.length" class="p-4 text-sm text-gray-600">Votre panier est vide.</div>
+                                <ul v-else class="max-h-80 overflow-auto divide-y">
+                                    <li v-for="item in cart.items" :key="item.id" class="p-3 flex items-center gap-3">
+                                        <img v-if="item.image_url" :src="item.image_url" :alt="item.title" class="w-12 h-12 object-cover rounded" />
+                                        <div class="flex-1">
+                                            <div class="text-sm font-medium text-gray-900 line-clamp-1">{{ item.title }}</div>
+                                            <div class="text-xs text-gray-600">x{{ item.quantity }} — {{ new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(item.price) }}</div>
+                                        </div>
+                                        <button @click="removeFromCart(item.id)" class="text-red-600 hover:text-red-700" title="Retirer">
+                                            <i class="bi bi-x-circle"></i>
+                                        </button>
+                                    </li>
+                                </ul>
+                                <div class="p-3 border-t">
+                                    <div class="flex justify-between text-sm mb-3">
+                                        <span>Sous-total</span>
+                                        <span>{{ new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(cart.subtotal) }}</span>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <Link :href="route('cart.index')" class="flex-1 px-3 py-2 text-center border border-primary text-primary rounded-md hover:bg-primary-bg-light" @click="closeCartMenu">Voir panier</Link>
+                                        <button @click="checkoutCart" class="flex-1 px-3 py-2 bg-primary text-white rounded-md hover:bg-primary-dark">Valider</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Profile menu (desktop) -->
+                        <div class="relative" v-if="auth && auth.user">
+                            <button @click="profileMenuOpen = !profileMenuOpen" class="flex items-center space-x-2 px-3 py-2 rounded-md hover:bg-primary-bg-light">
+                                <i class="bi bi-person-circle text-xl text-gray-800"></i>
+                                <span class="text-gray-800 font-medium">{{ auth.user.name }}</span>
+                                <i class="bi bi-caret-down-fill text-xs text-gray-600"></i>
+                            </button>
+                            <div v-show="profileMenuOpen" class="absolute right-0 top-12 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
+                                <Link :href="route('prospect.profile')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil</Link>
+                                <Link method="post" :href="route('logout')" as="button" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Se déconnecter</Link>
+                            </div>
                         </div>
                     </div>
 

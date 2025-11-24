@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
 import { ref, computed, onMounted } from 'vue';
 
@@ -22,6 +22,17 @@ onMounted(() => {
     script.textContent = JSON.stringify(productJsonLd.value);
     document.head.appendChild(script);
 });
+
+// Cart: quantity and add
+const quantity = ref<number>(1);
+const addToCart = () => {
+    const q = Math.max(1, Number(quantity.value) || 1);
+    router.post(route('cart.add', { id: props.product.id }), { quantity: q }, {
+        preserveScroll: true,
+        preserveState: true,
+        onSuccess: () => router.reload({ only: ['cart'] })
+    });
+};
 
 // Format price with currency
 const formatPrice = (price) => {
@@ -121,19 +132,39 @@ const productJsonLd = computed(() => {
                                 <p v-html="product.description"></p>
                             </div>
 
-                            <div class="flex flex-col sm:flex-row gap-4">
-                                <Link
-                                    :href="route('appointment.create')"
-                                    class="px-8 py-3 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors font-medium text-center"
-                                >
-                                    Prendre rendez-vous
-                                </Link>
-                                <Link
-                                    :href="route('contact')"
-                                    class="px-8 py-3 bg-white text-primary border border-primary rounded-full hover:bg-gray-50 transition-colors font-medium text-center"
-                                >
-                                    Nous contacter
-                                </Link>
+                            <div class="flex flex-col gap-4">
+                                <div class="flex items-center gap-3">
+                                    <label for="qty" class="text-sm text-gray-700">Quantité</label>
+                                    <input id="qty" type="number" min="1" v-model.number="quantity" class="w-24 border rounded px-3 py-2" />
+                                </div>
+                                <div class="flex flex-col sm:flex-row gap-4">
+                                    <button
+                                        @click="addToCart"
+                                        class="px-8 py-3 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors font-medium text-center"
+                                    >
+                                        Ajouter au panier
+                                    </button>
+                                    <Link
+                                        :href="route('cart.index')"
+                                        class="px-8 py-3 bg-white text-primary border border-primary rounded-full hover:bg-gray-50 transition-colors font-medium text-center"
+                                    >
+                                        Aller au panier
+                                    </Link>
+                                </div>
+                                <div class="flex flex-col sm:flex-row gap-4">
+                                    <Link
+                                        :href="route('appointment.create')"
+                                        class="px-8 py-3 bg-gray-800 text-white rounded-full hover:opacity-90 transition-colors font-medium text-center hidden"
+                                    >
+                                        Prendre rendez-vous
+                                    </Link>
+                                    <Link
+                                        :href="route('contact')"
+                                        class="px-8 py-3 bg-white text-primary border border-primary rounded-full hover:bg-gray-50 transition-colors font-medium text-center hidden"
+                                    >
+                                        Nous contacter
+                                    </Link>
+                                </div>
                             </div>
                         </div>
                     </div>

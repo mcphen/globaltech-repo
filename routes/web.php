@@ -19,6 +19,7 @@ use App\Http\Controllers\VisitorTrackerController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\FormationController;
 use App\Http\Controllers\LeadFormationController;
+use App\Http\Controllers\CartController;
 
 
 Route::get('/', [HomeController::class,'index'])->name('home');
@@ -47,6 +48,14 @@ Route::post('/contact', [ContactController::class, 'store'])->name('contact.stor
 Route::get('/appointment', [AppointmentController::class, 'create'])->name('appointment.create');
 Route::post('/appointment', [AppointmentController::class, 'store'])->name('appointment.store');
 Route::get('/appointment/{appointment}/confirmation', [AppointmentController::class, 'confirmation'])->name('appointment.confirmation');
+
+// Cart routes (session-based)
+Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
+Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
+Route::post('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
+Route::post('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
+Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
+Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
 
 // Front Profile pages (requires authentication)
 Route::middleware(['auth'])->group(function () {
