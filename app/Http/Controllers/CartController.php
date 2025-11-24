@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Product;
+use App\Models\Order;
+use App\Models\OrderItem;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 
 class CartController extends Controller
@@ -100,13 +103,64 @@ class CartController extends Controller
 
     public function checkout(Request $request)
     {
-        // For this simple session cart, we only clear and show a confirmation.
         $cart = $this->getCart();
+        if (empty($cart)) {
+            return back()->with('error', 'Votre panier est vide.');
+        }
+
+        // Optional customer info for guest checkout
+        $data = $request->validate([
+            'customer_name' => 'nullable|string|max:255',
+            'customer_email' => 'nullable|email|max:255',
+            'customer_phone' => 'nullable|string|max:50',
+            'notes' => 'nullable|string',
+        ]);
+
         $totals = $this->totals($cart);
+
+        $order = DB::transaction(function () use ($cart, $totals, $data) {
+            $order = Order::create([
+                'user_id' => auth()->id(),
+                'items_count' => $totals['count'],
+                'subtotal' => $totals['subtotal'],
+                'total' => $totals['total'],
+                'currency' => 'EUR',
+                'status' => 'pending',
+                'customer_name' => $data['customer_name'] ?? null,
+                'customer_email' => $data['customer_email'] ?? null,
+                'customer_phone' => $data['customer_phone'] ?? null,
+                'notes' => $data['notes'] ?? null,
+            ]);
+
+            foreach ($cart as $item) {
+                $qty = (int)($item['quantity'] ?? 1);
+                $price = (float)($item['price'] ?? 0);
+                OrderItem::create([
+                    'order_id' => $order->id,
+                    'product_id' => $item['id'] ?? null,
+                    'title' => $item['title'] ?? 'Article',
+                    'price' => $price,
+                    'quantity' => $qty,
+                    'line_total' => $price * $qty,
+                    'data' => [
+                        'image_url' => $item['image_url'] ?? null,
+                    ],
+                ]);
+            }
+
+            return $order;
+        });
+
+        // Clear the cart after order creation
         $this->putCart([]);
 
         return Inertia::render('Front/CartConfirmationFront', [
             'total' => $totals['total'],
+            'order' => [
+                'id' => $order->id,
+                'status' => $order->status,
+                'items_count' => $order->items_count,
+            ],
             'contactSettings' => app(HomeController::class)->getContactSettings(),
         ]);
     }
