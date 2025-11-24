@@ -14,7 +14,7 @@ defineProps<Props>();
 
 <template>
     <div class="flex items-center">
-        <img :src="'/images/logo.jpg'" class="h-10 w-auto" alt="NG Consulting">
+        <img :src="'/images/logotongolo.jpg'" class="h-20 w-auto" alt="NG Consulting">
 
     </div>
 </template>

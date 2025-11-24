@@ -19,23 +19,22 @@
                 <div class="flex items-center bg-primary-dark">
                     <div class="p-12 max-w-xl">
                         <h1 class="text-3xl font-serif font-bold text-white mb-6">
-                            Présentation de NG CONSULTING
+                            Présentation de TONGOLO TECH
                         </h1>
                         <div class="prose prose-lg text-white/90">
                             <p>
-                                NG CONSULTING, fondée en 2024, est une société de conseil spécialisée dans
-                                l'accompagnement stratégique, comptable et opérationnel des entreprises.
+                                 Créée en 2015, TONGOLO Tech (l’Etoile de la technologie) est une société à responsabilité limitée 
+                                (SARL) dont le siège social est à Dakar, Fass Paillote.
                             </p>
                             <p>
-                                Animée par une vision d'excellence et d'engagement, notre mission est de fournir des
-                                solutions personnalisées et efficaces pour renforcer la performance, la gouvernance
-                                et la croissance durable de nos clients.
+                                 Elle est spécialisée dans l’Ingénierie, les prestations de services, la fourniture d’équipements et la 
+maintenance
                             </p>
-                            <p>
+                            <!-- <p>
                                 Forts de notre expertise multisectorielle, nous intervenons dans quatre domaines
                                 clés : le conseil stratégique, l'assistance comptable, l'audit financier et la
                                 gouvernance & gestion des risques.
-                            </p>
+                            </p> -->
                         </div>
                         <div class="mt-8 flex flex-wrap gap-4">
                             <Link
@@ -72,17 +71,16 @@
             <!-- Content -->
             <div class="bg-primary-dark p-6">
                 <h1 class="text-2xl font-serif font-bold text-white mb-4">
-                    Présentation de NG CONSULTING
+                    Présentation de TONGOLO TECH
                 </h1>
                 <div class="prose prose-sm text-white/90">
                     <p>
-                        NG CONSULTING, fondée en 2024, est une société de conseil spécialisée dans
-                        l'accompagnement stratégique, comptable et opérationnel des entreprises.
+                         Créée en 2015, TONGOLO Tech (l’Etoile de la technologie) est une société à responsabilité limitée 
+                        (SARL) dont le siège social est à Dakar, Fass Paillote.
                     </p>
                     <p>
-                        Animée par une vision d'excellence et d'engagement, notre mission est de fournir des
-                        solutions personnalisées et efficaces pour renforcer la performance, la gouvernance
-                        et la croissance durable de nos clients.
+                         Elle est spécialisée dans l’Ingénierie, les prestations de services, la fourniture d’équipements et la 
+maintenance
                     </p>
                 </div>
                 <div class="mt-6 flex flex-wrap gap-3">
