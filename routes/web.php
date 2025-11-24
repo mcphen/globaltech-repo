@@ -19,6 +19,7 @@ use App\Http\Controllers\VisitorTrackerController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\FormationController;
 use App\Http\Controllers\LeadFormationController;
+use App\Http\Controllers\ProductOrderController;
 use App\Http\Controllers\CartController;
 
 
@@ -72,10 +73,12 @@ Route::middleware(['auth'])->group(function () {
 Route::get('/prospect/dashboard', [HomeController::class,'homePropect']
 )->middleware(['auth'])->name('prospect.dashboard');
 
-// Prospect training orders API
+// Prospect orders APIs (requires auth)
 Route::middleware(['auth'])->group(function () {
     Route::get('/prospect/training-orders', [LeadFormationController::class, 'index'])
         ->name('prospect.training-orders');
+    Route::get('/prospect/product-orders', [ProductOrderController::class, 'index'])
+        ->name('prospect.product-orders');
 });
 
 // Prospect profile page

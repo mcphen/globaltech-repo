@@ -15,9 +15,23 @@ const activeTab = ref<'rendezvous' | 'produits' | 'formations'>('rendezvous');
 
 // Data coming from Inertia page props (fallback to empty arrays)
 const appointments = computed<any[]>(() => ((page.props as any).appointments ?? []));
-const productOrders = computed<any[]>(() => ((page.props as any).productOrders ?? (page.props as any).ordersProducts ?? []));
+const productOrders = ref<any[]>([]);
+const loadingProductOrders = ref(false);
 const trainingOrders = ref<any[]>([]);
 const loadingTrainingOrders = ref(false);
+
+const loadProductOrders = async () => {
+  try {
+    loadingProductOrders.value = true;
+    const { data } = await axios.get(route('prospect.product-orders'));
+    productOrders.value = Array.isArray(data) ? data : [];
+  } catch (e) {
+    console.error('Failed to load product orders', e);
+    productOrders.value = [];
+  } finally {
+    loadingProductOrders.value = false;
+  }
+};
 
 const loadTrainingOrders = async () => {
   try {
@@ -33,6 +47,7 @@ const loadTrainingOrders = async () => {
 };
 
 onMounted(() => {
+  loadProductOrders();
   loadTrainingOrders();
 });
 </script>
