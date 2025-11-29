@@ -90,47 +90,57 @@ const breadcrumbItems = [
 
     <LayoutFront>
         <!-- Bannière du breadcrumb avec image de fond -->
-        <div class="relative bg-gray-900">
-            <!-- Image d'arrière-plan avec overlay -->
-            <div class="absolute inset-0 overflow-hidden">
-                <img src="/images/breadcrumb-bg.jpg" alt="Bannière Contact" class="w-full h-full object-cover object-center opacity-40">
-                <div class="absolute inset-0 bg-gradient-to-r from-primary/50 to-primary/30"></div>
-            </div>
+        <div class="relative bg-primary-bg-light py-16 overflow-hidden">
+        <!-- Image de fond avec overlay -->
+        <div class="absolute inset-0 z-0">
+            <img 
+            src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80" 
+            alt="Technology Background" 
+            class="w-full h-full object-cover"
+            />
+            <!-- Overlay gradient pour améliorer la lisibilité -->
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-900/85 via-blue-800/75 to-purple-900/85"></div>
+        </div>
+        
+        <!-- Contenu en avant-plan -->
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
+            <h1 class="text-4xl md:text-5xl font-serif font-bold text-white text-center mb-4 drop-shadow-lg">
+            Contact
+            </h1>
 
-            <!-- Contenu du breadcrumb -->
-            <div class="relative max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
-                <h1 class="text-4xl md:text-5xl font-serif font-bold text-white text-center mb-4">Contact</h1>
+            <!-- Breadcrumb navigation -->
+            <nav class="flex" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-2">
+                <li v-for="(item, index) in breadcrumbItems" :key="item.name">
+                <div class="flex items-center">
+                    <Link
+                    :href="item.href"
+                    :class="[
+                        item.current ? 'text-white font-medium' : 'text-white/80 hover:text-white',
+                        'text-sm md:text-base transition-colors drop-shadow-md'
+                    ]"
+                    >
+                    {{ item.name }}
+                    </Link>
 
-                <!-- Breadcrumb navigation -->
-                <nav class="flex" aria-label="Breadcrumb">
-                    <ol class="flex items-center space-x-2">
-                        <li v-for="(item, index) in breadcrumbItems" :key="item.name">
-                            <div class="flex items-center">
-                                <Link
-                                    :href="item.href"
-                                    :class="[
-                                        item.current ? 'text-white font-medium' : 'text-white/80 hover:text-white',
-                                        'text-sm md:text-base transition-colors'
-                                    ]"
-                                >
-                                    {{ item.name }}
-                                </Link>
-
-                                <!-- Séparateur, sauf pour le dernier élément -->
-                                <svg
-                                    v-if="index !== breadcrumbItems.length - 1"
-                                    class="h-5 w-5 text-white/70 mx-2"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </div>
-                        </li>
-                    </ol>
-                </nav>
-            </div>
+                    <!-- Séparateur, sauf pour le dernier élément -->
+                    <svg
+                    v-if="index !== breadcrumbItems.length - 1"
+                    class="h-5 w-5 text-white/70 mx-2 drop-shadow-md"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+                </li>
+            </ol>
+            </nav>
+        </div>
+        
+        <!-- Élément décoratif -->
+        <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent"></div>
         </div>
 
         <div class="py-12 bg-white">
@@ -139,9 +149,10 @@ const breadcrumbItems = [
                 <section class="mb-16">
                     <h2 class="text-3xl font-serif font-bold text-center text-primary mb-3">Contactez-nous</h2>
                     <div class="w-24 h-1 bg-primary mx-auto mb-8"></div>
-                    <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">
-                        Vous avez des questions ou souhaitez discuter de votre projet de mariage ? N'hésitez pas à nous contacter en remplissant le formulaire ci-dessous.
+                   <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">
+                        Vous avez des questions ou souhaitez discuter de vos projets en ingénierie, télécommunications ou réseaux ? Contactez notre équipe TONGOLO TECH dès maintenant, soit en remplissant le formulaire ci-dessous, soit en nous appelant directement. Nous vous répondrons rapidement.
                     </p>
+
 
                     <div class="bg-white shadow-lg rounded-lg overflow-hidden max-w-4xl mx-auto">
                         <!-- Success message -->

@@ -2,18 +2,35 @@
 import { Head, Link } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
 import { ref, watch, computed, onMounted } from 'vue';
-import { debounce } from 'lodash';
+import debounce from 'lodash/debounce';
 import { router } from '@inertiajs/vue3';
 
+
+
+interface Product {
+  id: number;
+  title: string;
+  description: string;
+  image_path: string | null;
+  price: number;
+}
+
 // Define props
-const props = defineProps({
-    products: {
-        type: Object,
-        required: true
-    },
-    filters: Object,
-    contactSettings: Object
-});
+const props = defineProps<{
+  products: {
+    data: Product[];
+    links?: any;
+    meta?: any;
+  };
+  filters?: {
+    search?: string;
+    min_price?: string;
+    max_price?: string;
+    sort?: string;
+  };
+  contactSettings?: any;
+}>();
+
 
 // Initialize filter states
 const search = ref(props.filters?.search || '');
@@ -63,6 +80,22 @@ const productsJsonLd = computed(() => {
 const formatPrice = (price: number) => {
     return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(price);
 };
+
+// Extraire le texte brut du HTML et le tronquer à 100 caractères
+function stripAndTruncateHtml(html: string | null, limit = 100): string {
+    if (!html) return '';
+
+    const tempDiv = document.createElement("div");
+    tempDiv.innerHTML = html;
+    const text = tempDiv.textContent || tempDiv.innerText || "";
+
+    // Tronquer
+    if (text.length > limit) {
+        return text.substring(0, limit) + "...";
+    }
+
+    return text;
+}
 
 // Apply filters with debounce
 const applyFilters = debounce(() => {
@@ -130,14 +163,40 @@ const addToCart = (productId: number, quantity: number = 1) => {
         </Head>
 
         <!-- En-tête de la page -->
-        <div class="bg-primary-bg-light py-16">
+
+        <div class="relative bg-primary-bg-light py-16 overflow-hidden">
+        <!-- Image de fond avec overlay -->
+        <div class="absolute inset-0 z-0">
+            <img 
+            src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80" 
+            alt="Technology Background" 
+            class="w-full h-full object-cover"
+            />
+            <!-- Overlay gradient pour améliorer la lisibilité -->
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-900/85 via-blue-800/75 to-purple-900/85"></div>
+        </div>
+        
+        <!-- Contenu en avant-plan -->
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+            <h1 class="text-4xl md:text-5xl font-serif font-bold text-white mb-4 drop-shadow-lg">
+                Nos Produits
+            </h1>
+            <p class="text-lg text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+            Chez <strong class="text-yellow-300">TONGOLO TECH</strong>, Découvrez notre sélection de produits de qualité pour rendre votre mariage inoubliable
+            </p>
+        </div>
+        
+        <!-- Élément décoratif (optionnel) -->
+        <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent"></div>
+        </div>
+        <!-- <div class="bg-primary-bg-light py-16">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
                 <h1 class="text-4xl md:text-5xl font-serif font-bold text-primary mb-4">Nos Produits</h1>
                 <p class="text-lg text-gray-700 max-w-3xl mx-auto">
                     Découvrez notre sélection de produits de qualité pour rendre votre mariage inoubliable.
                 </p>
             </div>
-        </div>
+        </div> -->
 
         <!-- Filtres et liste des produits -->
         <div class="py-12">
@@ -233,7 +292,7 @@ const addToCart = (productId: number, quantity: number = 1) => {
                         <div class="p-4">
                             <h3 class="text-lg font-medium text-gray-900 mb-2">{{ product.title }}</h3>
                             <p class="text-primary font-bold mb-2">{{ formatPrice(product.price) }}</p>
-                            <p class="text-gray-600 text-sm mb-4 line-clamp-3">{{ product.description }}</p>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-3">{{ stripAndTruncateHtml(product.description, 100) }}</p>
                             <div class="flex flex-col gap-2">
                                 <Link
                                     :href="route('product.show', { id: product.id })"
@@ -289,9 +348,9 @@ const addToCart = (productId: number, quantity: number = 1) => {
         <!-- Section CTA -->
         <div class="bg-primary-bg-light py-16">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                <h2 class="text-3xl md:text-4xl font-serif font-bold text-primary mb-6">Besoin d'aide pour choisir ?</h2>
+                <h2 class="text-3xl md:text-4xl font-serif font-bold text-primary mb-6">Besoin d’un accompagnement ?</h2>
                 <p class="text-lg text-gray-700 max-w-3xl mx-auto mb-8">
-                    Contactez-nous pour obtenir des conseils personnalisés sur nos produits et services.
+                    Contactez-nous pour obtenir des conseils dans le choix des meilleures  produits et services, et formations.
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
                     <Link

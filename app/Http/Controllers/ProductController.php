@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Inertia\Inertia;
 use App\Models\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Inertia\Inertia;
 
 class ProductController extends Controller
 {
@@ -42,6 +43,23 @@ class ProductController extends Controller
 
         return redirect()->route('admin.products.index')
             ->with('success', 'Produit créé.');
+    }
+
+    // Affichage des détails d'un produit
+    public function show(Product $product)
+    {
+        return Inertia::render('Admin/Products/ProductShow', [
+            'product' => [
+                'id' => $product->id,
+                'title' => $product->title,
+                'description' => $product->description,
+                'price' => $product->price,
+                'image_path' => $product->image_path,
+                'image_url' => $product->image_url,
+                'created_at' => $product->created_at,
+                'updated_at' => $product->updated_at,
+            ],
+        ]);
     }
 
     // Formulaire d'édition

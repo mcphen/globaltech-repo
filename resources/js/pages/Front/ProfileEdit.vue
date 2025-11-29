@@ -38,7 +38,7 @@ const submitProfile = () => {
 
 <template>
   <Head>
-    <title>Paramètres du compte - NG Consulting</title>
+    <title>Paramètres du compte - TONGOLO TECH</title>
     <meta name="description" content="Modifiez vos informations de profil." />
   </Head>
 

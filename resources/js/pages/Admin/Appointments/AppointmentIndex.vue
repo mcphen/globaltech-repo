@@ -1,8 +1,9 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItemType } from '@/types';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { router } from '@inertiajs/vue3';
 
 // Type pour un rendez-vous
 interface AppointmentService {
@@ -37,7 +38,7 @@ interface Appointment {
     schedule_id: number;
     subject: string;
     description: string | null;
-    status: 'pending' | 'confirmed' | 'cancelled';
+    status: 'pending' | 'confirmed' | 'cancelled' | 'completed';
     confirmed_at: string | null;
     confirmed_by: number | null;
     created_at: string;
@@ -66,6 +67,7 @@ interface Props {
 }
 
 const props = defineProps<Props>();
+const page = usePage();
 
 // Accéder aux rendez-vous
 const appointmentsList = computed(() => props.appointments.data);
@@ -88,7 +90,18 @@ const currentAppointment = ref<Appointment | null>(null);
 const viewMode = ref<'grid' | 'list'>('list');
 
 // Filtres
-const statusFilter = ref<'all' | 'pending' | 'confirmed' | 'cancelled'>('all');
+const statusFilter = ref<'all' | 'pending' | 'confirmed' | 'completed' | 'cancelled'>('all');
+
+// Statistiques
+const stats = ref({
+    totalAppointments: 0,
+    pendingAppointments: 0,
+    confirmedAppointments: 0,
+    completedAppointments: 0,
+    cancelledAppointments: 0,
+    upcomingAppointments: 0,
+    todayAppointments: 0
+});
 
 // Fonctions
 function confirmDelete(appointment: Appointment) {
@@ -108,7 +121,6 @@ function deleteAppointment() {
     showDeleteModal.value = false;
 }
 
-
 // Ouvrir la modal de confirmation
 function openConfirmModal(appointment: Appointment) {
     currentAppointment.value = appointment;
@@ -116,11 +128,31 @@ function openConfirmModal(appointment: Appointment) {
 }
 
 // Confirmer un rendez-vous
-function confirmAppointment() {
+// Confirmer un rendez-vous
+async function confirmAppointment() {
     if (currentAppointment.value) {
-        window.location.href = route('admin.appointments.confirm', currentAppointment.value.id);
+        try {
+            await router.post(route('admin.appointments.confirm', currentAppointment.value.id));
+            showConfirmModal.value = false;
+            // Recharger les données
+            router.reload({ only: ['appointments'] });
+        } catch (error) {
+            console.error('Erreur lors de la confirmation:', error);
+        }
     }
-    showConfirmModal.value = false;
+}
+// Mettre à jour le statut d'un rendez-vous
+async function updateAppointmentStatus(appointmentId: number, status: string) {
+    try {
+        await router.put(route('admin.appointments.update', appointmentId), { status });
+        // Optionnel: ajouter un toast de succès
+        // $toast.success('Statut du rendez-vous mis à jour avec succès');
+        
+        // Recharger les données
+        router.reload({ only: ['appointments'] });
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du statut:', error);
+    }
 }
 
 // Formatage de la date
@@ -135,8 +167,21 @@ function formatDate(dateString: string): string {
 
 // Formatage de l'heure
 function formatTime(timeString: string): string {
-    // Convertir le format HH:MM:SS en HH:MM
     return timeString.substring(0, 5);
+}
+
+// Vérifier si une date est aujourd'hui
+function isToday(dateString: string): boolean {
+    const today = new Date();
+    const date = new Date(dateString);
+    return date.toDateString() === today.toDateString();
+}
+
+// Vérifier si une date est future
+function isUpcoming(dateString: string): boolean {
+    const today = new Date();
+    const date = new Date(dateString);
+    return date >= today;
 }
 
 // Filtrer les rendez-vous par statut
@@ -148,32 +193,46 @@ const filteredAppointments = computed(() => {
 });
 
 // Obtenir la classe de couleur en fonction du statut
-function getStatusClass(status: string): string {
+function getStatusClass(status: string): { class: string, text: string } {
     switch (status) {
         case 'pending':
-            return 'bg-yellow-100 text-yellow-800';
+            return { class: 'bg-yellow-100 text-yellow-800', text: 'En attente' };
         case 'confirmed':
-            return 'bg-green-100 text-green-800';
+            return { class: 'bg-blue-100 text-blue-800', text: 'Confirmé' };
+        case 'completed':
+            return { class: 'bg-green-100 text-green-800', text: 'Terminé' };
         case 'cancelled':
-            return 'bg-red-100 text-red-800';
+            return { class: 'bg-red-100 text-red-800', text: 'Annulé' };
         default:
-            return 'bg-gray-100 text-gray-800';
+            return { class: 'bg-gray-100 text-gray-800', text: status };
     }
 }
 
-// Obtenir le texte du statut en français
-function getStatusText(status: string): string {
-    switch (status) {
-        case 'pending':
-            return 'En attente';
-        case 'confirmed':
-            return 'Confirmé';
-        case 'cancelled':
-            return 'Annulé';
-        default:
-            return status;
-    }
+// Calculer les statistiques
+function calculateStats() {
+    const totalAppointments = props.appointments.total;
+    const pendingAppointments = appointmentsList.value.filter(a => a.status === 'pending').length;
+    const confirmedAppointments = appointmentsList.value.filter(a => a.status === 'confirmed').length;
+    const completedAppointments = appointmentsList.value.filter(a => a.status === 'completed').length;
+    const cancelledAppointments = appointmentsList.value.filter(a => a.status === 'cancelled').length;
+    
+    const todayAppointments = appointmentsList.value.filter(a => isToday(a.schedule.date)).length;
+    const upcomingAppointments = appointmentsList.value.filter(a => isUpcoming(a.schedule.date) && a.status !== 'cancelled').length;
+
+    stats.value = {
+        totalAppointments,
+        pendingAppointments,
+        confirmedAppointments,
+        completedAppointments,
+        cancelledAppointments,
+        todayAppointments,
+        upcomingAppointments
+    };
 }
+
+onMounted(() => {
+    calculateStats();
+});
 </script>
 
 <template>
@@ -196,7 +255,7 @@ function getStatusText(status: string): string {
                         <button
                             @click="statusFilter = 'all'"
                             :class="[
-                                'px-3 py-1.5 rounded-md flex items-center gap-2 transition',
+                                'px-3 py-1.5 rounded-md flex items-center gap-2 transition text-sm',
                                 statusFilter === 'all'
                                     ? 'bg-white shadow-sm text-blue-600'
                                     : 'text-gray-600 hover:bg-gray-200'
@@ -207,7 +266,7 @@ function getStatusText(status: string): string {
                         <button
                             @click="statusFilter = 'pending'"
                             :class="[
-                                'px-3 py-1.5 rounded-md flex items-center gap-2 transition',
+                                'px-3 py-1.5 rounded-md flex items-center gap-2 transition text-sm',
                                 statusFilter === 'pending'
                                     ? 'bg-white shadow-sm text-blue-600'
                                     : 'text-gray-600 hover:bg-gray-200'
@@ -218,7 +277,7 @@ function getStatusText(status: string): string {
                         <button
                             @click="statusFilter = 'confirmed'"
                             :class="[
-                                'px-3 py-1.5 rounded-md flex items-center gap-2 transition',
+                                'px-3 py-1.5 rounded-md flex items-center gap-2 transition text-sm',
                                 statusFilter === 'confirmed'
                                     ? 'bg-white shadow-sm text-blue-600'
                                     : 'text-gray-600 hover:bg-gray-200'
@@ -227,9 +286,20 @@ function getStatusText(status: string): string {
                             Confirmés
                         </button>
                         <button
+                            @click="statusFilter = 'completed'"
+                            :class="[
+                                'px-3 py-1.5 rounded-md flex items-center gap-2 transition text-sm',
+                                statusFilter === 'completed'
+                                    ? 'bg-white shadow-sm text-blue-600'
+                                    : 'text-gray-600 hover:bg-gray-200'
+                            ]"
+                        >
+                            Terminés
+                        </button>
+                        <button
                             @click="statusFilter = 'cancelled'"
                             :class="[
-                                'px-3 py-1.5 rounded-md flex items-center gap-2 transition',
+                                'px-3 py-1.5 rounded-md flex items-center gap-2 transition text-sm',
                                 statusFilter === 'cancelled'
                                     ? 'bg-white shadow-sm text-blue-600'
                                     : 'text-gray-600 hover:bg-gray-200'
@@ -244,13 +314,13 @@ function getStatusText(status: string): string {
                         <button
                             @click="viewMode = 'grid'"
                             :class="[
-                                'px-3 py-1.5 rounded-md flex items-center gap-2 transition',
+                                'px-3 py-1.5 rounded-md flex items-center gap-2 transition text-sm',
                                 viewMode === 'grid'
                                     ? 'bg-white shadow-sm text-blue-600'
                                     : 'text-gray-600 hover:bg-gray-200'
                             ]"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                             </svg>
                             Grille
@@ -258,13 +328,13 @@ function getStatusText(status: string): string {
                         <button
                             @click="viewMode = 'list'"
                             :class="[
-                                'px-3 py-1.5 rounded-md flex items-center gap-2 transition',
+                                'px-3 py-1.5 rounded-md flex items-center gap-2 transition text-sm',
                                 viewMode === 'list'
                                     ? 'bg-white shadow-sm text-blue-600'
                                     : 'text-gray-600 hover:bg-gray-200'
                             ]"
                         >
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clip-rule="evenodd" />
                             </svg>
                             Liste
@@ -273,14 +343,72 @@ function getStatusText(status: string): string {
                 </div>
             </div>
 
-            <!-- Message flash -->
-            <div v-if="$page.props.flash && $page.props.flash.success" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md mb-4">
-                {{ $page.props.flash.success }}
+            <!-- Statistiques -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-blue-100 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-blue-600">Total rendez-vous</p>
+                            <p class="text-2xl font-bold text-blue-900">{{ stats.totalAppointments }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-green-100 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-green-600">À venir</p>
+                            <p class="text-2xl font-bold text-green-900">{{ stats.upcomingAppointments }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-orange-100 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-orange-600">Aujourd'hui</p>
+                            <p class="text-2xl font-bold text-orange-900">{{ stats.todayAppointments }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <div class="flex items-center">
+                        <div class="p-2 bg-purple-100 rounded-lg">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <div class="ml-4">
+                            <p class="text-sm font-medium text-purple-600">En attente</p>
+                            <p class="text-2xl font-bold text-purple-900">{{ stats.pendingAppointments }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
+            <!-- Message flash -->
+            <div v-if="page.props.flash && page.props.flash.success" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md mb-4">
+                {{ page.props.flash.success }}
+            </div>
 
             <!-- Vue en liste -->
-            <div v-if="viewMode === 'list'" class="overflow-x-auto">
+            <div v-if="viewMode === 'list'" class="overflow-x-auto rounded-lg border border-gray-200 bg-white">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
@@ -299,16 +427,13 @@ function getStatusText(status: string): string {
                             <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Statut
                             </th>
-                            <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                Confirmation
-                            </th>
-                            <th scope="col" class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                            <th scope="col" class="px-6 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
                                 Actions
                             </th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200">
-                        <tr v-for="appointment in filteredAppointments" :key="appointment.id" class="hover:bg-gray-50">
+                        <tr v-for="appointment in filteredAppointments" :key="appointment.id" class="hover:bg-gray-50 transition">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div>
@@ -332,9 +457,6 @@ function getStatusText(status: string): string {
                             </td>
                             <td class="px-6 py-4">
                                 <div class="text-sm text-gray-900">{{ appointment.subject }}</div>
-<!--                                <div v-if="appointment.description" class="text-sm text-gray-500 truncate max-w-xs">-->
-<!--                                    {{ appointment.description }}-->
-<!--                                </div>-->
                             </td>
                             <td class="px-6 py-4">
                                 <div class="flex flex-wrap gap-1">
@@ -348,25 +470,29 @@ function getStatusText(status: string): string {
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <span :class="['px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full', getStatusClass(appointment.status)]">
-                                    {{ getStatusText(appointment.status) }}
-                                </span>
-                            </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div v-if="appointment.confirmed_at" class="text-sm text-gray-900">
-                                    {{ formatDate(appointment.confirmed_at) }}
+                                <div class="flex items-center gap-2">
+                                    <span :class="['px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full', getStatusClass(appointment.status).class]">
+                                        {{ getStatusClass(appointment.status).text }}
+                                    </span>
+                                   <select
+    :value="appointment.status"
+    @change="updateAppointmentStatus(appointment.id, ($event.target as HTMLSelectElement).value)"
+    class="text-xs border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+>
+    <option value="pending">En attente</option>
+    <option value="confirmed">Confirmé</option>
+    <option value="completed">Terminé</option>
+    <option value="cancelled">Annulé</option>
+</select>
                                 </div>
-                                <div v-else class="text-sm text-gray-500">
-                                    Non confirmé
-                                </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <div class="flex justify-end gap-2">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-center">
+                                <div class="flex justify-center gap-2">
                                     <Link
                                         :href="route('admin.appointments.show', appointment.id)"
-                                        class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-1 rounded"
+                                        class="text-indigo-600 hover:text-indigo-900 bg-indigo-50 hover:bg-indigo-100 p-2 rounded transition"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                             <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
                                             <path fill-rule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clip-rule="evenodd" />
                                         </svg>
@@ -374,17 +500,17 @@ function getStatusText(status: string): string {
                                     <button
                                         v-if="appointment.status === 'pending'"
                                         @click="openConfirmModal(appointment)"
-                                        class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 p-1 rounded"
+                                        class="text-green-600 hover:text-green-900 bg-green-50 hover:bg-green-100 p-2 rounded transition"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
                                         </svg>
                                     </button>
                                     <button
                                         @click="confirmDelete(appointment)"
-                                        class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-1 rounded"
+                                        class="text-red-600 hover:text-red-900 bg-red-50 hover:bg-red-100 p-2 rounded transition"
                                     >
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                                             <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
                                         </svg>
                                     </button>
@@ -404,8 +530,8 @@ function getStatusText(status: string): string {
                                 <h3 class="text-lg font-semibold text-gray-900">{{ appointment.subject }}</h3>
                                 <p class="text-sm text-gray-600">{{ formatDate(appointment.schedule.date) }} | {{ formatTime(appointment.schedule.start_time) }} - {{ formatTime(appointment.schedule.end_time) }}</p>
                             </div>
-                            <span :class="['px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full', getStatusClass(appointment.status)]">
-                                {{ getStatusText(appointment.status) }}
+                            <span :class="['px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full', getStatusClass(appointment.status).class]">
+                                {{ getStatusClass(appointment.status).text }}
                             </span>
                         </div>
                     </div>
@@ -428,18 +554,18 @@ function getStatusText(status: string): string {
                                 </span>
                             </div>
                         </div>
-<!--                        <div v-if="appointment.description" class="mb-3">-->
-<!--                            <h4 class="text-sm font-medium text-gray-500">Description</h4>-->
-<!--                            <p class="text-sm text-gray-600 line-clamp-2">{{ appointment.description }}</p>-->
-<!--                        </div>-->
                         <div class="mb-3">
-                            <h4 class="text-sm font-medium text-gray-500">Confirmation</h4>
-                            <p v-if="appointment.confirmed_at" class="text-sm text-gray-900">
-                                {{ formatDate(appointment.confirmed_at) }}
-                            </p>
-                            <p v-else class="text-sm text-gray-500">
-                                Non confirmé
-                            </p>
+                            <h4 class="text-sm font-medium text-gray-500">Statut</h4>
+                            <select
+                                :value="appointment.status"
+                                @change="updateAppointmentStatus(appointment.id, ($event.target as HTMLSelectElement).value)"
+                                class="text-sm border border-gray-300 rounded-md px-2 py-1 w-full focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="pending">En attente</option>
+                                <option value="confirmed">Confirmé</option>
+                                <option value="completed">Terminé</option>
+                                <option value="cancelled">Annulé</option>
+                            </select>
                         </div>
                     </div>
                     <div class="px-4 py-3 bg-gray-50 border-t flex justify-end gap-2">
@@ -545,13 +671,3 @@ function getStatusText(status: string): string {
         </div>
     </AppLayout>
 </template>
-
-<style scoped>
-/* Limiter le nombre de lignes pour la description */
-.line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-</style>

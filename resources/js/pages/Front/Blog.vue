@@ -276,47 +276,58 @@ watch([selectedDate, sortBy], () => {
             <!-- Structured Data is now added programmatically in the onMounted hook -->
         </Head>
 
-        <div class="relative bg-gray-900">
-            <!-- Image d'arrière-plan avec overlay -->
-            <div class="absolute inset-0 overflow-hidden">
-                <img src="/images/breadcrumb-bg.jpg" alt="Bannière À Propos" class="w-full h-full object-cover object-center opacity-40">
-                <div class="absolute inset-0 bg-gradient-to-r from-primary/50 to-primary/30"></div>
-            </div>
+        <!-- En-tête de la page avec image de fond -->
+        <div class="relative bg-primary-bg-light py-16 overflow-hidden">
+        <!-- Image de fond avec overlay -->
+        <div class="absolute inset-0 z-0">
+            <img 
+            src="/images/nav-second.jpeg" 
+            alt="Technology Background" 
+            class="w-full h-full object-cover"
+            />
+            <!-- Overlay gradient pour améliorer la lisibilité -->
+            <div class="absolute inset-0 bg-gradient-to-r from-blue-900/85 via-blue-800/75 to-purple-900/85"></div>
+        </div>
+        
+        <!-- Contenu en avant-plan -->
+        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
+            <h1 class="text-4xl md:text-5xl font-serif font-bold text-white text-center mb-4 drop-shadow-lg">
+            Blog
+            </h1>
 
-            <!-- Contenu du breadcrumb -->
-            <div class="relative max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
-                <h1 class="text-4xl md:text-5xl font-serif font-bold text-white text-center mb-4">Blog</h1>
+            <!-- Breadcrumb navigation -->
+            <nav class="flex" aria-label="Breadcrumb">
+            <ol class="flex items-center space-x-2">
+                <li v-for="(item, index) in breadcrumbItems" :key="item.name">
+                <div class="flex items-center">
+                    <Link
+                    :href="item.href"
+                    :class="[
+                        item.current ? 'text-white font-medium' : 'text-white/80 hover:text-white',
+                        'text-sm md:text-base transition-colors drop-shadow-md'
+                    ]"
+                    >
+                    {{ item.name }}
+                    </Link>
 
-                <!-- Breadcrumb navigation -->
-                <nav class="flex" aria-label="Breadcrumb">
-                    <ol class="flex items-center space-x-2">
-                        <li v-for="(item, index) in breadcrumbItems" :key="item.name">
-                            <div class="flex items-center">
-                                <Link
-                                    :href="item.href"
-                                    :class="[
-                                        item.current ? 'text-white font-medium' : 'text-white/80 hover:text-white',
-                                        'text-sm md:text-base transition-colors'
-                                    ]"
-                                >
-                                    {{ item.name }}
-                                </Link>
-
-                                <!-- Séparateur, sauf pour le dernier élément -->
-                                <svg
-                                    v-if="index !== breadcrumbItems.length - 1"
-                                    class="h-5 w-5 text-white/70 mx-2"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </div>
-                        </li>
-                    </ol>
-                </nav>
-            </div>
+                    <!-- Séparateur, sauf pour le dernier élément -->
+                    <svg
+                    v-if="index !== breadcrumbItems.length - 1"
+                    class="h-5 w-5 text-white/70 mx-2 drop-shadow-md"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    >
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </div>
+                </li>
+            </ol>
+            </nav>
+        </div>
+        
+        <!-- Élément décoratif -->
+        <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent"></div>
         </div>
 
         <!-- En-tête de la page -->
@@ -498,7 +509,7 @@ watch([selectedDate, sortBy], () => {
             <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
                 <h2 class="text-primary mb-4 font-serif text-3xl font-bold">Restez informé</h2>
                 <p class="mx-auto mb-8 max-w-3xl text-lg text-gray-700">
-                    Abonnez-vous à notre newsletter pour recevoir nos derniers articles, conseils et tendances sur l'organisation de mariages.
+                    Abonnez-vous à notre newsletter pour suivre nos actualités, nos solutions technologiques et nos formations dédiées aux professionnels.
                 </p>
                 <div class="mx-auto max-w-md">
                     <div class="flex">

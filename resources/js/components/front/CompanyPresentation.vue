@@ -6,8 +6,8 @@
                 <!-- Left side - Image -->
                 <div class="h-[600px] bg-gray-100">
                     <img
-                        src="/images/banner/banner_maj.jpg"
-                        alt="NG Consulting Team"
+                        src="https://nasad.net/wp-content/uploads/2022/09/Admin-ReseauxSysteme.jpeg"
+                        alt="TONGOLO TECH Presentation"
                         class="w-full h-full object-cover"
                         style="object-position: top"
 
@@ -30,11 +30,7 @@
                                  Elle est spécialisée dans l’Ingénierie, les prestations de services, la fourniture d’équipements et la 
 maintenance
                             </p>
-                            <!-- <p>
-                                Forts de notre expertise multisectorielle, nous intervenons dans quatre domaines
-                                clés : le conseil stratégique, l'assistance comptable, l'audit financier et la
-                                gouvernance & gestion des risques.
-                            </p> -->
+                            
                         </div>
                         <div class="mt-8 flex flex-wrap gap-4">
                             <Link
@@ -54,14 +50,15 @@ maintenance
                 </div>
             </div>
         </div>
+       
 
         <!-- Mobile version -->
         <div class="md:hidden">
             <!-- Image -->
             <div class="h-[300px] bg-gray-100">
                 <img
-                    src="/images/banner/banner_maj.jpg"
-                    alt="NG Consulting Team"
+                    src="https://nasad.net/wp-content/uploads/2022/09/Admin-ReseauxSysteme.jpeg"
+                    alt="TONGOLO-TECH Team"
                     class="w-full h-full object-cover"
                     style="object-position: top"
                     onerror="this.src='/images/banner/banner_maj.jpg'; this.onerror=null;"
@@ -99,11 +96,12 @@ maintenance
                 </div>
             </div>
         </div>
+        
 
         <!-- Why choose us section -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div class="text-center mb-12">
-                <h2 class="text-2xl font-serif font-bold text-gray-900">Pourquoi choisir NG CONSULTING ?</h2>
+                <h2 class="text-2xl font-serif font-bold text-gray-900">Pourquoi choisir TONGOLO TECH ?</h2>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
@@ -140,6 +138,7 @@ maintenance
                 </div>
             </div>
         </div>
+        
     </section>
 </template>
 

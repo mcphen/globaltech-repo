@@ -27,6 +27,11 @@ class Lead extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function appointments()
+    {
+        return $this->hasMany(Appointment::class);
+    }
+
     public function formations()
     {
         return $this->belongsToMany(Formation::class, 'lead_formation', 'lead_id', 'formation_id')

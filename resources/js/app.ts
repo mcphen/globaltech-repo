@@ -9,6 +9,11 @@ import { initializeTheme } from './composables/useAppearance';
 import { initializeTracking } from './lib/tracker';
 import vTrack from './lib/trackingDirective';
 
+// Import Vue Toast
+import ToastPlugin from 'vue-toast-notification';
+import 'vue-toast-notification/dist/theme-bootstrap.css';
+
+
 // Extend ImportMeta interface for Vite...
 declare module 'vite/client' {
     interface ImportMetaEnv {
@@ -33,6 +38,15 @@ createInertiaApp({
         // Register plugins
         app.use(plugin);
         app.use(ZiggyVue);
+
+        // Register Vue Toast
+        app.use(ToastPlugin, {
+            position: 'top-right',
+            duration: 5000,
+            dismissible: true,
+            pauseOnHover: true,
+            queue: true, // Évite les notifications multiples
+        });
 
         // Register directives
         app.directive('track', vTrack);

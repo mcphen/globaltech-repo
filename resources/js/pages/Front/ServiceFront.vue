@@ -35,7 +35,7 @@ const fetchServices = async () => {
 const currentUrl = ref('');
 
 // Computed properties for meta tags
-const metaTitle = computed(() => "Nos Activités | NG Consulting");
+const metaTitle = computed(() => "Nos Services | TONGOLO TECH ");
 const metaDescription = computed(() => "Découvrez les services professionnels de conseil stratégique, d'assistance comptable, d'audit financier et de gouvernance proposés par NG Consulting. Renforcez la performance de votre entreprise.");
 
 // JSON-LD structured data for services
@@ -52,7 +52,7 @@ const servicesJsonLd = computed(() => {
         description: service.subtitle,
         provider: {
           '@type': 'Organization',
-          name: 'NG Consulting',
+          name: 'TONGOLO TECH',
           image: '/images/logo.jpg',
           address: {
             '@type': 'PostalAddress',
@@ -74,6 +74,7 @@ onMounted(() => {
 
 <template>
   <LayoutFront>
+
     <Head>
       <title>{{ metaTitle }}</title>
       <meta name="description" :content="metaDescription" />
@@ -94,13 +95,29 @@ onMounted(() => {
       <meta name="structured-data" :content="JSON.stringify(servicesJsonLd)" />
     </Head>
 
-    <!-- En-tête de la page -->
-    <div class="bg-primary-bg-light py-16">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h1 class="text-4xl md:text-5xl font-serif font-bold text-primary mb-4">Nos Activités</h1>
-        <p class="text-lg text-gray-700 max-w-3xl mx-auto">
-          NG Consulting vous propose une gamme de services professionnels pour renforcer la performance, la gouvernance et la croissance durable de votre entreprise.
+    <!-- En-tête de la page avec image de fond -->
+    <div class="relative bg-primary-bg-light py-16 overflow-hidden">
+      <!-- Image de fond avec overlay -->
+      <div class="absolute inset-0 z-0">
+        <img src="/images/nav-second.jpeg" alt="Technology Background" class="w-full h-full object-cover" />
+        <!-- Overlay gradient pour améliorer la lisibilité -->
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-900/85 via-blue-800/75 to-purple-900/85"></div>
+      </div>
+
+      <!-- Contenu en avant-plan -->
+      <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-5xl font-serif font-bold text-white mb-4 drop-shadow-lg">
+          Nos Services
+        </h1>
+        <p class="text-lg text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+          <strong class="text-yellow-300">TONGOLO TECH</strong> vous propose des solutions complètes afin d'accompagner
+          vos projets technologiques avec expertise, fiabilité et innovation.
         </p>
+      </div>
+
+      <!-- Élément décoratif (optionnel) -->
+      <div
+        class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent">
       </div>
     </div>
 
@@ -124,11 +141,9 @@ onMounted(() => {
                 <h2 class="text-3xl font-serif font-bold text-primary">{{ service.title }}</h2>
               </div>
               <p class="text-gray-700 text-lg mb-8 leading-relaxed">{{ service.subtitle }}</p>
-              <Link
-                :href="route('appointment.create')"
-                class="inline-block px-8 py-3 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors font-medium"
-              >
-                Prendre rendez-vous
+              <Link :href="route('appointment.create')"
+                class="inline-block px-8 py-3 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors font-medium">
+              Prendre rendez-vous
               </Link>
             </div>
 
@@ -140,7 +155,8 @@ onMounted(() => {
                 <div v-for="(item, itemIndex) in service.items" :key="itemIndex" class="flex">
                   <div class="flex-shrink-0 mr-3">
                     <svg class="h-6 w-6 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                   </div>
                   <div>
@@ -158,22 +174,20 @@ onMounted(() => {
     <!-- Section CTA -->
     <div class="bg-primary-bg-light py-16">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-3xl md:text-4xl font-serif font-bold text-primary mb-6">Prêt à transformer votre entreprise ?</h2>
+        <h2 class="text-3xl md:text-4xl font-serif font-bold text-primary mb-6">Prêt à transformer votre entreprise ?
+        </h2>
         <p class="text-lg text-gray-700 max-w-3xl mx-auto mb-8">
-          Contactez-nous dès aujourd'hui pour une consultation personnalisée et découvrez comment nos solutions peuvent renforcer votre performance.
+          Contactez-nous dès aujourd'hui pour une consultation personnalisée et découvrez comment nos solutions peuvent
+          renforcer votre performance.
         </p>
         <div class="flex flex-col sm:flex-row justify-center gap-4">
-          <Link
-            :href="route('appointment.create')"
-            class="px-8 py-3 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors font-medium"
-          >
-            prendre rendez-vous
+          <Link :href="route('appointment.create')"
+            class="px-8 py-3 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors font-medium">
+          prendre rendez-vous
           </Link>
-          <Link
-            :href="route('contact')"
-            class="px-8 py-3 bg-white text-primary border border-primary rounded-full hover:bg-gray-50 transition-colors font-medium"
-          >
-            Nous contacter
+          <Link :href="route('contact')"
+            class="px-8 py-3 bg-white text-primary border border-primary rounded-full hover:bg-gray-50 transition-colors font-medium">
+          Nous contacter
           </Link>
         </div>
       </div>

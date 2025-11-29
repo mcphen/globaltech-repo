@@ -199,7 +199,7 @@ onMounted(() => {
                 <div class="flex justify-between h-20">
                     <div class="flex items-center">
                         <Link :href="route('home')" class="flex-shrink-0 flex items-center">
-                            <AppLogoIcon />
+                            <AppLogoIcon class="h-20 w-20" />
                         </Link>
                     </div>
 
@@ -222,7 +222,7 @@ onMounted(() => {
                             href="/services"
                             class="px-3 py-2 text-gray-800 hover:text-secondary font-medium transition-colors"
                         >
-                            Nos Activités
+                            Nos Services
                         </Link>
 
                         <Link
@@ -384,7 +384,7 @@ onMounted(() => {
                             @click="toggleDropdown('services')"
                             class="w-full flex justify-between items-center px-4 py-2 text-base font-medium text-gray-700 hover:text-secondary hover:bg-primary-bg-light"
                         >
-                            <span>Nos Activités</span>
+                            <span>Nos Services</span>
                             <svg
                                 :class="{'transform rotate-180': dropdownStates.services}"
                                 class="h-5 w-5 transition-transform duration-200"
@@ -406,7 +406,7 @@ onMounted(() => {
                                 class="block px-3 py-2 text-base font-medium text-gray-600 hover:text-secondary hover:bg-primary-bg-light rounded-md"
                                 @click="closeMobileMenu"
                             >
-                                Voir toutes nos activités
+                                Voir tous nos services
                             </Link>
                         </div>
                     </div>
@@ -510,12 +510,12 @@ onMounted(() => {
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     <div>
-                        <h3 class="text-lg font-semibold mb-4">NG Consulting</h3>
+                        <h3 class="text-lg font-semibold mb-4">TONGOLO TECH</h3>
                         <p class="text-gray-300 mb-4">
-                            NG CONSULTING, fondée en 2024, est une société de conseil spécialisée dans l'accompagnement stratégique, comptable et opérationnel des entreprises.
+                            Créée en 2015, TONGOLO Tech (l’Etoile de la technologie) est une société à responsabilité limitée (SARL) dont le siège social est à Dakar, Fass Paillote.                  
                         </p>
                         <p class="text-gray-300 mb-4">
-                            Notre mission est de fournir des solutions personnalisées et efficaces pour renforcer la performance, la gouvernance et la croissance durable de nos clients.
+                            Elle est spécialisée dans l’Ingénierie, les prestations de services, la fourniture d’équipements et la maintenance
                         </p>
                         <div class="flex space-x-4">
                             <a :href="contactSettings.social_linkedin" target="_blank" class="text-gray-300 hover:text-white transition-colors">
@@ -551,7 +551,7 @@ onMounted(() => {
                             </li>
                             <li>
                                 <Link href="/services" class="text-gray-300 hover:text-white transition-colors">
-                                    Nos Activités
+                                    Nos Services
                                 </Link>
                             </li>
                             <li>
@@ -578,7 +578,7 @@ onMounted(() => {
                     </div>
 
                     <div>
-                        <h3 class="text-lg font-semibold mb-4">Nos Activités</h3>
+                        <h3 class="text-lg font-semibold mb-4">Nos Services</h3>
                         <ul class="space-y-2">
                             <li v-for="service in services" :key="service.id">
                                 <Link href="/services" class="text-gray-300 hover:text-white transition-colors">
@@ -616,7 +616,7 @@ onMounted(() => {
 
                 <div class="mt-12 pt-8 border-t border-gray-700">
                     <p class="text-gray-400 text-center">
-                        &copy; 2024 NG Consulting. Tous droits réservés.
+                        &copy; 2024 TONGOLO TECH. Tous droits réservés.
                     </p>
                 </div>
             </div>

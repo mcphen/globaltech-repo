@@ -136,8 +136,7 @@ const submitForm = async () => {
                     <div>
                         <h2 class="text-3xl font-serif font-bold text-gray-900">Contactez-nous</h2>
                         <p class="mt-4 text-lg text-gray-600">
-                            Vous avez des questions ou vous souhaitez planifier une consultation ? Notre équipe d'experts est à votre disposition.
-                        </p>
+Vous avez des questions ou souhaitez discuter de vos projets en ingénierie, télécommunications ou réseaux ? Contactez notre équipe TONGOLO TECH dès maintenant                        </p>
 
                         <div class="mt-8 space-y-6">
                             <div class="flex items-start">

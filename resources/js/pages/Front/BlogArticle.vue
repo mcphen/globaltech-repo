@@ -325,7 +325,7 @@ onMounted(() => {
           Vous avez aimé cet article ?
         </h2>
         <p class="text-lg text-gray-700 mb-8">
-          Abonnez-vous à notre newsletter pour recevoir nos derniers articles et conseils sur l'organisation de mariages.
+          Abonnez-vous à notre newsletter pour suivre nos actualités, nos solutions technologiques et nos formations dédiées aux professionnels.
         </p>
         <div class="max-w-md mx-auto">
           <div class="flex">

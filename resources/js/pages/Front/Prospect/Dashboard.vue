@@ -63,7 +63,7 @@ onMounted(() => {
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="mb-8">
           <h1 class="text-3xl md:text-4xl font-serif font-bold text-primary">Bonjour{{ auth?.user ? `, ${auth.user.name}` : '' }} 👋</h1>
-          <p class="text-gray-700 mt-2">Bienvenue sur votre espace NG Consulting.</p>
+          <p class="text-gray-700 mt-2">Bienvenue sur votre espace TONGOLO TECH.</p>
         </div>
 
         <div class="flex flex-col md:flex-row gap-6">

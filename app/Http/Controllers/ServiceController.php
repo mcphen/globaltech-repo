@@ -11,7 +11,10 @@ class ServiceController extends Controller
 {
     public function index()
     {
-        $services = Service::orderBy('created_at', 'desc')->get();
+        $services = Service::withCount('appointments') // Ajoutez cette ligne
+            ->orderBy('created_at', 'desc')
+            ->get();
+            
         return Inertia::render('Admin/Services/Index', [
             'services' => $services,
         ]);
@@ -33,7 +36,7 @@ class ServiceController extends Controller
             'min_price'   => 'nullable|numeric|min:0',
             'items'       => 'nullable|array',
             'items.*.title' => 'required|string|max:255',
-            'items.*.description' => 'required|string',
+            'items.*.description' => 'nullable|string',
         ]);
 
         if ($request->hasFile('image')) {
@@ -76,6 +79,54 @@ class ServiceController extends Controller
         ]);
     }
 
+    /**
+     * Display the specified service with appointments.
+     */
+    public function show(Service $service)
+{
+    // Load service with items and appointments
+    $service->load(['items', 'appointments.client', 'appointments.schedule']);
+    
+    // Get appointments count
+    $appointmentsCount = $service->appointments()->count();
+
+    return Inertia::render('Admin/Services/Show', [
+        'service' => [
+            'id' => $service->id,
+            'title' => $service->title,
+            'icon' => $service->icon,
+            'subtitle' => $service->subtitle,
+            'description_old' => $service->description_old,
+            'image_path' => $service->image_path,
+            'min_price' => $service->min_price,
+            'created_at' => $service->created_at,
+            'updated_at' => $service->updated_at,
+            'items' => $service->items,
+            'appointments' => $service->appointments->map(function ($appointment) {
+                return [
+                    'id' => $appointment->id,
+                    'subject' => $appointment->subject,
+                    'description' => $appointment->description,
+                    'status' => $appointment->status,
+                    'created_at' => $appointment->created_at,
+                    'schedule' => [
+                        'date' => $appointment->schedule->date,
+                        'start_time' => $appointment->schedule->start_time,
+                        'end_time' => $appointment->schedule->end_time,
+                    ],
+                    'client' => [
+                        'first_name' => $appointment->client->first_name,
+                        'last_name' => $appointment->client->last_name,
+                        'email' => $appointment->client->email,
+                        'phone' => $appointment->client->phone,
+                    ]
+                ];
+            }),
+            'appointments_count' => $appointmentsCount,
+        ],
+    ]);
+}
+
     public function update(Request $request, Service $service)
     {
         $data = $request->validate([
@@ -88,7 +139,7 @@ class ServiceController extends Controller
             'items'       => 'nullable|array',
             'items.*.id'  => 'nullable|integer|exists:service_items,id',
             'items.*.title' => 'required|string|max:255',
-            'items.*.description' => 'required|string',
+            'items.*.description' => 'nullable|string',
         ]);
 
         if ($request->hasFile('image')) {

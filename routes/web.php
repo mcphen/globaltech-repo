@@ -1,26 +1,27 @@
 <?php
 
-use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CartController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\AboutController;
-use App\Http\Controllers\ServiceController;
-use App\Http\Controllers\ProductController;
-use App\Http\Controllers\TeamMemberController;
-use App\Http\Controllers\PartnerController;
-use App\Http\Controllers\TestimonialController;
-use App\Http\Controllers\ActualiteController;
 use App\Http\Controllers\AlbumController;
 use App\Http\Controllers\BannerController;
-use App\Http\Controllers\HomeController;
-use App\Http\Controllers\SettingController;
-use App\Http\Controllers\Admin\ScheduleController;
-use App\Http\Controllers\AppointmentController;
-use App\Http\Controllers\VisitorTrackerController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\PartnerController;
+use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\SettingController;
+use App\Http\Controllers\ActualiteController;
 use App\Http\Controllers\FormationController;
-use App\Http\Controllers\LeadFormationController;
+use App\Http\Controllers\Admin\LeadController;
+use App\Http\Controllers\TeamMemberController;
+use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\ProductOrderController;
-use App\Http\Controllers\CartController;
+use App\Http\Controllers\LeadFormationController;
+use App\Http\Controllers\Admin\ScheduleController;
+use App\Http\Controllers\VisitorTrackerController;
 
 
 Route::get('/', [HomeController::class,'index'])->name('home');
@@ -102,21 +103,21 @@ Route::middleware(['auth'])->group(function () {
 
 
         Route::resource('services', ServiceController::class)
-            ->except(['show'])
             ->names([
                 'index' => 'admin.services.index',
                 'create' => 'admin.services.create',
                 'store' => 'admin.services.store',
+                'show' => 'admin.services.show',
                 'edit' => 'admin.services.edit',
                 'update' => 'admin.services.update',
                 'destroy' => 'admin.services.destroy',
             ]);
         Route::resource('products', ProductController::class)
-            ->except(['show'])
             ->names([
                 'index' => 'admin.products.index',
                 'create' => 'admin.products.create',
                 'store' => 'admin.products.store',
+                'show' => 'admin.products.show',
                 'edit' => 'admin.products.edit',
                 'update' => 'admin.products.update',
                 'destroy' => 'admin.products.destroy',
@@ -177,6 +178,7 @@ Route::middleware(['auth'])->group(function () {
             ]);
         // Admin formation detail (show)
         Route::get('formations/{formation}', [FormationController::class, 'adminShow'])->name('admin.formations.show');
+        Route::put('formations/{formation}/leads/{lead}/update-status', [FormationController::class, 'updateLeadStatus'])->name('admin.formations.leads.update-status');
 
         Route::prefix('albums')->group(function () {
             Route::get('/', [AlbumController::class, 'index'])->name('admin.albums.index');
@@ -232,6 +234,7 @@ Route::middleware(['auth'])->group(function () {
                 'index' => 'admin.appointments.index',
                 'show' => 'admin.appointments.show',
                 'update' => 'admin.appointments.update',
+                'updateStatus' => 'admin.appointments.updateStatus', 
                 'destroy' => 'admin.appointments.destroy',
             ]);
         Route::post('/appointments/{appointment}/confirm', [AppointmentController::class, 'confirm'])->name('admin.appointments.confirm');
@@ -240,6 +243,28 @@ Route::middleware(['auth'])->group(function () {
         Route::get('contacts', [ContactController::class, 'adminIndex'])->name('admin.contacts.index');
         Route::get('contacts/{contact}', [ContactController::class, 'show'])->name('admin.contacts.show');
         Route::delete('contacts/{contact}', [ContactController::class, 'destroy'])->name('admin.contacts.destroy');
+
+        // Leads management routes
+        Route::resource('leads', LeadController::class)
+            ->except(['create', 'store'])
+            ->names([
+                'index' => 'admin.leads.index',
+                'show' => 'admin.leads.show',
+                'edit' => 'admin.leads.edit',
+                'update' => 'admin.leads.update',
+                'destroy' => 'admin.leads.destroy',
+            ]);
+
+        // Lead formations management
+        Route::put('leads/{lead}/formations/{formation}', [LeadController::class, 'updateFormationStatus'])->name('admin.leads.formations.update');
+
+        // Lead orders management  
+        Route::put('leads/{lead}/orders/{order}', [LeadController::class, 'updateOrderStatus'])->name('admin.leads.orders.update');
+
+        // Lead appointments management
+        Route::put('leads/{lead}/appointments/{appointment}', [LeadController::class, 'updateAppointmentStatus'])->name('admin.leads.appointments.update');
+
+
 
         // Users management routes
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class)

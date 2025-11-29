@@ -101,8 +101,8 @@ class ContactController extends Controller
 
             // Send notification email to the recipient
             try {
-                $to = ['ngconsulting@gmail.com','gnilane@outlook.be'];
-                Mail::to($to)->bcc('enockmambou@gmail.com')->send(new ContactMessage($validated));
+                $to = ['glainnguema@gmail.com'];
+                Mail::to($to)->bcc('glainnguema@gmail.com')->send(new ContactMessage($validated));
             } catch (\Throwable $e) {
                 Log::error('Erreur lors de l\'envoi du message de contact : ' . $e->getMessage());
             }

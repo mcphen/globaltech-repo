@@ -169,6 +169,34 @@ class FormationController extends Controller
             ->with('success', 'Formation mise à jour.');
     }
 
+    /**
+ * Update lead status for a formation
+ */
+    public function updateLeadStatus(Request $request, Formation $formation, Lead $lead)
+    {
+        try {
+            $request->validate([
+                'status' => 'required|string|in:paid,unpaid',
+            ]);
+
+            // Vérifier que le lead est bien inscrit à cette formation
+            if ($formation->leads()->where('lead_id', $lead->id)->exists()) {
+                // Mettre à jour le statut dans la table pivot
+                $formation->leads()->updateExistingPivot($lead->id, [
+                    'status' => $request->status,
+                    'paid_at' => $request->status === 'paid' ? now() : null
+                ]);
+
+                return back()->with('success', 'Statut du participant mis à jour avec succès.');
+            }
+
+            return back()->with('error', 'Participant non trouvé pour cette formation.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Erreur lors de la mise à jour du statut.');
+        }
+    }
+
     // Public listing page
     public function frontIndex(Request $request)
     {

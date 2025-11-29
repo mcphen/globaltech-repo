@@ -76,7 +76,7 @@ const submit = () => {
                                         v-model="form.contact_phone"
                                         type="text"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                        placeholder="+(33) 7 00 00 00 00"
+                                        placeholder="+(221) 77 100 00 00"
                                     >
                                 </div>
 
@@ -87,7 +87,7 @@ const submit = () => {
                                         v-model="form.contact_phone_fixed"
                                         type="text"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                        placeholder="+(33) 7 00 00 00 00"
+                                        placeholder="+(221) 77 100 00 00 "
                                     >
                                 </div>
 
@@ -98,7 +98,7 @@ const submit = () => {
                                         v-model="form.contact_email"
                                         type="email"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                        placeholder="example@ngconsultingpro.com"
+                                        placeholder="example@tongolotech.com"
                                     >
                                 </div>
 
@@ -109,7 +109,7 @@ const submit = () => {
                                         v-model="form.contact_address"
                                         rows="3"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                        placeholder="71 rue de fontenay, 92140 ville Clamart, France"
+                                        placeholder="71 rue de fontenay, Dakar, Sénégal"
                                     ></textarea>
                                 </div>
                             </div>
@@ -124,7 +124,7 @@ const submit = () => {
                                         v-model="form.social_facebook"
                                         type="url"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                        placeholder="https://www.facebook.com/ngconsulting/"
+                                        placeholder="https://www.facebook.com/tongolotech/"
                                     >
                                 </div>
 
@@ -135,7 +135,7 @@ const submit = () => {
                                         v-model="form.social_twitter"
                                         type="url"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                        placeholder="https://twitter.com/ngconsulting"
+                                        placeholder="https://twitter.com/tongolotech"
                                     >
                                 </div>
 
@@ -146,7 +146,7 @@ const submit = () => {
                                         v-model="form.social_instagram"
                                         type="url"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                        placeholder="https://www.instagram.com/ngconsulting/"
+                                        placeholder="https://www.instagram.com/tongolotech/"
                                     >
                                 </div>
 
@@ -157,7 +157,7 @@ const submit = () => {
                                         v-model="form.social_linkedin"
                                         type="url"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                        placeholder="https://www.linkedin.com/company/ngconsulting/"
+                                        placeholder="https://www.linkedin.com/company/tongolotech/"
                                     >
                                 </div>
 
@@ -168,7 +168,7 @@ const submit = () => {
                                         v-model="form.social_youtube"
                                         type="url"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                        placeholder="https://www.youtube.com/ngconsulting"
+                                        placeholder="https://www.youtube.com/tongolotech"
                                     >
                                 </div>
 

@@ -23,9 +23,9 @@ const lead = computed(() => ((page.props as any).lead as LeadInfo | undefined));
 
 const user = computed<AuthUser | undefined>(() => auth.value?.user);
 
-const metaTitle = computed(() => 'Profil prospect | NG Consulting');
+const metaTitle = computed(() => 'Profil prospect | TONGOLO TECH');
 const metaDescription = computed(
-  () => "Consultez les informations de votre profil prospect au sein de NG Consulting."
+  () => "Consultez les informations de votre profil prospect au sein de TONGOLO TECH."
 );
 </script>
 
@@ -56,7 +56,7 @@ const metaDescription = computed(
             </div>
             <div>
               <h2 class="text-xl font-semibold text-gray-900">{{ user?.name || 'Utilisateur' }}</h2>
-              <p class="text-gray-600 text-sm">Prospect NG Consulting</p>
+              <p class="text-gray-600 text-sm">Prospect TONGOLO TECH</p>
             </div>
           </div>
 

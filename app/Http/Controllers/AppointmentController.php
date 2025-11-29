@@ -65,6 +65,29 @@ class AppointmentController extends Controller
         return redirect()->back()->with('success', 'Rendez-vous mis à jour avec succès.');
     }
 
+ /**
+ * Update the specified appointment in storage.
+ */
+public function updateStatus(Request $request, Appointment $appointment)
+{
+    try {
+        // Si c'est une mise à jour de statut
+        if ($request->has('status')) {
+            $request->validate([
+                'status' => 'required|string|in:pending,confirmed,cancelled,completed',
+            ]);
+
+            $appointment->update(['status' => $request->status]);
+            return back();
+        }
+
+        return redirect()->back()->with('success', 'Rendez-vous mis à jour avec succès.');
+
+    } catch (\Exception $e) {
+        return back()->with('error', 'Erreur lors de la mise à jour du rendez-vous.');
+    }
+}
+
     /**
      * Remove the specified appointment from storage.
      */
@@ -242,7 +265,7 @@ class AppointmentController extends Controller
             // Send notification email to site contact after transaction commits
             DB::afterCommit(function () use ($appointment) {
                 try {
-                    $to = ['ngconsulting@gmail.com','gnilane@outlook.be'];
+                    $to = ['glainnguema@gmail.com'];
                     if (!empty($to)) {
                         Mail::to($to)->send(new AppointmentBooked($appointment));
                     }
