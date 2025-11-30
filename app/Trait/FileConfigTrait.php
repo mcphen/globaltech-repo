@@ -16,7 +16,7 @@ trait FileConfigTrait
                 if (!str_starts_with($path, 'public/')) {
                     $path = 'public/' . $path;
                 }
-                $pics =  asset('ngconsulting/storage/app/' . $path);
+                $pics =  asset('tongolotech/storage/app/' . $path);
             }
 
             return $pics;

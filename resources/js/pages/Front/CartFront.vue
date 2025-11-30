@@ -30,7 +30,7 @@ const checkout = () => {
 <template>
   <LayoutFront>
     <Head>
-      <title>Panier | NG Consultings</title>
+      <title>Panier | TONGOLO TECHs</title>
     </Head>
 
     <div class="bg-primary-bg-light py-12">

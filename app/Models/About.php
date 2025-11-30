@@ -11,8 +11,8 @@ class About extends Model
     public function getImagePathAttribute($value)
     {
         // In production, prepend sophieWeeding/public/storage to the path
-        if (app()->environment('production') && $value && !str_starts_with($value, '/ngconsulting/public/storage/')) {
-            return '/ngconsulting/public/storage/' . ltrim($value, '/');
+        if (app()->environment('production') && $value && !str_starts_with($value, '/tongolotech/public/storage/')) {
+            return '/tongolotech/public/storage/' . ltrim($value, '/');
         }
 
         return "/storage/".$value;

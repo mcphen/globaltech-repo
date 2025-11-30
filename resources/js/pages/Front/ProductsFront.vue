@@ -40,7 +40,7 @@ const sort = ref(props.filters?.sort || 'newest');
 const currentUrl = ref('');
 
 // Computed properties for meta tags
-const metaTitle = computed(() => "Produits de Mariage | NG Consultings");
+const metaTitle = computed(() => "Produits de Mariage | TONGOLO TECHs");
 const metaDescription = computed(() => "Découvrez notre collection de produits de mariage de haute qualité. Accessoires, décorations et plus pour rendre votre mariage parfait à Dakar, Sénégal.");
 
 // JSON-LD structured data for product listing
@@ -167,15 +167,15 @@ const addToCart = (productId: number, quantity: number = 1) => {
         <div class="relative bg-primary-bg-light py-16 overflow-hidden">
         <!-- Image de fond avec overlay -->
         <div class="absolute inset-0 z-0">
-            <img 
-            src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80" 
-            alt="Technology Background" 
+            <img
+            src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80"
+            alt="Technology Background"
             class="w-full h-full object-cover"
             />
             <!-- Overlay gradient pour améliorer la lisibilité -->
             <div class="absolute inset-0 bg-gradient-to-r from-blue-900/85 via-blue-800/75 to-purple-900/85"></div>
         </div>
-        
+
         <!-- Contenu en avant-plan -->
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h1 class="text-4xl md:text-5xl font-serif font-bold text-white mb-4 drop-shadow-lg">
@@ -185,7 +185,7 @@ const addToCart = (productId: number, quantity: number = 1) => {
             Chez <strong class="text-yellow-300">TONGOLO TECH</strong>, Découvrez notre sélection de produits de qualité pour rendre votre mariage inoubliable
             </p>
         </div>
-        
+
         <!-- Élément décoratif (optionnel) -->
         <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent"></div>
         </div>

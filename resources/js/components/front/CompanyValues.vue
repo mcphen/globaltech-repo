@@ -2,7 +2,7 @@
     <!-- <section class="py-20 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
-                <h2 class="text-3xl font-serif font-bold text-gray-900">Les valeurs de NG CONSULTING</h2>
+                <h2 class="text-3xl font-serif font-bold text-gray-900">Les valeurs de TONGOLO TECH</h2>
                 <p class="mt-4 text-lg text-gray-600 max-w-2xl mx-auto">
                     Nos valeurs fondamentales guident chacune de nos actions et interactions
                 </p>

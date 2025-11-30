@@ -84,8 +84,8 @@ const breadcrumbItems = [
 
 <template>
     <Head>
-        <title>Contact - NG Consulting</title>
-        <meta name="description" content="Contactez NG Consulting pour planifier votre mariage de rêve ou pour toute question concernant nos services." />
+        <title>Contact - TONGOLO TECH</title>
+        <meta name="description" content="Contactez TONGOLO TECH pour planifier votre mariage de rêve ou pour toute question concernant nos services." />
     </Head>
 
     <LayoutFront>
@@ -93,15 +93,15 @@ const breadcrumbItems = [
         <div class="relative bg-primary-bg-light py-16 overflow-hidden">
         <!-- Image de fond avec overlay -->
         <div class="absolute inset-0 z-0">
-            <img 
-            src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80" 
-            alt="Technology Background" 
+            <img
+            src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80"
+            alt="Technology Background"
             class="w-full h-full object-cover"
             />
             <!-- Overlay gradient pour améliorer la lisibilité -->
             <div class="absolute inset-0 bg-gradient-to-r from-blue-900/85 via-blue-800/75 to-purple-900/85"></div>
         </div>
-        
+
         <!-- Contenu en avant-plan -->
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
             <h1 class="text-4xl md:text-5xl font-serif font-bold text-white text-center mb-4 drop-shadow-lg">
@@ -138,7 +138,7 @@ const breadcrumbItems = [
             </ol>
             </nav>
         </div>
-        
+
         <!-- Élément décoratif -->
         <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent"></div>
         </div>

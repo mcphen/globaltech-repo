@@ -27,7 +27,7 @@ interface Formation {
 
 const props = defineProps<{ formation: Formation }>();
 
-const metaTitle = computed(() => `${props.formation.title} | Formations | NG Consultings`);
+const metaTitle = computed(() => `${props.formation.title} | Formations | TONGOLO TECHs`);
 const metaDescription = computed(() => {
   const clean = (props.formation.description || '').replace(/<[^>]*>?/gm, '');
   return clean.slice(0, 160);

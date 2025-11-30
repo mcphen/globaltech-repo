@@ -15,9 +15,9 @@ class UserSeeder extends Seeder
     {
         // Admin account
         User::firstOrCreate(
-            ['email' => 'admin@ngconsulting.test'],
+            ['email' => 'admin@tongolotech.test'],
             [
-                'name' => 'Admin NG Consulting',
+                'name' => 'Admin TONGOLO TECH',
                 'password' => Hash::make('password'),
                 'role' => User::ROLE_ADMIN,
             ]
@@ -25,7 +25,7 @@ class UserSeeder extends Seeder
 
         // Regular user account
         User::firstOrCreate(
-            ['email' => 'user@ngconsulting.test'],
+            ['email' => 'user@tongolotech.test'],
             [
                 'name' => 'Utilisateur NG',
                 'password' => Hash::make('password'),

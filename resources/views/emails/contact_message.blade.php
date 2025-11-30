@@ -29,7 +29,7 @@
     <table role="presentation" cellspacing="0" cellpadding="0" border="0" width="100%" style="max-width:640px; margin:0 auto;">
       <tr>
         <td style="padding: 24px 16px; text-align:center;">
-          <a href="{{ config('app.url') }}" style="font-size:20px; font-weight:700; color:#0f172a;">{{ config('app.name', 'NgConsulting') }}</a>
+          <a href="{{ config('app.url') }}" style="font-size:20px; font-weight:700; color:#0f172a;">{{ config('app.name', 'tongolotech') }}</a>
         </td>
       </tr>
 
@@ -107,7 +107,7 @@
 
             <tr>
               <td style="background:#f8fafc; padding:16px 24px; border-top:1px solid #f1f5f9; text-align:center; color:#64748b; font-size:12px;">
-                © {{ date('Y') }} {{ config('app.name', 'NgConsulting') }}. Tous droits réservés.
+                © {{ date('Y') }} {{ config('app.name', 'tongolotech') }}. Tous droits réservés.
               </td>
             </tr>
           </table>

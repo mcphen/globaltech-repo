@@ -13,7 +13,7 @@ const formatPrice = (price: number) => new Intl.NumberFormat('fr-FR', { style: '
 <template>
   <LayoutFront>
     <Head>
-      <title>Confirmation de commande | NG Consultings</title>
+      <title>Confirmation de commande | TONGOLO TECHs</title>
     </Head>
 
     <div class="bg-primary-bg-light py-16">

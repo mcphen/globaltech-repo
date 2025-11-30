@@ -17,7 +17,7 @@ onMounted(() => {
 });
 
 // Computed properties for meta tags
-const metaTitle = computed(() => "Blog | NG Consultings - Conseils et Actualités Mariage");
+const metaTitle = computed(() => "Blog | TONGOLO TECHs - Conseils et Actualités Mariage");
 const metaDescription = computed(() => "Découvrez nos articles, conseils et actualités sur l'organisation de mariage à Dakar, Sénégal. Tendances, idées et inspiration pour votre mariage parfait.");
 
 // JSON-LD structured data for blog listing
@@ -25,12 +25,12 @@ const blogJsonLd = computed(() => {
     return {
         '@context': 'https://schema.org',
         '@type': 'Blog',
-        headline: 'Blog NG Consultings',
+        headline: 'Blog TONGOLO TECHs',
         description: metaDescription.value,
         url: currentUrl.value,
         publisher: {
             '@type': 'Organization',
-            name: 'NG Consultings',
+            name: 'TONGOLO TECHs',
             logo: {
                 '@type': 'ImageObject',
                 url: `${window.location.origin}/images/logo.jpg`
@@ -46,7 +46,7 @@ const blogJsonLd = computed(() => {
             url: `${window.location.origin}/blog/${post.id}`,
             author: {
                 '@type': 'Organization',
-                name: 'NG Consultings'
+                name: 'TONGOLO TECHs'
             }
         }))
     };
@@ -280,15 +280,15 @@ watch([selectedDate, sortBy], () => {
         <div class="relative bg-primary-bg-light py-16 overflow-hidden">
         <!-- Image de fond avec overlay -->
         <div class="absolute inset-0 z-0">
-            <img 
-            src="/images/nav-second.jpeg" 
-            alt="Technology Background" 
+            <img
+            src="/images/nav-second.jpeg"
+            alt="Technology Background"
             class="w-full h-full object-cover"
             />
             <!-- Overlay gradient pour améliorer la lisibilité -->
             <div class="absolute inset-0 bg-gradient-to-r from-blue-900/85 via-blue-800/75 to-purple-900/85"></div>
         </div>
-        
+
         <!-- Contenu en avant-plan -->
         <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
             <h1 class="text-4xl md:text-5xl font-serif font-bold text-white text-center mb-4 drop-shadow-lg">
@@ -325,7 +325,7 @@ watch([selectedDate, sortBy], () => {
             </ol>
             </nav>
         </div>
-        
+
         <!-- Élément décoratif -->
         <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent"></div>
         </div>

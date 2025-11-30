@@ -36,7 +36,7 @@ const currentUrl = ref('');
 
 // Computed properties for meta tags
 const metaTitle = computed(() => "Nos Services | TONGOLO TECH ");
-const metaDescription = computed(() => "Découvrez les services professionnels de conseil stratégique, d'assistance comptable, d'audit financier et de gouvernance proposés par NG Consulting. Renforcez la performance de votre entreprise.");
+const metaDescription = computed(() => "Découvrez les services professionnels de conseil stratégique, d'assistance comptable, d'audit financier et de gouvernance proposés par TONGOLO TECH. Renforcez la performance de votre entreprise.");
 
 // JSON-LD structured data for services
 const servicesJsonLd = computed(() => {

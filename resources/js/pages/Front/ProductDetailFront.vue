@@ -28,7 +28,7 @@ const quantity = ref<number>(1);
 
 const addToCart = () => {
     if (!props.product?.id) return;
-    
+
     const q = Math.max(1, Number(quantity.value) || 1);
     router.post(route('cart.add', { id: props.product.id }), { quantity: q }, {
         preserveScroll: true,
@@ -61,16 +61,16 @@ function stripAndTruncateHtml(html: string | null, limit = 100): string {
 
 
 // Computed properties for meta tags
-const metaTitle = computed(() => 
+const metaTitle = computed(() =>
     props.product ? `${props.product.title} | Sophie Wedding` : 'Produit | Sophie Wedding'
 );
 
 const metaDescription = computed(() => {
     if (!props.product) return 'Découvrez nos produits de mariage de qualité';
-    
+
     return props.product.description
         ? props.product.description.substring(0, 160)
-        : `Découvrez ${props.product.title} - Produit de mariage de qualité par NG Consultings`;
+        : `Découvrez ${props.product.title} - Produit de mariage de qualité par TONGOLO TECHs`;
 });
 
 // Helper function to get full image URL
@@ -83,7 +83,7 @@ const getImageUrl = (imagePath: string | null): string => {
 // JSON-LD structured data for product
 const productJsonLd = computed(() => {
     if (!props.product) return null;
-    
+
     return {
         '@context': 'https://schema.org',
         '@type': 'Product',
@@ -98,7 +98,7 @@ const productJsonLd = computed(() => {
         },
         brand: {
             '@type': 'Brand',
-            name: 'NG Consultings'
+            name: 'TONGOLO TECHs'
         }
     };
 });

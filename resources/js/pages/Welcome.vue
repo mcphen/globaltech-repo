@@ -99,7 +99,7 @@ const submitForm = async () => {
 </script>
 
 <template>
-    <Head title="NG Consulting - Cabinet Conseil"  />
+    <Head title="TONGOLO TECH - Cabinet Conseil"  />
 
 
     <LayoutFront>

@@ -23,7 +23,7 @@ const breadcrumbItems = [
 <template>
   <Head>
     <title>Mon profil </title>
-    <meta name="description" content="Gérez les informations de votre profil NG Consulting." />
+    <meta name="description" content="Gérez les informations de votre profil TONGOLO TECH." />
   </Head>
 
   <LayoutFront>

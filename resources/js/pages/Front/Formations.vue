@@ -39,8 +39,8 @@ const props = defineProps<{
 const searchQuery = ref(props.filters.search || '');
 const isLoading = ref(false);
 
-const metaTitle = computed(() => 'Formations | NG Consultings');
-const metaDescription = computed(() => "Découvrez nos formations proposées par NG Consultings. Programme, dates et modalités d'inscription.");
+const metaTitle = computed(() => 'Formations | TONGOLO TECHs');
+const metaDescription = computed(() => "Découvrez nos formations proposées par TONGOLO TECHs. Programme, dates et modalités d'inscription.");
 
 const formatDate = (dateString?: string | null) => {
   if (!dateString) return '';

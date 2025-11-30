@@ -116,23 +116,23 @@ onMounted(() => {
     <Head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <meta name="description" content="NG Consulting - Cabinet conseil spécialisé dans l'accompagnement stratégique, comptable et opérationnel des entreprises. Solutions personnalisées pour renforcer votre performance." />
+        <meta name="description" content="TONGOLO TECH - Cabinet conseil spécialisé dans l'accompagnement stratégique, comptable et opérationnel des entreprises. Solutions personnalisées pour renforcer votre performance." />
         <meta name="keywords" content="conseil stratégique, assistance comptable, audit financier, gouvernance, gestion des risques, consulting, entreprise, performance" />
-        <meta name="author" content="NG Consulting" />
+        <meta name="author" content="TONGOLO TECH" />
         <meta name="robots" content="index, follow" />
 
 
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website" />
-        <meta property="og:title" content="NG Consulting - Cabinet Conseil" />
-        <meta property="og:description" content="NG Consulting - Cabinet conseil spécialisé dans l'accompagnement stratégique, comptable et opérationnel des entreprises. Solutions personnalisées pour renforcer votre performance." />
+        <meta property="og:title" content="TONGOLO TECH - Cabinet Conseil" />
+        <meta property="og:description" content="TONGOLO TECH - Cabinet conseil spécialisé dans l'accompagnement stratégique, comptable et opérationnel des entreprises. Solutions personnalisées pour renforcer votre performance." />
         <meta property="og:image" content="/images/logo.jpg" />
-        <meta property="og:site_name" content="NG Consulting" />
+        <meta property="og:site_name" content="TONGOLO TECH" />
 
         <!-- Twitter -->
         <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content="NG Consulting - Cabinet Conseil" />
-        <meta name="twitter:description" content="NG Consulting - Cabinet conseil spécialisé dans l'accompagnement stratégique, comptable et opérationnel des entreprises. Solutions personnalisées pour renforcer votre performance." />
+        <meta name="twitter:title" content="TONGOLO TECH - Cabinet Conseil" />
+        <meta name="twitter:description" content="TONGOLO TECH - Cabinet conseil spécialisé dans l'accompagnement stratégique, comptable et opérationnel des entreprises. Solutions personnalisées pour renforcer votre performance." />
         <meta name="twitter:image" content="/images/logo.jpg" />
     </Head>
 
@@ -512,7 +512,7 @@ onMounted(() => {
                     <div>
                         <h3 class="text-lg font-semibold mb-4">TONGOLO TECH</h3>
                         <p class="text-gray-300 mb-4">
-                            Créée en 2015, TONGOLO Tech (l’Etoile de la technologie) est une société à responsabilité limitée (SARL) dont le siège social est à Dakar, Fass Paillote.                  
+                            Créée en 2015, TONGOLO Tech (l’Etoile de la technologie) est une société à responsabilité limitée (SARL) dont le siège social est à Dakar, Fass Paillote.
                         </p>
                         <p class="text-gray-300 mb-4">
                             Elle est spécialisée dans l’Ingénierie, les prestations de services, la fourniture d’équipements et la maintenance

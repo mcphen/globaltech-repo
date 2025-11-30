@@ -21,6 +21,7 @@ use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\ProductOrderController;
 use App\Http\Controllers\LeadFormationController;
 use App\Http\Controllers\Admin\ScheduleController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\VisitorTrackerController;
 
 
@@ -195,6 +196,12 @@ Route::middleware(['auth'])->group(function () {
         Route::get('banner', [BannerController::class, 'index'])->name('admin.banner.index');
         Route::post('banner/update', [BannerController::class, 'update'])->name('admin.banner.update');
 
+        // Orders management routes
+        Route::get('orders', [OrderController::class, 'index'])->name('admin.orders.index');
+        Route::get('orders/list', [OrderController::class, 'list'])->name('admin.orders.list');
+        Route::get('orders/{order}', [OrderController::class, 'show'])->name('admin.orders.show');
+        Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('admin.orders.update-status');
+
         // Settings management routes
         Route::resource('settings', SettingController::class)
             ->except(['show'])
@@ -234,7 +241,7 @@ Route::middleware(['auth'])->group(function () {
                 'index' => 'admin.appointments.index',
                 'show' => 'admin.appointments.show',
                 'update' => 'admin.appointments.update',
-                'updateStatus' => 'admin.appointments.updateStatus', 
+                'updateStatus' => 'admin.appointments.updateStatus',
                 'destroy' => 'admin.appointments.destroy',
             ]);
         Route::post('/appointments/{appointment}/confirm', [AppointmentController::class, 'confirm'])->name('admin.appointments.confirm');
@@ -258,7 +265,7 @@ Route::middleware(['auth'])->group(function () {
         // Lead formations management
         Route::put('leads/{lead}/formations/{formation}', [LeadController::class, 'updateFormationStatus'])->name('admin.leads.formations.update');
 
-        // Lead orders management  
+        // Lead orders management
         Route::put('leads/{lead}/orders/{order}', [LeadController::class, 'updateOrderStatus'])->name('admin.leads.orders.update');
 
         // Lead appointments management
