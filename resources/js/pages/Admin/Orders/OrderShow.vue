@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 
 interface BreadcrumbItemType {
@@ -26,6 +26,20 @@ interface UserSnapshot {
   email: string;
 }
 
+interface Appel {
+  id: number;
+  user_id: number;
+  user: UserSnapshot;
+  called_at: string;
+  type: 'entrant' | 'sortant';
+  status: 'répondu' | 'non-répondu' | 'rappel-prévu';
+  duration: number | null;
+  notes: string;
+  next_call_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 interface Order {
   id: number;
   user_id: number | null;
@@ -40,19 +54,45 @@ interface Order {
   customer_email: string | null;
   customer_phone: string | null;
   notes: string | null;
+  invoice_number: string | null;
+  invoice_date: string | null;
+  invoice_path: string | null;
   created_at: string;
   updated_at: string;
+  appels: Appel[];
 }
 
 const props = defineProps<{ order: Order }>();
 const order = ref<Order>({ ...props.order });
 
+// États
 const breadcrumbs: BreadcrumbItemType[] = [
   { title: 'Dashboard', href: '/dashboard' },
   { title: 'Commandes', href: route('admin.orders.index') },
   { title: `Commande #${order.value.id}` },
 ];
 
+const updating = ref(false);
+const error = ref<string | null>(null);
+const success = ref<string | null>(null);
+const loadingInvoice = ref(false);
+const loadingAppels = ref(false);
+const showAppelModal = ref(false);
+const showAppelsList = ref(false);
+const appels = ref<Appel[]>(order.value.appels || []);
+const appelsPage = ref(1);
+const appelsHasMore = ref(true);
+
+// Formulaire d'appel
+const appelForm = ref({
+  type: 'sortant',
+  status: 'répondu',
+  duration: null as number | null,
+  notes: '',
+  next_call_at: '',
+});
+
+// Helper functions
 function formatCurrency(value: string | number, currency = 'EUR') {
   const num = typeof value === 'string' ? parseFloat(value) : value;
   return new Intl.NumberFormat('fr-FR', { style: 'currency', currency }).format(num || 0);
@@ -63,6 +103,13 @@ function formatDateTime(iso: string) {
   return new Intl.DateTimeFormat('fr-FR', {
     year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit'
+  }).format(d);
+}
+
+function formatDate(iso: string) {
+  const d = new Date(iso);
+  return new Intl.DateTimeFormat('fr-FR', {
+    year: 'numeric', month: '2-digit', day: '2-digit'
   }).format(d);
 }
 
@@ -79,10 +126,54 @@ function getStatusPill(status: string) {
   }
 }
 
-const updating = ref(false);
-const error = ref<string | null>(null);
-const success = ref<string | null>(null);
+function getAppelTypeLabel(type: string) {
+  return type === 'sortant' ? 'Sortant' : 'Entrant';
+}
 
+function getAppelStatusLabel(status: string) {
+  switch (status) {
+    case 'répondu': return 'Répondu';
+    case 'non-répondu': return 'Non répondu';
+    case 'rappel-prévu': return 'Rappel prévu';
+    default: return status;
+  }
+}
+
+function getAppelTypeClasses(type: string) {
+  return type === 'sortant' 
+    ? 'bg-blue-100 text-blue-800' 
+    : 'bg-purple-100 text-purple-800';
+}
+
+function getAppelStatusClasses(status: string) {
+  switch (status) {
+    case 'répondu': return 'bg-green-100 text-green-800';
+    case 'non-répondu': return 'bg-red-100 text-red-800';
+    case 'rappel-prévu': return 'bg-yellow-100 text-yellow-800';
+    default: return 'bg-gray-100 text-gray-800';
+  }
+}
+
+function formatDuration(seconds: number | null) {
+  if (!seconds) return 'N/A';
+  const minutes = Math.floor(seconds / 60);
+  const secs = seconds % 60;
+  return `${minutes}:${secs.toString().padStart(2, '0')}`;
+}
+
+// Computed
+const totals = computed(() => ({
+  items: order.value.items?.length || 0,
+  subtotal: order.value.subtotal,
+  total: order.value.total,
+  currency: order.value.currency,
+}));
+
+const hasInvoice = computed(() => {
+  return order.value.invoice_number && order.value.invoice_path;
+});
+
+// Functions
 async function updateStatus(status: 'pending' | 'paid' | 'canceled') {
   if (updating.value) return;
   updating.value = true;
@@ -100,34 +191,133 @@ async function updateStatus(status: 'pending' | 'paid' | 'canceled') {
   }
 }
 
-const totals = computed(() => ({
-  items: order.value.items?.length || 0,
-  subtotal: order.value.subtotal,
-  total: order.value.total,
-  currency: order.value.currency,
-}));
+async function generateInvoice() {
+  if (loadingInvoice.value) return;
+  loadingInvoice.value = true;
+  error.value = null;
+  try {
+    const { data } = await axios.post(route('admin.orders.generate-invoice', order.value.id));
+    order.value.invoice_number = data.order.invoice_number;
+    order.value.invoice_date = data.order.invoice_date;
+    order.value.invoice_path = data.order.invoice_path;
+    success.value = 'Facture générée avec succès';
+  } catch (e: any) {
+    error.value = e?.response?.data?.message || e?.message || 'Erreur lors de la génération de la facture';
+  } finally {
+    loadingInvoice.value = false;
+    setTimeout(() => { success.value = null; }, 3000);
+  }
+}
+
+function downloadInvoice() {
+  if (!order.value.invoice_path) return;
+  window.open(route('admin.orders.download-invoice', order.value.id), '_blank');
+}
+
+async function loadAppels() {
+  if (loadingAppels.value) return;
+  loadingAppels.value = true;
+  try {
+    const { data } = await axios.get(route('admin.orders.appels.index', order.value.id), {
+      params: { page: appelsPage.value }
+    });
+    
+    if (data.data.length > 0) {
+      appels.value = [...appels.value, ...data.data];
+      appelsPage.value++;
+      appelsHasMore.value = data.next_page_url !== null;
+    }
+  } catch (e: any) {
+    console.error('Erreur lors du chargement des appels:', e);
+  } finally {
+    loadingAppels.value = false;
+  }
+}
+
+async function submitAppel() {
+  if (!appelForm.value.notes.trim()) {
+    error.value = 'Les notes sont obligatoires';
+    return;
+  }
+
+  try {
+    const { data } = await axios.post(route('admin.orders.appels.store', order.value.id), {
+      ...appelForm.value,
+      duration: appelForm.value.duration || null,
+      next_call_at: appelForm.value.next_call_at || null,
+    });
+
+    // Ajouter le nouvel appel en tête de liste
+    appels.value.unshift(data.appel);
+    
+    // Réinitialiser le formulaire
+    appelForm.value = {
+      type: 'sortant',
+      status: 'répondu',
+      duration: null,
+      notes: '',
+      next_call_at: '',
+    };
+    
+    showAppelModal.value = false;
+    success.value = 'Appel enregistré avec succès';
+    setTimeout(() => { success.value = null; }, 3000);
+  } catch (e: any) {
+    error.value = e?.response?.data?.message || e?.message || 'Erreur lors de l\'enregistrement de l\'appel';
+  }
+}
+
+async function deleteAppel(appelId: number) {
+  if (!confirm('Êtes-vous sûr de vouloir supprimer cet appel ?')) return;
+
+  try {
+    await axios.delete(route('admin.orders.appels.destroy', {
+      order: order.value.id,
+      appel: appelId
+    }));
+    
+    // Supprimer de la liste
+    appels.value = appels.value.filter(a => a.id !== appelId);
+    success.value = 'Appel supprimé avec succès';
+    setTimeout(() => { success.value = null; }, 3000);
+  } catch (e: any) {
+    error.value = e?.response?.data?.message || e?.message || 'Erreur lors de la suppression de l\'appel';
+  }
+}
+
+// Initial load
+onMounted(() => {
+  if (order.value.appels && order.value.appels.length > 0) {
+    appels.value = order.value.appels;
+  }
+});
 </script>
 
 <template>
   <Head :title="`Commande #${order.id}`" />
   <AppLayout :breadcrumbs="breadcrumbs">
     <div class="flex h-full flex-1 flex-col gap-6 rounded-xl p-6 bg-white shadow-sm">
+      <!-- Header avec actions -->
       <div class="flex flex-col gap-4">
-        <div class="flex items-start justify-between gap-4">
+        <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
           <div>
             <h2 class="text-2xl font-bold text-gray-800">Commande #{{ order.id }}</h2>
-            <div class="mt-2 flex items-center gap-3">
+            <div class="mt-2 flex flex-wrap items-center gap-3">
               <span :class="['px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full', getStatusPill(order.status).cls]">
                 {{ getStatusPill(order.status).text }}
               </span>
               <span class="text-sm text-gray-500">Créée le {{ formatDateTime(order.created_at) }}</span>
-              <span class="text-sm text-gray-400">Dernière MAJ: {{ formatDateTime(order.updated_at) }}</span>
+              <span v-if="order.invoice_number" class="text-sm text-blue-600 font-medium">
+                Facture: {{ order.invoice_number }}
+              </span>
             </div>
           </div>
-          <!-- Action icons -->
-          <div class="flex items-center gap-2">
+          
+          <!-- Action buttons -->
+          <div class="flex flex-wrap gap-2">
+            <!-- Statut buttons -->
             <button
-              class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium border border-gray-300 hover:bg-gray-50 disabled:opacity-50"
+              class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium border border-gray-300 hover:bg-gray-50 disabled:opacity-50 transition"
               :disabled="updating || order.status==='pending'"
               @click="updateStatus('pending')"
               title="Marquer en attente"
@@ -136,7 +326,7 @@ const totals = computed(() => ({
               En attente
             </button>
             <button
-              class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium border border-green-300 text-green-700 hover:bg-green-50 disabled:opacity-50"
+              class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium border border-green-300 text-green-700 hover:bg-green-50 disabled:opacity-50 transition"
               :disabled="updating || order.status==='paid'"
               @click="updateStatus('paid')"
               title="Marquer comme payée"
@@ -145,7 +335,7 @@ const totals = computed(() => ({
               Payée
             </button>
             <button
-              class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium border border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50"
+              class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium border border-red-300 text-red-700 hover:bg-red-50 disabled:opacity-50 transition"
               :disabled="updating || order.status==='canceled'"
               @click="updateStatus('canceled')"
               title="Annuler la commande"
@@ -153,11 +343,121 @@ const totals = computed(() => ({
               <span class="i-lucide-x-circle text-red-600"></span>
               Annuler
             </button>
+            
+            <!-- Facture button -->
+            <button
+              v-if="!hasInvoice"
+              @click="generateInvoice"
+              :disabled="loadingInvoice"
+              class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition"
+            >
+              <span v-if="loadingInvoice" class="i-lucide-loader animate-spin"></span>
+              <span v-else class="i-lucide-file-text"></span>
+              {{ loadingInvoice ? 'Génération...' : 'Générer facture' }}
+            </button>
+            
+            <!-- Télécharger facture -->
+            <button
+              v-if="hasInvoice"
+              @click="downloadInvoice"
+              class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium bg-green-600 text-white hover:bg-green-700 transition"
+            >
+              <span class="i-lucide-download"></span>
+              Télécharger facture
+            </button>
+            
+            <!-- Nouvel appel -->
+            <button
+              @click="showAppelModal = true"
+              class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium bg-purple-600 text-white hover:bg-purple-700 transition"
+            >
+              <span class="i-lucide-phone"></span>
+              Nouvel appel
+            </button>
+            
+            <!-- Voir les appels -->
+            <button
+              @click="showAppelsList = !showAppelsList"
+              class="inline-flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium border border-gray-300 hover:bg-gray-50 transition"
+            >
+              <span class="i-lucide-history"></span>
+              Historique appels ({{ appels.length }})
+            </button>
           </div>
         </div>
 
-        <div v-if="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">{{ error }}</div>
-        <div v-if="success" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">{{ success }}</div>
+        <!-- Messages d'erreur/succès -->
+        <div v-if="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+          {{ error }}
+        </div>
+        <div v-if="success" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
+          {{ success }}
+        </div>
+      </div>
+
+      <!-- Historique des appels -->
+      <div v-if="showAppelsList" class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="text-lg font-semibold text-gray-800">Historique des appels</h3>
+          <button
+            @click="showAppelsList = false"
+            class="text-gray-500 hover:text-gray-700"
+          >
+            <span class="i-lucide-x"></span>
+          </button>
+        </div>
+        
+        <div v-if="appels.length === 0" class="text-center py-4 text-gray-500">
+          Aucun appel enregistré pour cette commande.
+        </div>
+        
+        <div v-else class="space-y-3">
+          <div v-for="appel in appels" :key="appel.id" class="bg-white border border-gray-200 rounded-lg p-4">
+            <div class="flex justify-between items-start mb-2">
+              <div class="flex items-center gap-2">
+                <span :class="['px-2 py-1 text-xs font-medium rounded-full', getAppelTypeClasses(appel.type)]">
+                  {{ getAppelTypeLabel(appel.type) }}
+                </span>
+                <span :class="['px-2 py-1 text-xs font-medium rounded-full', getAppelStatusClasses(appel.status)]">
+                  {{ getAppelStatusLabel(appel.status) }}
+                </span>
+                <span class="text-sm text-gray-500">
+                  {{ formatDateTime(appel.called_at) }}
+                </span>
+              </div>
+              <button
+                @click="deleteAppel(appel.id)"
+                class="text-red-500 hover:text-red-700"
+                title="Supprimer l'appel"
+              >
+                <span class="i-lucide-trash-2 h-4 w-4"></span>
+              </button>
+            </div>
+            
+            <div class="text-sm text-gray-600 mb-2">
+              <div class="flex items-center gap-4">
+                <span>Par: {{ appel.user.name }}</span>
+                <span v-if="appel.duration">Durée: {{ formatDuration(appel.duration) }}</span>
+                <span v-if="appel.next_call_at" class="text-yellow-600">
+                  Rappel: {{ formatDate(appel.next_call_at) }}
+                </span>
+              </div>
+            </div>
+            
+            <div class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded">
+              {{ appel.notes }}
+            </div>
+          </div>
+          
+          <button
+            v-if="appelsHasMore"
+            @click="loadAppels"
+            :disabled="loadingAppels"
+            class="w-full py-2 text-sm text-blue-600 hover:text-blue-800 disabled:opacity-50"
+          >
+            {{ loadingAppels ? 'Chargement...' : 'Charger plus' }}
+          </button>
+        </div>
       </div>
 
       <!-- Customer and summary -->
@@ -188,6 +488,10 @@ const totals = computed(() => ({
             <div class="flex justify-between border-t pt-2 mt-2">
               <span>Total</span>
               <span class="font-bold text-gray-900">{{ formatCurrency(totals.total, totals.currency) }}</span>
+            </div>
+            <div v-if="order.invoice_date" class="flex justify-between text-xs text-gray-500">
+              <span>Facture du:</span>
+              <span>{{ formatDate(order.invoice_date) }}</span>
             </div>
           </div>
         </div>
@@ -226,4 +530,120 @@ const totals = computed(() => ({
       </div>
     </div>
   </AppLayout>
+
+  <!-- Modal pour nouveau appel -->
+  <div v-if="showAppelModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+      <div class="p-6">
+        <div class="flex justify-between items-center mb-6">
+          <h3 class="text-xl font-semibold text-gray-900">Nouvel appel</h3>
+          <button
+            @click="showAppelModal = false"
+            class="text-gray-400 hover:text-gray-500"
+          >
+            <span class="i-lucide-x h-6 w-6"></span>
+          </button>
+        </div>
+        
+        <div class="space-y-4">
+          <!-- Type d'appel -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Type d'appel</label>
+            <div class="flex gap-4">
+              <label class="inline-flex items-center">
+                <input
+                  type="radio"
+                  v-model="appelForm.type"
+                  value="sortant"
+                  class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                >
+                <span class="ml-2 text-sm text-gray-700">Sortant (nous appelons)</span>
+              </label>
+              <label class="inline-flex items-center">
+                <input
+                  type="radio"
+                  v-model="appelForm.type"
+                  value="entrant"
+                  class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
+                >
+                <span class="ml-2 text-sm text-gray-700">Entrant (client appelle)</span>
+              </label>
+            </div>
+          </div>
+          
+          <!-- Statut -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
+            <select
+              v-model="appelForm.status"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
+              <option value="répondu">Répondu</option>
+              <option value="non-répondu">Non répondu</option>
+              <option value="rappel-prévu">Rappel prévu</option>
+            </select>
+          </div>
+          
+          <!-- Durée -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Durée (en secondes)
+              <span class="text-gray-400 text-sm font-normal"> - Optionnel</span>
+            </label>
+            <input
+              type="number"
+              v-model="appelForm.duration"
+              min="0"
+              placeholder="Ex: 300 pour 5 minutes"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
+          </div>
+          
+          <!-- Date de rappel -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Date de rappel
+              <span class="text-gray-400 text-sm font-normal"> - Optionnel</span>
+            </label>
+            <input
+              type="datetime-local"
+              v-model="appelForm.next_call_at"
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            >
+          </div>
+          
+          <!-- Notes -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Notes <span class="text-red-500">*</span>
+            </label>
+            <textarea
+              v-model="appelForm.notes"
+              rows="6"
+              required
+              placeholder="Résumé de l'appel, points discutés, actions à prendre..."
+              class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+            ></textarea>
+          </div>
+          
+          <!-- Actions -->
+          <div class="flex justify-end gap-3 pt-4">
+            <button
+              @click="showAppelModal = false"
+              class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition"
+            >
+              Annuler
+            </button>
+            <button
+              @click="submitAppel"
+              :disabled="!appelForm.notes.trim()"
+              class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Enregistrer l'appel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </template>

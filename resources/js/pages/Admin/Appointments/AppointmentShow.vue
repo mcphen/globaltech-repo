@@ -2,8 +2,9 @@
 import { Head, Link, usePage } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItemType } from '@/types';
-import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import { router } from '@inertiajs/vue3';
+import axios from 'axios';
 
 // Type pour un rendez-vous
 interface AppointmentService {
@@ -40,6 +41,20 @@ interface User {
     email: string;
 }
 
+interface Appel {
+    id: number;
+    user_id: number;
+    user: User;
+    called_at: string;
+    type: 'entrant' | 'sortant';
+    status: 'répondu' | 'non-répondu' | 'rappel-prévu';
+    duration: number | null;
+    notes: string;
+    next_call_at: string | null;
+    created_at: string;
+    updated_at: string;
+}
+
 interface Appointment {
     id: number;
     client_id: number;
@@ -55,6 +70,7 @@ interface Appointment {
     schedule: Schedule;
     services: AppointmentService[];
     confirmedBy?: User;
+    appels: Appel[];
 }
 
 // Props
@@ -72,41 +88,28 @@ const breadcrumbs: BreadcrumbItemType[] = [
     { title: `Rendez-vous #${props.appointment.id}`, href: route('admin.appointments.show', props.appointment.id) }
 ];
 
-// État pour les modals
+// États
 const showConfirmModal = ref(false);
 const showDeleteModal = ref(false);
+const showAppelModal = ref(false);
+const showAppelsList = ref(false);
+const updating = ref(false);
+const loadingAppels = ref(false);
+const error = ref<string | null>(null);
+const success = ref<string | null>(null);
+const appels = ref<Appel[]>(props.appointment.appels || []);
 
-// Fonctions
-// Confirmer un rendez-vous
-async function confirmAppointment() {
-    try {
-        await router.post(route('admin.appointments.confirm', props.appointment.id));
-        showConfirmModal.value = false;
-        // Recharger les données
-        router.reload();
-    } catch (error) {
-        console.error('Erreur lors de la confirmation:', error);
-    }
-}
 
-function deleteAppointment() {
-    window.location.href = route('admin.appointments.destroy', props.appointment.id);
-}
+// Formulaire d'appel
+const appelForm = ref({
+    type: 'sortant',
+    status: 'répondu',
+    duration: null as number | null,
+    notes: '',
+    next_call_at: '',
+});
 
-// Mettre à jour le statut
-async function updateAppointmentStatus(status: string) {
-    try {
-        await router.put(route('admin.appointments.update', props.appointment.id), { status });
-        // Optionnel: ajouter un toast de succès
-        // $toast.success('Statut du rendez-vous mis à jour avec succès');
-        
-        // Recharger les données
-        router.reload();
-    } catch (error) {
-        console.error('Erreur lors de la mise à jour du statut:', error);
-    }
-}
-// Formatage de la date
+// Fonctions utilitaires
 function formatDate(dateString: string): string {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -117,12 +120,10 @@ function formatDate(dateString: string): string {
     }).format(date);
 }
 
-// Formatage de l'heure
 function formatTime(timeString: string): string {
     return timeString.substring(0, 5);
 }
 
-// Formatage de la date et heure
 function formatDateTime(dateString: string): string {
     if (!dateString) return '';
     const date = new Date(dateString);
@@ -135,7 +136,13 @@ function formatDateTime(dateString: string): string {
     }).format(date);
 }
 
-// Obtenir la classe de couleur en fonction du statut
+function formatDuration(seconds: number | null) {
+    if (!seconds) return 'N/A';
+    const minutes = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
+}
+
 function getStatusClass(status: string): { class: string, text: string } {
     switch (status) {
         case 'pending':
@@ -148,6 +155,109 @@ function getStatusClass(status: string): { class: string, text: string } {
             return { class: 'bg-red-100 text-red-800', text: 'Annulé' };
         default:
             return { class: 'bg-gray-100 text-gray-800', text: status };
+    }
+}
+
+function getAppelTypeLabel(type: string) {
+    return type === 'sortant' ? 'Sortant' : 'Entrant';
+}
+
+function getAppelStatusLabel(status: string) {
+    switch (status) {
+        case 'répondu': return 'Répondu';
+        case 'non-répondu': return 'Non répondu';
+        case 'rappel-prévu': return 'Rappel prévu';
+        default: return status;
+    }
+}
+
+function getAppelTypeClasses(type: string) {
+    return type === 'sortant' 
+        ? 'bg-blue-100 text-blue-800' 
+        : 'bg-purple-100 text-purple-800';
+}
+
+function getAppelStatusClasses(status: string) {
+    switch (status) {
+        case 'répondu': return 'bg-green-100 text-green-800';
+        case 'non-répondu': return 'bg-red-100 text-red-800';
+        case 'rappel-prévu': return 'bg-yellow-100 text-yellow-800';
+        default: return 'bg-gray-100 text-gray-800';
+    }
+}
+
+// Fonctions principales
+async function confirmAppointment() {
+    try {
+        await router.post(route('admin.appointments.confirm', props.appointment.id));
+        showConfirmModal.value = false;
+        router.reload();
+    } catch (error) {
+        console.error('Erreur lors de la confirmation:', error);
+    }
+}
+
+function deleteAppointment() {
+    window.location.href = route('admin.appointments.destroy', props.appointment.id);
+}
+
+async function updateAppointmentStatus(status: string) {
+    try {
+        await router.put(route('admin.appointments.update', props.appointment.id), { status });
+        router.reload();
+    } catch (error) {
+        console.error('Erreur lors de la mise à jour du statut:', error);
+    }
+}
+
+async function submitAppel() {
+    if (!appelForm.value.notes.trim()) {
+        error.value = 'Les notes sont obligatoires';
+        return;
+    }
+
+    try {
+        const { data } = await axios.post(route('admin.appointments.appels.store', props.appointment.id), {
+            ...appelForm.value,
+            duration: appelForm.value.duration || null,
+            next_call_at: appelForm.value.next_call_at || null,
+        });
+
+        // Ajouter le nouvel appel en tête de liste
+        appels.value.unshift(data.appel);
+        
+        // Réinitialiser le formulaire
+        appelForm.value = {
+            type: 'sortant',
+            status: 'répondu',
+            duration: null,
+            notes: '',
+            next_call_at: '',
+        };
+        
+        showAppelModal.value = false;
+        success.value = 'Appel enregistré avec succès';
+        setTimeout(() => { success.value = null; }, 3000);
+    } catch (e: any) {
+        error.value = e?.response?.data?.message || e?.message || 'Erreur lors de l\'enregistrement de l\'appel';
+    }
+}
+
+async function deleteAppel(appelId: number) {
+    if (!confirm('Êtes-vous sûr de vouloir supprimer cet appel ?')) return;
+
+    try {
+        await axios.delete(route('admin.appointments.appels.destroy', {
+            appointment: props.appointment.id,
+            appel: appelId
+        }));
+        
+        // Supprimer de la liste
+        appels.value = appels.value.filter(a => a.id !== appelId);
+        success.value = 'Appel supprimé avec succès';
+        setTimeout(() => { success.value = null; }, 3000);
+    } catch (e: any) {
+        error.value = e?.response?.data?.message || e?.message || 'Erreur lors de la suppression de l\'appel';
     }
 }
 </script>
@@ -166,16 +276,16 @@ function getStatusClass(status: string): { class: string, text: string } {
                             <span :class="['px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full', getStatusClass(appointment.status).class]">
                                 {{ getStatusClass(appointment.status).text }}
                             </span>
-                           <select
-    :value="appointment.status"
-    @change="updateAppointmentStatus(($event.target as HTMLSelectElement).value)"
-    class="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
->
-    <option value="pending">En attente</option>
-    <option value="confirmed">Confirmé</option>
-    <option value="completed">Terminé</option>
-    <option value="cancelled">Annulé</option>
-</select>
+                            <select
+                                :value="appointment.status"
+                                @change="updateAppointmentStatus(($event.target as HTMLSelectElement).value)"
+                                class="text-sm border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <option value="pending">En attente</option>
+                                <option value="confirmed">Confirmé</option>
+                                <option value="completed">Terminé</option>
+                                <option value="cancelled">Annulé</option>
+                            </select>
                         </div>
                     </div>
                     <p class="text-gray-500 mt-1">
@@ -183,13 +293,36 @@ function getStatusClass(status: string): { class: string, text: string } {
                     </p>
                 </div>
 
-                <div class="flex items-center gap-3">
+                <div class="flex flex-wrap gap-2">
                     <Link
                         :href="route('admin.appointments.index')"
                         class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
                     >
                         Retour à la liste
                     </Link>
+                    
+                    <!-- Bouton Nouvel appel -->
+                    <button
+                        @click="showAppelModal = true"
+                        class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                        </svg>
+                        Nouvel appel
+                    </button>
+                    
+                    <!-- Bouton Historique appels -->
+                    <button
+                        @click="showAppelsList = !showAppelsList"
+                        class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                        </svg>
+                        Historique appels ({{ appels.length }})
+                    </button>
+                    
                     <button
                         v-if="appointment.status === 'pending'"
                         @click="showConfirmModal = true"
@@ -206,9 +339,78 @@ function getStatusClass(status: string): { class: string, text: string } {
                 </div>
             </div>
 
+            <!-- Messages d'erreur/succès -->
+            <div v-if="error" class="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md">
+                {{ error }}
+            </div>
+            <div v-if="success" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md">
+                {{ success }}
+            </div>
+
             <!-- Message flash -->
-            <div v-if="page.props.flash && page.props.flash.success" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md mb-4">
+            <!-- <div v-if="page.props.flash && page.props.flash.success" class="bg-green-50 border border-green-200 text-green-700 px-4 py-3 rounded-md mb-4">
                 {{ page.props.flash.success }}
+            </div> -->
+
+            <!-- Historique des appels -->
+            <div v-if="showAppelsList" class="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-semibold text-gray-800">Historique des appels</h3>
+                    <button
+                        @click="showAppelsList = false"
+                        class="text-gray-500 hover:text-gray-700"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div v-if="appels.length === 0" class="text-center py-4 text-gray-500">
+                    Aucun appel enregistré pour ce rendez-vous.
+                </div>
+                
+                <div v-else class="space-y-3">
+                    <div v-for="appel in appels" :key="appel.id" class="bg-white border border-gray-200 rounded-lg p-4">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex items-center gap-2">
+                                <span :class="['px-2 py-1 text-xs font-medium rounded-full', getAppelTypeClasses(appel.type)]">
+                                    {{ getAppelTypeLabel(appel.type) }}
+                                </span>
+                                <span :class="['px-2 py-1 text-xs font-medium rounded-full', getAppelStatusClasses(appel.status)]">
+                                    {{ getAppelStatusLabel(appel.status) }}
+                                </span>
+                                <span class="text-sm text-gray-500">
+                                    {{ formatDateTime(appel.called_at) }}
+                                </span>
+                            </div>
+                            <button
+                                @click="deleteAppel(appel.id)"
+                                class="text-red-500 hover:text-red-700"
+                                title="Supprimer l'appel"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                </svg>
+                            </button>
+                        </div>
+                        
+                        <div class="text-sm text-gray-600 mb-2">
+                            <div class="flex items-center gap-4">
+                                <span>Par: {{ appel.user.name }}</span>
+                                <span v-if="appel.duration">Durée: {{ formatDuration(appel.duration) }}</span>
+                                <span v-if="appel.next_call_at" class="text-yellow-600">
+                                    Rappel: {{ formatDate(appel.next_call_at) }}
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <div class="text-sm text-gray-700 whitespace-pre-wrap bg-gray-50 p-3 rounded">
+                            {{ appel.notes }}
+                        </div>
+                    </div>
+                    
+                </div>
             </div>
 
             <!-- Informations principales -->
@@ -345,6 +547,17 @@ function getStatusClass(status: string): { class: string, text: string } {
                                     </svg>
                                     Confirmer le rendez-vous
                                 </button>
+                                
+                                <button
+                                    @click="showAppelModal = true"
+                                    class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-purple-600 hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-purple-500"
+                                >
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                                        <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z" />
+                                    </svg>
+                                    Nouvel appel
+                                </button>
+                                
                                 <button
                                     @click="showDeleteModal = true"
                                     class="w-full inline-flex justify-center items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
@@ -409,4 +622,122 @@ function getStatusClass(status: string): { class: string, text: string } {
             </div>
         </div>
     </AppLayout>
+
+    <!-- Modal pour nouveau appel -->
+    <div v-if="showAppelModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-semibold text-gray-900">Nouvel appel pour le rendez-vous</h3>
+                    <button
+                        @click="showAppelModal = false"
+                        class="text-gray-400 hover:text-gray-500"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                        </svg>
+                    </button>
+                </div>
+                
+                <div class="space-y-4">
+                    <!-- Type d'appel -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Type d'appel</label>
+                        <div class="flex gap-4">
+                            <label class="inline-flex items-center">
+                                <input
+                                    type="radio"
+                                    v-model="appelForm.type"
+                                    value="sortant"
+                                    class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300"
+                                >
+                                <span class="ml-2 text-sm text-gray-700">Sortant (nous appelons)</span>
+                            </label>
+                            <label class="inline-flex items-center">
+                                <input
+                                    type="radio"
+                                    v-model="appelForm.type"
+                                    value="entrant"
+                                    class="h-4 w-4 text-purple-600 focus:ring-purple-500 border-gray-300"
+                                >
+                                <span class="ml-2 text-sm text-gray-700">Entrant (client appelle)</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Statut -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
+                        <select
+                            v-model="appelForm.status"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        >
+                            <option value="répondu">Répondu</option>
+                            <option value="non-répondu">Non répondu</option>
+                            <option value="rappel-prévu">Rappel prévu</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Durée -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Durée (en secondes)
+                            <span class="text-gray-400 text-sm font-normal"> - Optionnel</span>
+                        </label>
+                        <input
+                            type="number"
+                            v-model="appelForm.duration"
+                            min="0"
+                            placeholder="Ex: 300 pour 5 minutes"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        >
+                    </div>
+                    
+                    <!-- Date de rappel -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Date de rappel
+                            <span class="text-gray-400 text-sm font-normal"> - Optionnel</span>
+                        </label>
+                        <input
+                            type="datetime-local"
+                            v-model="appelForm.next_call_at"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        >
+                    </div>
+                    
+                    <!-- Notes -->
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Notes <span class="text-red-500">*</span>
+                        </label>
+                        <textarea
+                            v-model="appelForm.notes"
+                            rows="6"
+                            required
+                            placeholder="Résumé de l'appel, points discutés, actions à prendre..."
+                            class="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                        ></textarea>
+                    </div>
+                    
+                    <!-- Actions -->
+                    <div class="flex justify-end gap-3 pt-4">
+                        <button
+                            @click="showAppelModal = false"
+                            class="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 hover:bg-gray-200 rounded-md transition"
+                        >
+                            Annuler
+                        </button>
+                        <button
+                            @click="submitAppel"
+                            :disabled="!appelForm.notes.trim()"
+                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 rounded-md transition disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            Enregistrer l'appel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </template>

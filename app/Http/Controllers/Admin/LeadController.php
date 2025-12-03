@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Models\Lead;
 use Inertia\Inertia;
+use App\Models\Appel;
 use App\Models\Order;
 use App\Models\Formation;
 use App\Models\Appointment;
@@ -15,85 +16,54 @@ class LeadController extends Controller
     /**
      * Display a listing of the leads.
      */
-    // public function index()
-    // {
-    //     $leads = Lead::with(['user:id,name,email,created_at', 'formations'])
-    //         ->orderByDesc('created_at')
-    //         ->get()
-    //         ->map(function ($lead) {
-    //             return [
-    //                 'id' => $lead->id,
-    //                 'first_name' => $lead->first_name,
-    //                 'last_name' => $lead->last_name,
-    //                 'full_name' => $lead->first_name . ' ' . $lead->last_name,
-    //                 'phone' => $lead->phone,
-    //                 'company' => $lead->company,
-    //                 'email' => $lead->user->email ?? 'N/A',
-    //                 'consent_at' => $lead->consent_at?->toDateTimeString(),
-    //                 'created_at' => $lead->created_at->toDateTimeString(),
-    //                 'updated_at' => $lead->updated_at->toDateTimeString(),
-    //                 'formations_count' => $lead->formations->count(),
-    //                 'user' => $lead->user ? [
-    //                     'id' => $lead->user->id,
-    //                     'name' => $lead->user->name,
-    //                     'email' => $lead->user->email,
-    //                     'created_at' => $lead->user->created_at->toDateTimeString(),
-    //                 ] : null,
-    //             ];
-    //         });
+  
 
-    //     return Inertia::render('Admin/Leads/LeadIndex', [
-    //         'leads' => $leads
-    //     ]);
-    // }
+    public function index()
+    {
+        // Récupérer tous les leads avec leurs relations
+        $leads = Lead::with(['user', 'formations', 'appointments'])
+            ->withCount(['formations', 'appointments'])
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($lead) {
+                return [
+                    'id' => $lead->id,
+                    'first_name' => $lead->first_name,
+                    'last_name' => $lead->last_name,
+                    'full_name' => $lead->first_name . ' ' . $lead->last_name,
+                    'phone' => $lead->phone,
+                    'company' => $lead->company,
+                    'email' => $lead->user->email ?? 'N/A',
+                    'consent_at' => $lead->consent_at?->toDateTimeString(),
+                    'created_at' => $lead->created_at->toDateTimeString(),
+                    'updated_at' => $lead->updated_at->toDateTimeString(),
+                    'formations_count' => $lead->formations_count,
+                    'appointments_count' => $lead->appointments_count,
+                    'user' => $lead->user ? [
+                        'id' => $lead->user->id,
+                        'name' => $lead->user->name,
+                        'email' => $lead->user->email,
+                        'created_at' => $lead->user->created_at->toDateTimeString(),
+                    ] : null,
+                ];
+            });
 
-// Dans Admin/LeadController.php - méthode index()
-public function index()
-{
-    // Récupérer tous les leads avec leurs relations
-    $leads = Lead::with(['user', 'formations', 'appointments'])
-        ->withCount(['formations', 'appointments'])
-        ->orderByDesc('created_at')
-        ->get()
-        ->map(function ($lead) {
-            return [
-                'id' => $lead->id,
-                'first_name' => $lead->first_name,
-                'last_name' => $lead->last_name,
-                'full_name' => $lead->first_name . ' ' . $lead->last_name,
-                'phone' => $lead->phone,
-                'company' => $lead->company,
-                'email' => $lead->user->email ?? 'N/A',
-                'consent_at' => $lead->consent_at?->toDateTimeString(),
-                'created_at' => $lead->created_at->toDateTimeString(),
-                'updated_at' => $lead->updated_at->toDateTimeString(),
-                'formations_count' => $lead->formations_count,
-                'appointments_count' => $lead->appointments_count,
-                'user' => $lead->user ? [
-                    'id' => $lead->user->id,
-                    'name' => $lead->user->name,
-                    'email' => $lead->user->email,
-                    'created_at' => $lead->user->created_at->toDateTimeString(),
-                ] : null,
-            ];
-        });
+        // Statistiques globales
+        $totalLeads = Lead::count();
+        $totalWithConsent = Lead::whereNotNull('consent_at')->count();
+        $totalWithFormations = Lead::has('formations')->count();
+        $totalWithAppointments = Lead::has('appointments')->count();
 
-    // Statistiques globales
-    $totalLeads = Lead::count();
-    $totalWithConsent = Lead::whereNotNull('consent_at')->count();
-    $totalWithFormations = Lead::has('formations')->count();
-    $totalWithAppointments = Lead::has('appointments')->count();
-
-    return Inertia::render('Admin/Leads/LeadIndex', [
-        'leads' => $leads,
-        'stats' => [
-            'total_leads' => $totalLeads,
-            'with_consent' => $totalWithConsent,
-            'with_formations' => $totalWithFormations,
-            'with_appointments' => $totalWithAppointments,
-        ]
-    ]);
-}
+        return Inertia::render('Admin/Leads/LeadIndex', [
+            'leads' => $leads,
+            'stats' => [
+                'total_leads' => $totalLeads,
+                'with_consent' => $totalWithConsent,
+                'with_formations' => $totalWithFormations,
+                'with_appointments' => $totalWithAppointments,
+            ]
+        ]);
+    }
 
 
     /**
@@ -104,6 +74,7 @@ public function index()
         // Charger toutes les données liées au lead
         $lead->load([
             'user',
+            'appels.user',
             'formations' => function ($query) {
                 $query->withPivot('attentes', 'status', 'paid_at', 'created_at');
             },
@@ -149,7 +120,7 @@ public function index()
                         'id' => $pivot->id,
                         'attentes' => $pivot->attentes,
                         'status' => $pivot->status,
-                        'paid_at' => $pivot->paid_at?->toDateTimeString(),
+                        'paid_at' => $pivot->paid_at,
                         'created_at' => $pivot->created_at?->toDateTimeString(),
                     ]
                 ];
@@ -168,6 +139,10 @@ public function index()
                     'customer_phone' => $order->customer_phone,
                     'notes' => $order->notes,
                     'created_at' => $order->created_at->toDateTimeString(),
+                     //3 CHAMPS POUR LES FACTURES
+                    'invoice_number' => $order->invoice_number,
+                    'invoice_date' => $order->invoice_date?->toDateTimeString(),
+                    'invoice_path' => $order->invoice_path,
                     'items' => $order->items->map(function ($item) {
                         return [
                             'id' => $item->id,
@@ -308,4 +283,103 @@ public function index()
 
         return redirect()->route('admin.leads.index')->with('success', 'Lead supprimé avec succès.');
     }
+
+
+    public function storeAppel(Request $request, Lead $lead)
+{
+    $data = $request->validate([
+        'type' => 'required|in:entrant,sortant',
+        'status' => 'required|in:répondu,non-répondu,rappel-prévu',
+        'duration' => 'nullable|integer|min:0',
+        'notes' => 'required|string|max:2000',
+        'next_call_at' => 'nullable|date',
+    ]);
+
+    // Créer l'appel lié directement au lead
+    $appel = $lead->appels()->create([
+        'user_id' => auth()->id(),
+        'called_at' => now(),
+        'type' => $data['type'],
+        'status' => $data['status'],
+        'duration' => $data['duration'],
+        'notes' => $data['notes'],
+        'next_call_at' => $data['next_call_at'] ?? null,
+    ]);
+
+    $appel->load('user');
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Appel enregistré avec succès',
+        'appel' => $appel,
+    ]);
+}
+
+/**
+ * Lister tous les appels d'un lead (y compris ceux liés à ses commandes et rendez-vous)
+ */
+public function listAppels(Lead $lead)
+{
+    // Récupérer tous les IDs des commandes et rendez-vous du lead
+    $orderIds = $lead->user ? $lead->user->orders()->pluck('id')->toArray() : [];
+    $appointmentIds = $lead->appointments()->pluck('id')->toArray();
+    
+    // Récupérer les appels liés directement au lead, à ses commandes et à ses rendez-vous
+    $appels = Appel::where(function($query) use ($lead, $orderIds, $appointmentIds) {
+        // Appels liés directement au lead
+        $query->where(function($q) use ($lead) {
+            $q->where('callable_type', Lead::class)
+              ->where('callable_id', $lead->id);
+        });
+        
+        // Appels liés aux commandes du lead
+        if (!empty($orderIds)) {
+            $query->orWhere(function($q) use ($orderIds) {
+                $q->where('callable_type', Order::class)
+                  ->whereIn('callable_id', $orderIds);
+            });
+        }
+        
+        // Appels liés aux rendez-vous du lead
+        if (!empty($appointmentIds)) {
+            $query->orWhere(function($q) use ($appointmentIds) {
+                $q->where('callable_type', Appointment::class)
+                  ->whereIn('callable_id', $appointmentIds);
+            });
+        }
+    })
+    ->with(['user', 'callable' => function($query) {
+        $query->withTrashed(); // Inclure même les éléments supprimés si nécessaire
+    }])
+    ->latest()
+    ->paginate(10);
+    
+    return response()->json($appels);
+}
+
+/**
+ * Supprimer un appel d'un lead
+ */
+public function deleteAppel(Lead $lead, Appel $appel)
+{
+    // Vérifier que l'appel appartient bien à ce lead ou à ses commandes/rendez-vous
+    $isLeadAppel = $appel->callable_type === Lead::class && $appel->callable_id === $lead->id;
+    
+    $orderIds = $lead->user ? $lead->user->orders()->pluck('id')->toArray() : [];
+    $appointmentIds = $lead->appointments()->pluck('id')->toArray();
+    
+    $isOrderAppel = $appel->callable_type === Order::class && in_array($appel->callable_id, $orderIds);
+    $isAppointmentAppel = $appel->callable_type === Appointment::class && in_array($appel->callable_id, $appointmentIds);
+    
+    if (!$isLeadAppel && !$isOrderAppel && !$isAppointmentAppel) {
+        abort(403, 'Cet appel ne correspond pas à ce lead');
+    }
+
+    $appel->delete();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Appel supprimé avec succès',
+    ]);
+}
 }

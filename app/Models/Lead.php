@@ -2,8 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Lead extends Model
 {
@@ -37,5 +38,10 @@ class Lead extends Model
         return $this->belongsToMany(Formation::class, 'lead_formation', 'lead_id', 'formation_id')
             ->withPivot('attentes', 'status', 'paid_at')
             ->withTimestamps();
+    }
+
+    public function appels(): MorphMany
+    {
+        return $this->morphMany(Appel::class, 'callable');
     }
 }

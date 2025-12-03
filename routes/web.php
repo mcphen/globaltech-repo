@@ -202,6 +202,20 @@ Route::middleware(['auth'])->group(function () {
         Route::get('orders/{order}', [OrderController::class, 'show'])->name('admin.orders.show');
         Route::patch('orders/{order}/status', [OrderController::class, 'updateStatus'])->name('admin.orders.update-status');
 
+        // Nouvelles routes pour les factures
+        Route::post('/orders/{order}/generate-invoice', [OrderController::class, 'generateInvoice'])
+            ->name('admin.orders.generate-invoice');
+        Route::get('/orders/{order}/download-invoice', [OrderController::class, 'downloadInvoice'])
+            ->name('admin.orders.download-invoice');
+        
+        // Nouvelles routes pour les appels
+        Route::post('/orders/{order}/appels', [OrderController::class, 'storeAppel'])
+            ->name('admin.orders.appels.store');
+        Route::get('/orders/{order}/appels', [OrderController::class, 'listAppels'])
+            ->name('admin.orders.appels.index');
+        Route::delete('/orders/{order}/appels/{appel}', [OrderController::class, 'deleteAppel'])
+            ->name('admin.orders.appels.destroy');
+
         // Settings management routes
         Route::resource('settings', SettingController::class)
             ->except(['show'])
@@ -245,10 +259,19 @@ Route::middleware(['auth'])->group(function () {
                 'destroy' => 'admin.appointments.destroy',
             ]);
         Route::post('/appointments/{appointment}/confirm', [AppointmentController::class, 'confirm'])->name('admin.appointments.confirm');
+        // Routes pour les appels
+        Route::post('/appointments/{appointment}/appels', [AppointmentController::class, 'storeAppel'])
+            ->name('admin.appointments.appels.store');
+        Route::get('/appointments/{appointment}/appels', [AppointmentController::class, 'listAppels'])
+            ->name('admin.appointments.appels.index');
+        Route::delete('/appointments/{appointment}/appels/{appel}', [AppointmentController::class, 'deleteAppel'])
+            ->name('admin.appointments.appels.destroy');
+
 
         // Contacts management routes
         Route::get('contacts', [ContactController::class, 'adminIndex'])->name('admin.contacts.index');
         Route::get('contacts/{contact}', [ContactController::class, 'show'])->name('admin.contacts.show');
+         Route::patch('/contacts/{contact}/status', [ContactController::class, 'updateStatus'])->name('admin.contacts.update-status');
         Route::delete('contacts/{contact}', [ContactController::class, 'destroy'])->name('admin.contacts.destroy');
 
         // Leads management routes
@@ -270,6 +293,13 @@ Route::middleware(['auth'])->group(function () {
 
         // Lead appointments management
         Route::put('leads/{lead}/appointments/{appointment}', [LeadController::class, 'updateAppointmentStatus'])->name('admin.leads.appointments.update');
+
+        Route::post('/leads/{lead}/appels', [LeadController::class, 'storeAppel'])
+            ->name('admin.leads.appels.store');
+        Route::get('/leads/{lead}/appels', [LeadController::class, 'listAppels'])
+            ->name('admin.leads.appels.index');
+        Route::delete('/leads/{lead}/appels/{appel}', [LeadController::class, 'deleteAppel'])
+            ->name('admin.leads.appels.destroy');
 
 
 

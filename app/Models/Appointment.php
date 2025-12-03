@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class Appointment extends Model
 {
@@ -64,5 +65,18 @@ class Appointment extends Model
     public function services(): BelongsToMany
     {
         return $this->belongsToMany(Service::class);
+    }
+
+     public function appels(): MorphMany
+    {
+        return $this->morphMany(Appel::class, 'callable');
+    }
+
+     /**
+     * Récupérer les appels récents
+     */
+    public function recentAppels($limit = 5)
+    {
+        return $this->appels()->with('user')->latest()->take($limit)->get();
     }
 }

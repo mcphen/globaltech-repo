@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Mail\AppointmentBooked;
-use App\Models\Appointment;
+use App\Models\Lead;
+use App\Models\User;
+use Inertia\Inertia;
+use App\Models\Appel;
 use App\Models\Client;
-use App\Models\Schedule;
 use App\Models\Service;
 use App\Models\Setting;
-use App\Models\User;
-use App\Models\Lead;
+use App\Models\Schedule;
+use App\Models\Appointment;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Mail\AppointmentBooked;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Str;
-use Inertia\Inertia;
 
 class AppointmentController extends Controller
 {
@@ -41,7 +42,7 @@ class AppointmentController extends Controller
     public function show(Appointment $appointment)
     {
         // Load the appointment with its relationships (including new user/lead)
-        $appointment->load(['client', 'schedule', 'services', 'user', 'lead']);
+        $appointment->load(['client', 'schedule', 'services', 'user', 'lead', 'appels.user']);
 
         return Inertia::render('Admin/Appointments/AppointmentShow', [
             'appointment' => $appointment,
@@ -63,30 +64,30 @@ class AppointmentController extends Controller
         $appointment->update($validated);
 
         return redirect()->back()->with('success', 'Rendez-vous mis à jour avec succès.');
-    }
+    } 
 
- /**
- * Update the specified appointment in storage.
- */
-public function updateStatus(Request $request, Appointment $appointment)
-{
-    try {
-        // Si c'est une mise à jour de statut
-        if ($request->has('status')) {
-            $request->validate([
-                'status' => 'required|string|in:pending,confirmed,cancelled,completed',
-            ]);
+    /**
+     * Update the specified appointment in storage.
+     */
+    public function updateStatus(Request $request, Appointment $appointment)
+    {
+        try {
+            // Si c'est une mise à jour de statut
+            if ($request->has('status')) {
+                $request->validate([
+                    'status' => 'required|string|in:pending,confirmed,cancelled,completed',
+                ]);
 
-            $appointment->update(['status' => $request->status]);
-            return back();
+                $appointment->update(['status' => $request->status]);
+                return back();
+            }
+
+            return redirect()->back()->with('success', 'Rendez-vous mis à jour avec succès.');
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Erreur lors de la mise à jour du rendez-vous.');
         }
-
-        return redirect()->back()->with('success', 'Rendez-vous mis à jour avec succès.');
-
-    } catch (\Exception $e) {
-        return back()->with('error', 'Erreur lors de la mise à jour du rendez-vous.');
     }
-}
 
     /**
      * Remove the specified appointment from storage.
@@ -298,6 +299,68 @@ public function updateStatus(Request $request, Appointment $appointment)
 
         return Inertia::render('Front/Appointment/Confirmation', [
             'appointment' => $appointment,
+        ]);
+    }
+
+
+    /**
+     * Ajouter un nouvel appel pour un rendez-vous
+     */
+    public function storeAppel(Request $request, Appointment $appointment)
+    {
+        $data = $request->validate([
+            'type' => 'required|in:entrant,sortant',
+            'status' => 'required|in:répondu,non-répondu,rappel-prévu',
+            'duration' => 'nullable|integer|min:0',
+            'notes' => 'required|string|max:2000',
+            'next_call_at' => 'nullable|date',
+        ]);
+
+        // Créer l'appel
+        $appel = $appointment->appels()->create([
+            'user_id' => auth()->id(),
+            'called_at' => now(),
+            'type' => $data['type'],
+            'status' => $data['status'],
+            'duration' => $data['duration'],
+            'notes' => $data['notes'],
+            'next_call_at' => $data['next_call_at'] ?? null,
+        ]);
+
+        $appel->load('user');
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Appel enregistré avec succès',
+            'appel' => $appel,
+        ]);
+    }
+
+    /**
+     * Lister les appels d'un rendez-vous
+     */
+    public function listAppels(Appointment $appointment)
+    {
+        $appels = $appointment->appels()->with('user')->latest()->paginate(10);
+        
+        return response()->json($appels);
+    }
+
+    /**
+     * Supprimer un appel d'un rendez-vous
+     */
+    public function deleteAppel(Appointment $appointment, Appel $appel)
+    {
+        // Vérifier que l'appel appartient bien à ce rendez-vous
+        if ($appel->callable_type !== Appointment::class || $appel->callable_id !== $appointment->id) {
+            abort(403, 'Cet appel ne correspond pas à ce rendez-vous');
+        }
+
+        $appel->delete();
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Appel supprimé avec succès',
         ]);
     }
 }
