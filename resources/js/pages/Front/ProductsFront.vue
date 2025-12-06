@@ -31,7 +31,6 @@ const props = defineProps<{
   contactSettings?: any;
 }>();
 
-
 // Initialize filter states
 const search = ref(props.filters?.search || '');
 const minPrice = ref(props.filters?.min_price || '');
@@ -136,7 +135,8 @@ const addToCart = (productId: number, quantity: number = 1) => {
     router.post(route('cart.add', { id: productId }), { quantity }, {
         preserveScroll: true,
         preserveState: true,
-        onSuccess: () => router.reload({ only: ['cart'] })
+        only: ['cart'],      // On ne récupère que la prop "cart"
+        replace: true        // Pas d’empilement dans l’historique (optionnel)
     });
 };
 </script>
@@ -293,26 +293,30 @@ const addToCart = (productId: number, quantity: number = 1) => {
                             <h3 class="text-lg font-medium text-gray-900 mb-2">{{ product.title }}</h3>
                             <p class="text-primary font-bold mb-2">{{ formatPrice(product.price) }}</p>
                             <p class="text-gray-600 text-sm mb-4 line-clamp-3">{{ stripAndTruncateHtml(product.description, 100) }}</p>
-                            <div class="flex flex-col gap-2">
+                            <div class="flex items-center gap-2">
                                 <Link
                                     :href="route('product.show', { id: product.id })"
-                                    class="w-full text-center px-4 py-2 bg-white text-primary border border-primary rounded-md hover:bg-gray-50 transition-colors"
+                                    class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-white text-primary border border-primary rounded-md hover:bg-gray-50 transition-colors"
+                                    title="Voir le produit"
+                                    aria-label="Voir le produit"
                                 >
-                                    Voir plus
+                                    <i class="bi bi-eye text-lg"></i>
                                 </Link>
                                 <button
                                     @click="addToCart(product.id)"
-                                    class="w-full text-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
+                                    class="flex-1 inline-flex items-center justify-center px-4 py-2 bg-primary text-white rounded-md hover:bg-primary-dark transition-colors"
+                                    title="Ajouter au panier"
+                                    aria-label="Ajouter au panier"
                                 >
-                                    Ajouter au panier
+                                    <i class="bi bi-cart-plus text-lg"></i>
                                 </button>
-                                <Link
-                                    :href="route('appointment.create')"
-                                    class="w-full text-center px-4 py-2 bg-secondary text-white rounded-md hover:opacity-90 transition-colors hidden"
-                                >
-                                    Prendre rendez-vous
-                                </Link>
                             </div>
+                            <Link
+                                :href="route('appointment.create')"
+                                class="w-full text-center px-4 py-2 bg-secondary text-white rounded-md hover:opacity-90 transition-colors hidden"
+                            >
+                                Prendre rendez-vous
+                            </Link>
                         </div>
                     </div>
                 </div>

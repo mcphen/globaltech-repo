@@ -30,12 +30,35 @@ const submit = () => {
   <LayoutFront>
     <Head title="Connexion" />
 
-    <section class="bg-primary-bg-light">
+    <!-- En-tête identique à ProductsFront.vue -->
+    <div class="relative bg-primary-bg-light py-16 overflow-hidden">
+      <!-- Image de fond avec overlay -->
+      <div class="absolute inset-0 z-0">
+        <img
+          src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80"
+          alt="Technology Background"
+          class="w-full h-full object-cover"
+        />
+        <!-- Overlay gradient pour améliorer la lisibilité -->
+        <div class="absolute inset-0 bg-gradient-to-r from-blue-900/85 via-blue-800/75 to-purple-900/85"></div>
+      </div>
+
+      <!-- Contenu en avant-plan -->
+      <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        <h1 class="text-4xl md:text-5xl font-serif font-bold text-white mb-4 drop-shadow-lg">
+          Connexion
+        </h1>
+        <p class="text-lg text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
+          Accédez à votre espace en saisissant vos identifiants.
+        </p>
+      </div>
+
+      <!-- Élément décoratif (optionnel) -->
+      <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent"></div>
+    </div>
+
+    <section class="py-12">
       <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-20">
-        <header class="mb-6">
-          <h1 class="text-2xl font-semibold text-primary">Connexion</h1>
-          <p class="mt-1 text-gray-600">Accédez à votre espace en saisissant vos identifiants.</p>
-        </header>
 
         <div class="bg-white border rounded-lg shadow-sm p-6 sm:p-8">
           <div v-if="status" class="mb-4 text-center text-sm font-medium text-green-600">
@@ -94,7 +117,7 @@ const submit = () => {
         </div>
 
         <p class="mt-6 text-sm text-muted-foreground text-center">
-          Contactez un administrateur pour créer un compte.
+          Vous n'avez pas encore de compte ?  <Link :href="route('prospect.register')" class="">Inscrivez-vous</Link>
         </p>
       </div>
     </section>

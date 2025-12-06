@@ -16,6 +16,23 @@ class CartController extends Controller
         return session()->get('cart', []);
     }
 
+    /**
+     * Show the checkout page (requires authentication)
+     */
+    public function checkoutPage()
+    {
+        $cart = $this->getCart();
+        if (empty($cart)) {
+            return redirect()->route('cart.index')->with('error', 'Votre panier est vide.');
+        }
+
+        return Inertia::render('Front/Checkout', [
+            'items' => array_values($cart),
+            'totals' => $this->totals($cart),
+            'contactSettings' => app(HomeController::class)->getContactSettings(),
+        ]);
+    }
+
     protected function putCart(array $cart): void
     {
         session(['cart' => $cart]);
@@ -124,7 +141,7 @@ class CartController extends Controller
                 'items_count' => $totals['count'],
                 'subtotal' => $totals['subtotal'],
                 'total' => $totals['total'],
-                'currency' => 'EUR',
+                'currency' => 'XOF',
                 'status' => 'pending',
                 'customer_name' => $data['customer_name'] ?? null,
                 'customer_email' => $data['customer_email'] ?? null,
@@ -133,8 +150,8 @@ class CartController extends Controller
             ]);
 
             foreach ($cart as $item) {
-                $qty = (int)($item['quantity'] ?? 1);
-                $price = (float)($item['price'] ?? 0);
+                $qty = (int)($item["quantity"] ?? 1);
+                $price = (float)($item["price"] ?? 0);
                 OrderItem::create([
                     'order_id' => $order->id,
                     'product_id' => $item['id'] ?? null,
@@ -148,19 +165,34 @@ class CartController extends Controller
                 ]);
             }
 
+            // Generate invoice metadata immediately after creation
+            $order->invoice_number = $order->generateInvoiceNumber();
+            $order->invoice_date = now();
+            $order->save();
+
             return $order;
         });
 
         // Clear the cart after order creation
         $this->putCart([]);
 
+        // After success, redirect to confirmation page
+        session(['order_total' => (float)$order->total]);
+        return redirect()->route('cart.confirmation');
+    }
+
+    /**
+     * Show the order confirmation page after successful checkout
+     */
+    public function confirmation()
+    {
+        $total = session()->pull('order_total'); // read once and forget
+        if ($total === null) {
+            return redirect()->route('cart.index');
+        }
+
         return Inertia::render('Front/CartConfirmationFront', [
-            'total' => $totals['total'],
-            'order' => [
-                'id' => $order->id,
-                'status' => $order->status,
-                'items_count' => $order->items_count,
-            ],
+            'total' => (float)$total,
             'contactSettings' => app(HomeController::class)->getContactSettings(),
         ]);
     }

@@ -42,13 +42,15 @@ class HandleInertiaRequests extends Middleware
         // Build shared cart data from session
         $cart = session()->get('cart', []);
         $subtotal = 0;
-        $count = 0;
+        $quantityCount = 0; // total quantity across all items
         foreach ($cart as $item) {
             $qty = (int)($item['quantity'] ?? 1);
             $price = (float)($item['price'] ?? 0);
             $subtotal += $qty * $price;
-            $count += $qty;
+            $quantityCount += $qty;
         }
+        // Distinct item count (number of different products in cart)
+        $distinctCount = count($cart);
         $total = $subtotal; // No extra fees for now
 
         return [
@@ -65,7 +67,7 @@ class HandleInertiaRequests extends Middleware
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
             'cart' => [
                 'items' => array_values($cart),
-                'count' => $count,
+                'count' => $distinctCount, // show number of distinct items in UI
                 'subtotal' => $subtotal,
                 'total' => $total,
             ],

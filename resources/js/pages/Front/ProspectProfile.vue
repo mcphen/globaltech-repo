@@ -36,13 +36,7 @@ const metaDescription = computed(
       <meta name="description" :content="metaDescription" />
     </Head>
 
-    <!-- Bandeau titre -->
-    <section class="bg-primary-bg-light py-10">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 class="text-3xl md:text-4xl font-serif font-bold text-primary">Mon profil prospect</h1>
-        <p class="text-gray-700 mt-2">Retrouvez ici vos informations de compte liées à vos prises de contact et rendez-vous.</p>
-      </div>
-    </section>
+
 
     <section class="py-10">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
