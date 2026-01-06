@@ -70,18 +70,20 @@ const removeFromCart = (id: number) => {
     router.post(route('cart.remove', { id }), {}, {
         preserveScroll: true,
         preserveState: true,
-        onSuccess: () => router.reload({ only: ['cart'] })
+        only: ['cart'],
+        replace: true,
     });
 };
 const clearCart = () => {
     router.post(route('cart.clear'), {}, {
         preserveScroll: true,
         preserveState: true,
-        onSuccess: () => router.reload({ only: ['cart'] })
+        only: ['cart'],
+        replace: true,
     });
 };
 const checkoutCart = () => {
-    router.post(route('cart.checkout'));
+    router.visit(route('cart.checkout'));
 };
 
 const toggleDropdown = (menu: keyof typeof dropdownStates.value) => {
@@ -98,11 +100,19 @@ onMounted(() => {
     isLoading.value = false;
 
     // Ajouter les écouteurs d'événements pour les transitions de page
-    router.on('start', () => {
+    router.on('start', (event: any) => {
+        const visit = event?.detail?.visit;
+        const isPartial = Array.isArray(visit?.only) && visit.only.length > 0;
+        // Ne pas afficher le loader pour les rafraîchissements partiels (only)
+        if (isPartial) return;
         isLoading.value = true;
     });
 
-    router.on('finish', () => {
+    router.on('finish', (event: any) => {
+        const visit = event?.detail?.visit;
+        const isPartial = Array.isArray(visit?.only) && visit.only.length > 0;
+        // Ne pas afficher/masquer le loader pour les rafraîchissements partiels (only)
+        if (isPartial) return;
         // Utilisation d'un petit délai pour assurer que le DOM est mis à jour
         setTimeout(() => {
             isLoading.value = false;
@@ -308,6 +318,7 @@ onMounted(() => {
                             </button>
                             <div v-show="profileMenuOpen" class="absolute right-0 top-12 w-48 bg-white border border-gray-200 rounded-md shadow-lg z-50">
                                 <Link :href="route('prospect.profile')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Profil</Link>
+                                <Link :href="route('prospect.dashboard')" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Tableau de bord</Link>
                                 <Link method="post" :href="route('logout')" as="button" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Se déconnecter</Link>
                             </div>
                         </div>

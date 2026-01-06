@@ -41,6 +41,12 @@ class HomeController extends Controller
 
     }
 
+    public function prospectProfileEdit(){
+        return Inertia::render('Front/ProfileEdit', [
+            'contactSettings' => $this->getContactSettings()
+        ]);
+    }
+
 
     public function about(){
         $about = About::first();

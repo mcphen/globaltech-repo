@@ -58,7 +58,12 @@ Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
 Route::post('/cart/update/{id}', [CartController::class, 'update'])->name('cart.update');
 Route::post('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
 Route::post('/cart/clear', [CartController::class, 'clear'])->name('cart.clear');
-Route::post('/cart/checkout', [CartController::class, 'checkout'])->name('cart.checkout');
+// Checkout flow: GET page requires auth; POST submit also requires auth
+Route::middleware(['auth'])->group(function () {
+    Route::get('/cart/checkout', [CartController::class, 'checkoutPage'])->name('cart.checkout');
+    Route::post('/cart/checkout/submit', [CartController::class, 'checkout'])->name('cart.checkout.submit');
+    Route::get('/cart/confirmation', [CartController::class, 'confirmation'])->name('cart.confirmation');
+});
 
 // Front Profile pages (requires authentication)
 Route::middleware(['auth'])->group(function () {
@@ -66,9 +71,7 @@ Route::middleware(['auth'])->group(function () {
         return Inertia::render('Front/Profile');
     })->name('front.profile');
 
-    Route::get('/profile/edit', function () {
-        return Inertia::render('Front/ProfileEdit');
-    })->name('front.profile.edit');
+    Route::get('/prospect/profile/edit',[HomeController::class,'prospectProfileEdit'])->name('front.profile.edit');
 });
 
 //Prospect dashboard (lead role) - no email verification required
@@ -208,7 +211,7 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.orders.generate-invoice');
         Route::get('/orders/{order}/download-invoice', [OrderController::class, 'downloadInvoice'])
             ->name('admin.orders.download-invoice');
-        
+
         // Nouvelles routes pour les appels
         Route::post('/orders/{order}/appels', [OrderController::class, 'storeAppel'])
             ->name('admin.orders.appels.store');
