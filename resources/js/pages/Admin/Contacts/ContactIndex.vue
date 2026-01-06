@@ -3,6 +3,7 @@ import { Head, Link, router  } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItemType } from '@/types';
 import { ref, computed, onMounted } from 'vue';
+import axios from 'axios';
 
 // Types
 interface Client {
@@ -90,9 +91,15 @@ function cancelDelete() {
     showDeleteModal.value = false;
 }
 
-function deleteContact() {
+async function deleteContact() {
     if (contactToDelete.value) {
-        window.location.href = route('admin.contacts.destroy', contactToDelete.value.id);
+        try {
+            await axios.delete(route('admin.contacts.destroy', contactToDelete.value.id));
+            router.reload({ preserveState: false });
+        } catch (error) {
+            console.error('Erreur lors de la suppression:', error);
+            alert('Erreur lors de la suppression du contact.');
+        }
     }
     showDeleteModal.value = false;
 }

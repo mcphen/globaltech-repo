@@ -1,9 +1,10 @@
 <script setup lang="ts">
-import { Head, Link } from '@inertiajs/vue3';
+import { Head, Link, router } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItemType } from '@/types';
 import { ref } from 'vue';
 import axios from 'axios';
+
 
 // Types
 interface Client {
@@ -59,8 +60,14 @@ function cancelDelete() {
     showDeleteModal.value = false;
 }
 
-function deleteContact() {
-    window.location.href = route('admin.contacts.destroy', props.contact.id);
+async function deleteContact() {
+    try {
+        await axios.delete(route('admin.contacts.destroy', props.contact.id));
+        router.visit(route('admin.contacts.index'), { method: 'get' });
+    } catch (error) {
+        console.error('Erreur lors de la suppression:', error);
+        alert('Erreur lors de la suppression du contact.');
+    }
 }
 
 // Fonction pour mettre à jour le statut

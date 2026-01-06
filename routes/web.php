@@ -81,6 +81,7 @@ Route::middleware(['auth'])->group(function () {
         ->name('prospect.training-orders');
     Route::get('/prospect/product-orders', [ProductOrderController::class, 'index'])
         ->name('prospect.product-orders');
+
 });
 
 // Prospect profile page
@@ -273,6 +274,7 @@ Route::middleware(['auth'])->group(function () {
         Route::get('contacts/{contact}', [ContactController::class, 'show'])->name('admin.contacts.show');
          Route::patch('/contacts/{contact}/status', [ContactController::class, 'updateStatus'])->name('admin.contacts.update-status');
         Route::delete('contacts/{contact}', [ContactController::class, 'destroy'])->name('admin.contacts.destroy');
+        
 
         // Leads management routes
         Route::resource('leads', LeadController::class)
