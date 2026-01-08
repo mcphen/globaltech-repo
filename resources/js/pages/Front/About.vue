@@ -158,6 +158,8 @@ const breadcrumbItems = [
                             alt="L'équipe TONGOLO TECH"
                             class="rounded-lg shadow-lg w-full h-auto object-cover"
                         >
+
+                        
                     </div>
                     <div class="md:w-1/2">
                         <h2 class="text-2xl font-serif font-semibold text-gray-800 mb-4">Notre Histoire</h2>

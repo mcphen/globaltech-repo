@@ -66,11 +66,11 @@ const metaTitle = computed(() =>
 );
 
 const metaDescription = computed(() => {
-    if (!props.product) return 'Découvrez nos produits de mariage de qualité';
+    if (!props.product) return 'Découvrez nos produits de qualité';
 
     return props.product.description
         ? props.product.description.substring(0, 160)
-        : `Découvrez ${props.product.title} - Produit de mariage de qualité par TONGOLO TECHs`;
+        : `Découvrez ${props.product.title} - Produit de qualité par TONGOLO TECHs`;
 });
 
 // Helper function to get full image URL

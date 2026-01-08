@@ -18,6 +18,14 @@ class AboutController extends Controller
         ]);
     }
 
+    public function indexAdminAbout()
+    {
+        $about = About::first();
+        return Inertia::render('Admin/About/Index', [
+            'about' => $about
+        ]);
+    }
+
     // Affiche la page d'édition en back-office
     public function edit()
     {

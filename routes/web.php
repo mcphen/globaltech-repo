@@ -14,14 +14,16 @@ use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\SettingController;
 use App\Http\Controllers\ActualiteController;
 use App\Http\Controllers\FormationController;
+use App\Http\Controllers\SubscribeController;
 use App\Http\Controllers\Admin\LeadController;
 use App\Http\Controllers\TeamMemberController;
+use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\AppointmentController;
+use App\Http\Controllers\ProfilFrontController;
 use App\Http\Controllers\TestimonialController;
 use App\Http\Controllers\ProductOrderController;
 use App\Http\Controllers\LeadFormationController;
 use App\Http\Controllers\Admin\ScheduleController;
-use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\VisitorTrackerController;
 
 
@@ -47,6 +49,9 @@ Route::post('/formations/{formation}/participate', [FormationController::class, 
 Route::get('/contact', [ContactController::class, 'index'])->name('contact');
 Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
 
+// Public route subscribe
+Route::post('/subscribe', [SubscribeController::class, 'store'])->name('subscribe.store');
+
 // Appointment booking routes (public: guests can book and will be connected at the end)
 Route::get('/appointment', [AppointmentController::class, 'create'])->name('appointment.create');
 Route::post('/appointment', [AppointmentController::class, 'store'])->name('appointment.store');
@@ -67,11 +72,22 @@ Route::middleware(['auth'])->group(function () {
 
 // Front Profile pages (requires authentication)
 Route::middleware(['auth'])->group(function () {
-    Route::get('/profile', function () {
-        return Inertia::render('Front/Profile');
-    })->name('front.profile');
+    // Route::get('/profile', function () {
+    //     return Inertia::render('Front/Profile');
+    // })->name('front.profile');
 
-    Route::get('/prospect/profile/edit',[HomeController::class,'prospectProfileEdit'])->name('front.profile.edit');
+    // Route::get('/prospect/profile/edit',[HomeController::class,'prospectProfileEdit'])->name('front.profile.edit');
+
+
+    // Routes pour le profil
+
+
+    Route::get('/profile', [ProfilFrontController::class, 'index'])->name('front.profile');
+    Route::get('/prospect/profile/edit', [ProfilFrontController::class, 'edit'])->name('front.profile.edit');
+
+    // Routes PATCH pour les mises à jour (front)
+    Route::patch('/profile/update', [ProfilFrontController::class, 'updateProfile'])->name('front.profile.update');
+    Route::patch('/profile/password', [ProfilFrontController::class, 'updatePassword'])->name('front.profile.password.update');
 });
 
 //Prospect dashboard (lead role) - no email verification required
@@ -89,7 +105,8 @@ Route::middleware(['auth'])->group(function () {
 
 // Prospect profile page
 Route::middleware(['auth'])->group(function () {
-    Route::get('/prospect/profile', [HomeController::class,'prospectProfile'])->name('prospect.profile');
+    Route::get('/prospect/profile', [ProfilFrontController::class,'index'])->name('prospect.profile');
+
 });
 
 
@@ -100,9 +117,7 @@ Route::get('dashboard', [VisitorTrackerController::class, 'dashboard'])
     ->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
-    Route::get('/admin/about', [AboutController::class, 'edit'])->name('admin.about.edit');
-    Route::get('/admin/about/edit', [AboutController::class, 'edit'])->name('admin.about.edit');
-    Route::post('/admin/about', [AboutController::class, 'update'])->name('admin.about.update');
+
 
     Route::prefix('admin')->group(function () {
 
@@ -277,7 +292,11 @@ Route::middleware(['auth'])->group(function () {
         Route::get('contacts/{contact}', [ContactController::class, 'show'])->name('admin.contacts.show');
          Route::patch('/contacts/{contact}/status', [ContactController::class, 'updateStatus'])->name('admin.contacts.update-status');
         Route::delete('contacts/{contact}', [ContactController::class, 'destroy'])->name('admin.contacts.destroy');
-        
+
+        // Admin routes for subscribes
+        Route::get('/admin/subscribes', [SubscribeController::class, 'index'])->name('admin.subscribes.index');
+        Route::delete('/admin/subscribes/{subscribe}', [SubscribeController::class, 'destroy'])->name('admin.subscribes.destroy');
+
 
         // Leads management routes
         Route::resource('leads', LeadController::class)
@@ -305,6 +324,14 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.leads.appels.index');
         Route::delete('/leads/{lead}/appels/{appel}', [LeadController::class, 'deleteAppel'])
             ->name('admin.leads.appels.destroy');
+
+
+            //Route About
+        Route::get('/admin/about', [AboutController::class, 'edit'])->name('admin.about.edit');
+        Route::get('/admin/about/edit', [AboutController::class, 'edit'])->name('admin.about.edit');
+        Route::post('/admin/about', [AboutController::class, 'update'])->name('admin.about.update');
+        Route::get('/admin/about/index', [AboutController::class, 'indexAdminAbout'])->name('admin.about.index');
+
 
 
 

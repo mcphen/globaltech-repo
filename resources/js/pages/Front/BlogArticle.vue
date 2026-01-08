@@ -285,11 +285,12 @@ onMounted(() => {
             <!-- Image de l'article -->
             <div class="relative h-48 overflow-hidden">
               <img
-                :src="article.image_url"
+                :src="`/storage/${article.image_path}`"
                 :alt="article.title"
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
               />
+           
               <div class="absolute bottom-0 left-0 bg-primary text-white px-3 py-1 text-sm">
                 {{ formatDate(article.published_at) }}
               </div>

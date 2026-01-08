@@ -1,7 +1,71 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
+import { useToast } from 'vue-toast-notification';
+import { useForm, usePage } from '@inertiajs/vue3';
 import { ref, watch, computed, onMounted } from 'vue';
+
+interface Flash {
+  success?: string;
+  error?: string;
+  status?: string;
+}
+
+const page = usePage<{ flash?: Flash }>();
+const $toast = useToast();
+
+// Formulaire d'abonnement
+const subscribeForm = useForm({
+  email: '',
+});
+
+// Watch for flash messages
+// Watch for flash messages - version corrigée
+watch(() => page.props.flash, (flash: Flash | undefined) => {
+  if (flash?.success) {
+    $toast.success(flash.success, {
+      position: 'top-right',
+      duration: 4000,
+      dismissible: true,
+    });
+    subscribeForm.reset('email');
+    // Nettoyer le flash après affichage
+    setTimeout(() => {
+      router.reload({ only: [] });
+    }, 100);
+  }
+  
+  if (flash?.status) {
+    $toast.success(flash.status, {
+      position: 'top-right',
+      duration: 4000,
+      dismissible: true,
+    });
+    subscribeForm.reset('email');
+  }
+  
+  if (flash?.error) {
+    $toast.error(flash.error, {
+      position: 'top-right',
+      duration: 5000,
+      dismissible: true,
+    });
+  }
+}, { immediate: true });
+
+
+// Watch for form errors
+watch(() => subscribeForm.errors, (errors) => {
+  if (Object.keys(errors).length > 0) {
+    Object.values(errors).forEach((error: string) => {
+      $toast.error(error, {
+        position: 'top-right',
+        duration: 5000,
+        dismissible: true,
+      });
+    });
+  }
+});
 
 // Current URL for canonical and sharing
 const currentUrl = ref('');
@@ -15,6 +79,28 @@ onMounted(() => {
     script.textContent = JSON.stringify(blogJsonLd.value);
     document.head.appendChild(script);
 });
+
+// Fonction pour gérer l'abonnement
+const handleSubscribe = () => {
+  subscribeForm.post(route('subscribe.store'), {
+    preserveScroll: true,
+    preserveState: false, // <-- Changez à false pour forcer le rechargement
+    onSuccess: () => {
+      // Réinitialiser le formulaire
+      subscribeForm.reset('email');
+      
+      // Forcer un toast de succès immédiat
+      $toast.success('Abonnement réussi ! Merci de vous être abonné à notre newsletter.', {
+        position: 'top-right',
+        duration: 4000,
+        dismissible: true,
+      });
+    },
+    onError: () => {
+      // Les erreurs sont gérées par le watch sur form.errors
+    },
+  });
+};
 
 // Computed properties for meta tags
 const metaTitle = computed(() => "Blog | TONGOLO TECHs - Conseils et Actualités Mariage");
@@ -504,26 +590,55 @@ watch([selectedDate, sortBy], () => {
             </div>
         </section>
 
-        <!-- Newsletter -->
-        <section class="bg-primary-bg-light py-16">
-            <div class="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-                <h2 class="text-primary mb-4 font-serif text-3xl font-bold">Restez informé</h2>
-                <p class="mx-auto mb-8 max-w-3xl text-lg text-gray-700">
-                    Abonnez-vous à notre newsletter pour suivre nos actualités, nos solutions technologiques et nos formations dédiées aux professionnels.
-                </p>
-                <div class="mx-auto max-w-md">
-                    <div class="flex">
-                        <input
-                            type="email"
-                            placeholder="Votre adresse email"
-                            class="focus:ring-primary flex-grow rounded-l-full border-y border-l border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:outline-none"
-                        />
-                        <button class="bg-primary hover:bg-primary-dark rounded-r-full px-6 py-2 text-white transition-colors">S'abonner</button>
-                    </div>
-                    <p class="mt-2 text-sm text-gray-500">Nous respectons votre vie privée. Désabonnez-vous à tout moment.</p>
-                </div>
-            </div>
-        </section>
+<!-- Section Newsletter -->
+<section class="py-16 bg-primary-bg-light">
+  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+    <h2 class="text-2xl font-serif font-bold text-primary mb-4">
+      Vous avez aimé cet article ?
+    </h2>
+    <p class="text-lg text-gray-700 mb-8">
+      Abonnez-vous à notre newsletter pour suivre nos actualités, nos solutions technologiques et nos formations dédiées aux professionnels.
+    </p>
+
+    <div class="max-w-md mx-auto">
+      <!-- Formulaire d'abonnement -->
+      <form @submit.prevent="handleSubscribe" class="space-y-3">
+        <div class="flex">
+          <input
+            v-model="subscribeForm.email"
+            type="email"
+            placeholder="Votre adresse email"
+            required
+            :disabled="subscribeForm.processing"
+            class="flex-grow px-4 py-2 rounded-l-full border-y border-l border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100"
+            :class="subscribeForm.errors.email ? 'border-red-300' : 'border-gray-300'"
+          />
+          <button
+            type="submit"
+            :disabled="subscribeForm.processing"
+            class="px-6 py-2 bg-primary text-white rounded-r-full hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <span v-if="subscribeForm.processing">...</span>
+            <span v-else>S'abonner</span>
+          </button>
+        </div>
+        
+        <!-- Message d'erreur -->
+        <p v-if="subscribeForm.errors.email" class="text-sm text-red-600 text-left">
+          {{ subscribeForm.errors.email }}
+        </p>
+        
+        <p class="text-sm text-gray-500 mt-2">
+          Nous respectons votre vie privée. Désabonnez-vous à tout moment.
+        </p>
+      </form>
+    </div>
+  </div>
+</section>
+
+
+
+
     </LayoutFront>
 </template>
 

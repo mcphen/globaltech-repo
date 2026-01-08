@@ -17,7 +17,7 @@ use Inertia\Response;
 class NewPasswordController extends Controller
 {
     /**
-     * Show the password reset page.
+     * Affiche la page de réinitialisation de mot de passe.
      */
     public function create(Request $request): Response
     {
@@ -28,7 +28,7 @@ class NewPasswordController extends Controller
     }
 
     /**
-     * Handle an incoming new password request.
+     * Traite la demande de nouveau mot de passe.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -38,11 +38,12 @@ class NewPasswordController extends Controller
             'token' => 'required',
             'email' => 'required|email',
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ], [
+            'password.required' => 'Le mot de passe est requis.',
+            'password.confirmed' => 'Les mots de passe ne correspondent pas.',
+            'password.min' => 'Le mot de passe doit contenir au moins 8 caractères.',
         ]);
 
-        // Here we will attempt to reset the user's password. If it is successful we
-        // will update the password on an actual user model and persist it to the
-        // database. Otherwise we will parse the error and return the response.
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user) use ($request) {
@@ -55,15 +56,24 @@ class NewPasswordController extends Controller
             }
         );
 
-        // If the password was successfully reset, we will redirect the user back to
-        // the application's home authenticated view. If there is an error we can
-        // redirect them back to where they came from with their error message.
-        if ($status == Password::PasswordReset) {
-            return to_route('login')->with('status', __($status));
+        // Messages personnalisés en français
+        $messages = [
+            Password::PASSWORD_RESET => 'Votre mot de passe a été réinitialisé avec succès !',
+            Password::INVALID_TOKEN => 'Le lien de réinitialisation est invalide ou a expiré.',
+            Password::INVALID_USER => 'Aucun compte ne correspond à cette adresse email.',
+            Password::RESET_THROTTLED => 'Trop de tentatives. Veuillez réessayer plus tard.',
+        ];
+
+        if ($status === Password::PASSWORD_RESET) {
+            return to_route('login')->with([
+                'status' => $messages[$status],
+                'success' => $messages[$status]
+            ]);
         }
 
         throw ValidationException::withMessages([
-            'email' => [__($status)],
+            'email' => [$messages[$status] ?? 'Une erreur est survenue.'],
+            'error' => $messages[$status] ?? 'Une erreur est survenue.'
         ]);
     }
 }

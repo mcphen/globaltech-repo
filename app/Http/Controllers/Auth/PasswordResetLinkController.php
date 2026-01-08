@@ -12,7 +12,7 @@ use Inertia\Response;
 class PasswordResetLinkController extends Controller
 {
     /**
-     * Show the password reset link request page.
+     * Affiche la page de demande de réinitialisation de mot de passe.
      */
     public function create(Request $request): Response
     {
@@ -22,7 +22,7 @@ class PasswordResetLinkController extends Controller
     }
 
     /**
-     * Handle an incoming password reset link request.
+     * Traite la demande de réinitialisation de mot de passe.
      *
      * @throws \Illuminate\Validation\ValidationException
      */
@@ -32,10 +32,28 @@ class PasswordResetLinkController extends Controller
             'email' => 'required|email',
         ]);
 
-        Password::sendResetLink(
+        $status = Password::sendResetLink(
             $request->only('email')
         );
 
-        return back()->with('status', __('A reset link will be sent if the account exists.'));
+        if ($status === Password::RESET_LINK_SENT) {
+            // Message personnalisé pour le succès
+            return back()->with([
+                'status' => 'Un lien de réinitialisation a été envoyé à votre adresse email.',
+                'success' => 'Un lien de réinitialisation a été envoyé à votre adresse email.'
+            ]);
+        }
+
+        // Messages d'erreur personnalisés en français
+        $messages = [
+            Password::INVALID_USER => 'Aucun compte ne correspond à cette adresse email.',
+            Password::INVALID_TOKEN => 'Le lien de réinitialisation est invalide ou a expiré.',
+            Password::RESET_THROTTLED => 'Trop de tentatives. Veuillez réessayer plus tard.',
+        ];
+
+        return back()->withErrors([
+            'email' => $messages[$status] ?? 'Une erreur est survenue. Veuillez réessayer.',
+            'error' => $messages[$status] ?? 'Une erreur est survenue. Veuillez réessayer.'
+        ]);
     }
 }

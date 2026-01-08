@@ -48,6 +48,11 @@ const interactionItems: NavItem[] = [
         href: route('admin.leads.index'),
         icon: Users,
     },
+    {
+        title: 'Abonnements',
+        href: route('admin.subscribes.index'),
+        icon: Users,
+    },
 ];
 
 // Nouveau groupe: Gestion du site web (replié par défaut)
@@ -66,6 +71,11 @@ const siteManagementItems: NavItem[] = [
         title: 'Témoignages',
         href: route('admin.testimonials.index'),
         icon: MessageSquare,
+    },
+    {
+        title: 'À propos',
+        href: route('admin.about.index'),
+        icon: Newspaper,
     },
     {
         title: 'Partner',

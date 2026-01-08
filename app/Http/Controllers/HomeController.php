@@ -33,19 +33,19 @@ class HomeController extends Controller
         ]);
     }
 
-    public function prospectProfile()
-    {
-        return Inertia::render('Front/ProspectProfile', [
-            'contactSettings' => $this->getContactSettings()
-        ]);
+    // public function prospectProfile()
+    // {
+    //     return Inertia::render('Front/ProspectProfile', [
+    //         'contactSettings' => $this->getContactSettings()
+    //     ]);
 
-    }
+    // }
 
-    public function prospectProfileEdit(){
-        return Inertia::render('Front/ProfileEdit', [
-            'contactSettings' => $this->getContactSettings()
-        ]);
-    }
+    // public function prospectProfileEdit(){
+    //     return Inertia::render('Front/ProfileEdit', [
+    //         'contactSettings' => $this->getContactSettings()
+    //     ]);
+    // }
 
 
     public function about(){
