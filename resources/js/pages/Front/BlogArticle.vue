@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
+import NewsletterSubscribe from '../Front/NewsletterSubscribe.vue';
 import { ref, computed, onMounted } from 'vue';
 
 // Interface pour le modèle Actualite
@@ -43,8 +44,77 @@ const getExcerpt = (text: string, maxLength: number = 100) => {
 };
 
 // Méta données pour le partage social
-const metaTitle = computed(() => `${props.actualite.title} | Amour Éternel`);
+const metaTitle = computed(() => `${props.actualite.title} | TONGOLO TECHs`);
 const metaDescription = computed(() => getExcerpt(props.actualite.description, 150));
+
+// Fonction pour tronquer le HTML tout en conservant la structure
+const truncateHtml = (html: string, maxLength = 120) => {
+    // Retirer les balises HTML pour compter les caractères
+    const tempDiv = document.createElement('div');
+    tempDiv.innerHTML = html;
+    const textContent = tempDiv.textContent || tempDiv.innerText || '';
+
+    if (textContent.length <= maxLength) {
+        return html;
+    }
+
+    // Chercher où couper tout en gardant les balises intactes
+    let truncated = '';
+    let charCount = 0;
+    let inTag = false;
+
+    for (let i = 0; i < html.length; i++) {
+        const char = html[i];
+
+        if (char === '<') {
+            inTag = true;
+            truncated += char;
+        } else if (char === '>') {
+            inTag = false;
+            truncated += char;
+        } else if (!inTag) {
+            // On compte seulement les caractères hors des balises
+            if (charCount < maxLength) {
+                truncated += char;
+                charCount++;
+            } else if (charCount === maxLength) {
+                truncated += '...';
+                charCount++;
+            }
+        } else {
+            // Caractère à l'intérieur d'une balise
+            truncated += char;
+        }
+    }
+
+    // Assurer que toutes les balises sont fermées correctement
+    const openTags = [];
+    const regex = /<([^\/\s>]+)([^>]*)>/g;
+    const closeRegex = /<\/([^>]+)>/g;
+    let match;
+
+    while ((match = regex.exec(truncated)) !== null) {
+        // Ignorer les balises auto-fermantes comme <img/>
+        if (!/\/>$/.test(match[0])) {
+            openTags.push(match[1]);
+        }
+    }
+
+    while ((match = closeRegex.exec(truncated)) !== null) {
+        // Retirer la dernière occurrence de cette balise
+        const tagIndex = openTags.lastIndexOf(match[1]);
+        if (tagIndex !== -1) {
+            openTags.splice(tagIndex, 1);
+        }
+    }
+
+    // Fermer les balises restantes dans l'ordre inverse
+    while (openTags.length) {
+        truncated += `</${openTags.pop()}>`;
+    }
+
+    return truncated;
+};
 
 // Options de partage
 const shareOptions = computed(() => {
@@ -87,7 +157,7 @@ const copyArticleLink = () => {
   });
 };
 
-
+// Breadcrumb items
 const breadcrumbItems = [
     { name: 'Accueil', href: '/', current: false },
     { name: 'Blog', href: '/blog', current: false },
@@ -112,50 +182,50 @@ onMounted(() => {
       <meta property="og:type" content="article" />
       <meta name="twitter:card" content="summary_large_image" />
     </Head>
-      <div class="relative bg-gray-900">
-          <!-- Image d'arrière-plan avec overlay -->
-          <div class="absolute inset-0 overflow-hidden">
-              <img src="/images/breadcrumb-bg.jpg" alt="Bannière À Propos" class="w-full h-full object-cover object-center opacity-40">
-              <div class="absolute inset-0 bg-gradient-to-r from-primary/50 to-primary/30"></div>
-          </div>
 
-          <!-- Contenu du breadcrumb -->
-          <div class="relative max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
-              <h1 class="text-4xl md:text-5xl font-serif font-bold text-white text-center mb-4">{{actualite.title}}</h1>
+    <!-- Header avec breadcrumb -->
+    <div class="relative bg-gray-900">
+        <!-- Image d'arrière-plan avec overlay -->
+        <div class="absolute inset-0 overflow-hidden">
+            <img src="/images/breadcrumb-bg.jpg" alt="Bannière À Propos" class="w-full h-full object-cover object-center opacity-40">
+            <div class="absolute inset-0 bg-gradient-to-r from-primary/50 to-primary/30"></div>
+        </div>
 
-              <!-- Breadcrumb navigation -->
-              <nav class="flex" aria-label="Breadcrumb">
-                  <ol class="flex items-center space-x-2">
-                      <li v-for="(item, index) in breadcrumbItems" :key="item.name">
-                          <div class="flex items-center">
-                              <Link
-                                  :href="item.href"
-                                  :class="[
-                                        item.current ? 'text-white font-medium' : 'text-white/80 hover:text-white',
-                                        'text-sm md:text-base transition-colors'
-                                    ]"
-                              >
-                                  {{ item.name }}
-                              </Link>
+        <!-- Contenu du breadcrumb -->
+        <div class="relative max-w-7xl mx-auto py-16 px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
+            <h1 class="text-4xl md:text-5xl font-serif font-bold text-white text-center mb-4">{{actualite.title}}</h1>
 
-                              <!-- Séparateur, sauf pour le dernier élément -->
-                              <svg
-                                  v-if="index !== breadcrumbItems.length - 1"
-                                  class="h-5 w-5 text-white/70 mx-2"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                              >
-                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                              </svg>
-                          </div>
-                      </li>
-                  </ol>
-              </nav>
-          </div>
-      </div>
-    <!-- Fil d'Ariane -->
+            <!-- Breadcrumb navigation -->
+            <nav class="flex" aria-label="Breadcrumb">
+                <ol class="flex items-center space-x-2">
+                    <li v-for="(item, index) in breadcrumbItems" :key="item.name">
+                        <div class="flex items-center">
+                            <Link
+                                :href="item.href"
+                                :class="[
+                                    item.current ? 'text-white font-medium' : 'text-white/80 hover:text-white',
+                                    'text-sm md:text-base transition-colors'
+                                ]"
+                            >
+                                {{ item.name }}
+                            </Link>
 
+                            <!-- Séparateur, sauf pour le dernier élément -->
+                            <svg
+                                v-if="index !== breadcrumbItems.length - 1"
+                                class="h-5 w-5 text-white/70 mx-2"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                            >
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+        </div>
+    </div>
 
     <!-- Article principal -->
     <article class="py-12 bg-white">
@@ -178,7 +248,6 @@ onMounted(() => {
           <div class="relative mb-10 shadow-xl rounded-lg overflow-hidden">
             <img
                 :src="`/storage/${actualite.image_path}`"
-
               :alt="actualite.title"
               class="w-full h-auto object-cover object-center rounded-lg"
             />
@@ -248,10 +317,10 @@ onMounted(() => {
 
         <!-- Contenu de l'article -->
         <div class="prose prose-lg max-w-none">
-          <p v-html="actualite.description "></p>
+          <p v-html="actualite.description"></p>
         </div>
 
-        <!-- Pied de l'article (tags, auteur, etc.) -->
+        <!-- Pied de l'article -->
         <footer class="mt-12 pt-8 border-t border-gray-200">
           <div class="flex justify-between items-center">
             <!-- Retour à la liste des articles -->
@@ -290,7 +359,7 @@ onMounted(() => {
                 class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 loading="lazy"
               />
-           
+
               <div class="absolute bottom-0 left-0 bg-primary text-white px-3 py-1 text-sm">
                 {{ formatDate(article.published_at) }}
               </div>
@@ -302,7 +371,8 @@ onMounted(() => {
                 {{ article.title }}
               </h3>
               <p class="text-sm text-gray-600 mb-4">
-                {{ getExcerpt(article.description) }}
+                <!-- {{ getExcerpt(article.description) }} -->
+                <span v-html="truncateHtml(article.description)"></span>
               </p>
               <Link
                 :href="route('blog.show', article.id)"
@@ -319,32 +389,12 @@ onMounted(() => {
       </div>
     </section>
 
-    <!-- Section commentaires ou inscription newsletter -->
-    <section class="py-16 bg-primary-bg-light">
-      <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        <h2 class="text-2xl font-serif font-bold text-primary mb-4">
-          Vous avez aimé cet article ?
-        </h2>
-        <p class="text-lg text-gray-700 mb-8">
-          Abonnez-vous à notre newsletter pour suivre nos actualités, nos solutions technologiques et nos formations dédiées aux professionnels.
-        </p>
-        <div class="max-w-md mx-auto">
-          <div class="flex">
-            <input
-              type="email"
-              placeholder="Votre adresse email"
-              class="flex-grow px-4 py-2 rounded-l-full border-y border-l border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-            >
-            <button class="px-6 py-2 bg-primary text-white rounded-r-full hover:bg-primary-dark transition-colors">
-              S'abonner
-            </button>
-          </div>
-          <p class="text-sm text-gray-500 mt-2">
-            Nous respectons votre vie privée. Désabonnez-vous à tout moment.
-          </p>
-        </div>
-      </div>
-    </section>
+    <!-- Section Newsletter -->
+    <NewsletterSubscribe
+      :compact="true"
+      title="Vous avez aimé cet article ?"
+      description="Abonnez-vous à notre newsletter pour suivre nos actualités, nos solutions technologiques et nos formations dédiées aux professionnels."
+    />
   </LayoutFront>
 </template>
 

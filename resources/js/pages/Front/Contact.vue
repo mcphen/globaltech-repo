@@ -1,39 +1,12 @@
 <script setup lang="ts">
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
-import { ref, computed } from 'vue';
-
-// Use the same contact settings structure as LayoutFront
-interface ContactSettings {
-    contact_phone: string;
-    contact_phone_fixed: string;
-    contact_email: string;
-    social_facebook: string;
-    social_twitter: string;
-    social_youtube: string;
-    social_linkedin: string;
-    social_tiktok: string;
-    social_instagram: string;
-    contact_address: string;
-    opening_hours: string;
-}
+import NewsletterSubscribe from '../Front/NewsletterSubscribe.vue';
+import { useToast } from 'vue-toast-notification';
+import { computed } from 'vue';
 
 const page = usePage();
-const contactSettings = computed<ContactSettings>(() => page.props.contactSettings as ContactSettings);
-
-// Form validation state
-const errors = ref({
-    first_name: '',
-    last_name: '',
-    email: '',
-    phone: '',
-    subject: '',
-    description: ''
-});
-
-// Form submission state
-const isSubmitting = ref(false);
-const isSuccess = ref(false);
+const $toast = useToast();
 
 // Create form using Inertia's useForm
 const form = useForm({
@@ -45,32 +18,47 @@ const form = useForm({
     description: ''
 });
 
-// Handle form submission
+// Fonction pour gérer la soumission du formulaire
 const submitForm = () => {
-    isSubmitting.value = true;
-    errors.value = {
-        first_name: '',
-        last_name: '',
-        email: '',
-        phone: '',
-        subject: '',
-        description: ''
-    };
-
     form.post(route('contact.store'), {
+        preserveScroll: true,
+        preserveState: true,
         onSuccess: () => {
-            isSuccess.value = true;
-            form.reset();
-            isSubmitting.value = false;
+            // Succès
+            $toast.success('Votre message a été envoyé avec succès. Nous vous répondrons dans les plus brefs délais.', {
+                position: 'top-right',
+                duration: 9000,
+                dismissible: true,
+            });
 
-            // Reset success message after 5 seconds
-            setTimeout(() => {
-                isSuccess.value = false;
-            }, 5000);
+            // Réinitialiser le formulaire
+            form.reset();
+            form.clearErrors();
         },
-        onError: (formErrors) => {
-            errors.value = formErrors;
-            isSubmitting.value = false;
+        onError: (errors) => {
+            // Gérer les erreurs de champ spécifiques
+            Object.entries(errors).forEach(([field, message]) => {
+                if (field !== 'error') {
+                    $toast.error(`${field}: ${message}`, {
+                        position: 'top-right',
+                        duration: 10000,
+                        dismissible: true,
+                    });
+                }
+            });
+
+            // Gérer les erreurs générales
+            if (errors.error) {
+                $toast.error(errors.error, {
+                    position: 'top-right',
+                    duration: 10000,
+                    dismissible: true,
+                });
+            }
+        },
+        onFinish: () => {
+            // Nettoyer après traitement
+            form.clearErrors();
         }
     });
 };
@@ -80,6 +68,55 @@ const breadcrumbItems = [
     { name: 'Accueil', href: route('home'), current: false },
     { name: 'Contact', href: route('contact'), current: true }
 ];
+
+// Classes pour les champs avec erreurs
+const inputClass = (field: string) => {
+    const baseClass = 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 transition-colors duration-200';
+
+    // Type assertion pour accéder aux erreurs de manière sécurisée
+    const errors = form.errors as Record<string, string>;
+    if (errors[field]) {
+        return `${baseClass} border-red-300 focus:ring-red-500`;
+    }
+
+    return `${baseClass} border-gray-300 focus:border-primary`;
+};
+
+const textareaClass = (field: string) => {
+    const baseClass = 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 transition-colors duration-200';
+
+    // Type assertion pour accéder aux erreurs de manière sécurisée
+    const errors = form.errors as Record<string, string>;
+    if (errors[field]) {
+        return `${baseClass} border-red-300 focus:ring-red-500`;
+    }
+
+    return `${baseClass} border-gray-300 focus:border-primary`;
+};
+
+// Helper pour accéder aux erreurs
+const getError = (field: string): string | undefined => {
+    const errors = form.errors as Record<string, string>;
+    return errors[field];
+};
+
+// Accès sécurisé aux props
+const contactSettings = computed(() => {
+    const props = page.props as any;
+    return props.contactSettings || {
+        contact_phone: '',
+        contact_phone_fixed: '',
+        contact_email: '',
+        social_facebook: '',
+        social_twitter: '',
+        social_youtube: '',
+        social_linkedin: '',
+        social_tiktok: '',
+        social_instagram: '',
+        contact_address: '',
+        opening_hours: ''
+    };
+});
 </script>
 
 <template>
@@ -149,18 +186,11 @@ const breadcrumbItems = [
                 <section class="mb-16">
                     <h2 class="text-3xl font-serif font-bold text-center text-primary mb-3">Contactez-nous</h2>
                     <div class="w-24 h-1 bg-primary mx-auto mb-8"></div>
-                   <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">
+                    <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">
                         Vous avez des questions ou souhaitez discuter de vos projets en ingénierie, télécommunications ou réseaux ? Contactez notre équipe TONGOLO TECH dès maintenant, soit en remplissant le formulaire ci-dessous, soit en nous appelant directement. Nous vous répondrons rapidement.
                     </p>
 
-
                     <div class="bg-white shadow-lg rounded-lg overflow-hidden max-w-4xl mx-auto">
-                        <!-- Success message -->
-                        <div v-if="isSuccess" class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-6">
-                            <p class="font-medium">Merci pour votre message !</p>
-                            <p>Nous vous contacterons dans les plus brefs délais.</p>
-                        </div>
-
                         <form @submit.prevent="submitForm" class="p-8">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <!-- Prénom -->
@@ -170,11 +200,13 @@ const breadcrumbItems = [
                                         type="text"
                                         id="first_name"
                                         v-model="form.first_name"
-                                        class="w-full px-4 py-2 border rounded-md focus:ring-primary focus:border-primary"
-                                        :class="{'border-red-500': errors.first_name}"
+                                        :class="inputClass('first_name')"
+                                        :disabled="form.processing"
                                         required
                                     >
-                                    <p v-if="errors.first_name" class="mt-1 text-sm text-red-600">{{ errors.first_name }}</p>
+                                    <p v-if="getError('first_name')" class="mt-1 text-sm text-red-600 animate-fade-in">
+                                        {{ getError('first_name') }}
+                                    </p>
                                 </div>
 
                                 <!-- Nom -->
@@ -184,11 +216,13 @@ const breadcrumbItems = [
                                         type="text"
                                         id="last_name"
                                         v-model="form.last_name"
-                                        class="w-full px-4 py-2 border rounded-md focus:ring-primary focus:border-primary"
-                                        :class="{'border-red-500': errors.last_name}"
+                                        :class="inputClass('last_name')"
+                                        :disabled="form.processing"
                                         required
                                     >
-                                    <p v-if="errors.last_name" class="mt-1 text-sm text-red-600">{{ errors.last_name }}</p>
+                                    <p v-if="getError('last_name')" class="mt-1 text-sm text-red-600 animate-fade-in">
+                                        {{ getError('last_name') }}
+                                    </p>
                                 </div>
 
                                 <!-- Email -->
@@ -198,24 +232,32 @@ const breadcrumbItems = [
                                         type="email"
                                         id="email"
                                         v-model="form.email"
-                                        class="w-full px-4 py-2 border rounded-md focus:ring-primary focus:border-primary"
-                                        :class="{'border-red-500': errors.email}"
+                                        :class="inputClass('email')"
+                                        :disabled="form.processing"
                                         required
                                     >
-                                    <p v-if="errors.email" class="mt-1 text-sm text-red-600">{{ errors.email }}</p>
+                                    <p v-if="getError('email')" class="mt-1 text-sm text-red-600 animate-fade-in">
+                                        {{ getError('email') }}
+                                    </p>
                                 </div>
 
                                 <!-- Téléphone -->
                                 <div>
-                                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Téléphone (optionnel)</label>
                                     <input
                                         type="tel"
                                         id="phone"
                                         v-model="form.phone"
-                                        class="w-full px-4 py-2 border rounded-md focus:ring-primary focus:border-primary"
-                                        :class="{'border-red-500': errors.phone}"
+                                        :class="inputClass('phone')"
+                                        :disabled="form.processing"
+                                        placeholder="Ex: +221 77 123 45 67"
                                     >
-                                    <p v-if="errors.phone" class="mt-1 text-sm text-red-600">{{ errors.phone }}</p>
+                                    <p v-if="getError('phone')" class="mt-1 text-sm text-red-600 animate-fade-in">
+                                        {{ getError('phone') }}
+                                    </p>
+                                    <p v-else class="mt-1 text-xs text-gray-500">
+                                        Format accepté: +221 77 123 45 67
+                                    </p>
                                 </div>
 
                                 <!-- Objet -->
@@ -225,11 +267,13 @@ const breadcrumbItems = [
                                         type="text"
                                         id="subject"
                                         v-model="form.subject"
-                                        class="w-full px-4 py-2 border rounded-md focus:ring-primary focus:border-primary"
-                                        :class="{'border-red-500': errors.subject}"
+                                        :class="inputClass('subject')"
+                                        :disabled="form.processing"
                                         required
                                     >
-                                    <p v-if="errors.subject" class="mt-1 text-sm text-red-600">{{ errors.subject }}</p>
+                                    <p v-if="getError('subject')" class="mt-1 text-sm text-red-600 animate-fade-in">
+                                        {{ getError('subject') }}
+                                    </p>
                                 </div>
 
                                 <!-- Message -->
@@ -239,21 +283,35 @@ const breadcrumbItems = [
                                         id="description"
                                         v-model="form.description"
                                         rows="6"
-                                        class="w-full px-4 py-2 border rounded-md focus:ring-primary focus:border-primary"
-                                        :class="{'border-red-500': errors.description}"
+                                        :class="textareaClass('description')"
+                                        :disabled="form.processing"
                                         required
+                                        placeholder="Décrivez votre projet ou votre question en détail..."
                                     ></textarea>
-                                    <p v-if="errors.description" class="mt-1 text-sm text-red-600">{{ errors.description }}</p>
+                                    <div class="flex justify-between items-center mt-1">
+                                        <p v-if="getError('description')" class="text-sm text-red-600 animate-fade-in">
+                                            {{ getError('description') }}
+                                        </p>
+                                        <p v-else class="text-xs text-gray-500">
+                                            {{ form.description.length }}/1000 caractères
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="mt-8 flex justify-center">
                                 <button
                                     type="submit"
-                                    class="px-8 py-3 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
-                                    :disabled="isSubmitting"
+                                    class="px-8 py-3 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                    :disabled="form.processing"
                                 >
-                                    <span v-if="isSubmitting">Envoi en cours...</span>
+                                    <span v-if="form.processing" class="flex items-center">
+                                        <svg class="animate-spin h-5 w-5 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Envoi en cours...
+                                    </span>
                                     <span v-else>Envoyer le message</span>
                                 </button>
                             </div>
@@ -271,7 +329,9 @@ const breadcrumbItems = [
                         </div>
                         <h3 class="text-xl font-semibold text-gray-800 mb-2">Téléphone</h3>
                         <p class="text-gray-600 mb-1">Mobile: {{ contactSettings.contact_phone }}</p>
-                        <p class="text-gray-600" v-if="contactSettings.contact_phone_fixed">Fixe: {{ contactSettings.contact_phone_fixed }}</p>
+                        <p class="text-gray-600" v-if="contactSettings.contact_phone_fixed">
+                            Fixe: {{ contactSettings.contact_phone_fixed }}
+                        </p>
                     </div>
 
                     <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center text-center">
@@ -292,17 +352,55 @@ const breadcrumbItems = [
                             </svg>
                         </div>
                         <h3 class="text-xl font-semibold text-gray-800 mb-2">Adresse</h3>
-                        <p class="text-gray-600">{{contactSettings.contact_address}}</p>
-                    </div>
-                </section>
-
-                <!-- Section Carte Google Maps -->
-                <section class="mb-16">
-                    <div class="w-full h-96 rounded-lg overflow-hidden shadow-lg">
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2628.190826009983!2d2.2725177!3d48.7973365!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x47e6709ffe38026b%3A0x13f519149dc17db4!2s71%20Rue%20de%20Fontenay%2C%2092140%20Clamart%2C%20France!5e0!3m2!1sen!2ssn!4v1760344298268!5m2!1sen!2ssn" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        <p class="text-gray-600">{{ contactSettings.contact_address }}</p>
                     </div>
                 </section>
             </div>
         </div>
+
+        <NewsletterSubscribe
+            :compact="true"
+            title="Abonnez-vous à notre newsletter"
+            description="Recevez les dernières nouvelles et mises à jour directement dans votre boîte de réception."
+        />
     </LayoutFront>
 </template>
+
+<style scoped>
+/* Animation pour le spinner */
+.animate-spin {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Animation pour les messages d'erreur */
+.animate-fade-in {
+  animation: fadeIn 0.3s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Transition pour le bouton */
+.transition-colors {
+  transition-property: background-color, border-color, color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+</style>

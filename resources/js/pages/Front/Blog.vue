@@ -1,142 +1,8 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
-import { useToast } from 'vue-toast-notification';
-import { useForm, usePage } from '@inertiajs/vue3';
+import NewsletterSubscribe from '../Front/NewsletterSubscribe.vue';
 import { ref, watch, computed, onMounted } from 'vue';
-
-interface Flash {
-  success?: string;
-  error?: string;
-  status?: string;
-}
-
-const page = usePage<{ flash?: Flash }>();
-const $toast = useToast();
-
-// Formulaire d'abonnement
-const subscribeForm = useForm({
-  email: '',
-});
-
-// Watch for flash messages
-// Watch for flash messages - version corrigée
-watch(() => page.props.flash, (flash: Flash | undefined) => {
-  if (flash?.success) {
-    $toast.success(flash.success, {
-      position: 'top-right',
-      duration: 4000,
-      dismissible: true,
-    });
-    subscribeForm.reset('email');
-    // Nettoyer le flash après affichage
-    setTimeout(() => {
-      router.reload({ only: [] });
-    }, 100);
-  }
-  
-  if (flash?.status) {
-    $toast.success(flash.status, {
-      position: 'top-right',
-      duration: 4000,
-      dismissible: true,
-    });
-    subscribeForm.reset('email');
-  }
-  
-  if (flash?.error) {
-    $toast.error(flash.error, {
-      position: 'top-right',
-      duration: 5000,
-      dismissible: true,
-    });
-  }
-}, { immediate: true });
-
-
-// Watch for form errors
-watch(() => subscribeForm.errors, (errors) => {
-  if (Object.keys(errors).length > 0) {
-    Object.values(errors).forEach((error: string) => {
-      $toast.error(error, {
-        position: 'top-right',
-        duration: 5000,
-        dismissible: true,
-      });
-    });
-  }
-});
-
-// Current URL for canonical and sharing
-const currentUrl = ref('');
-
-onMounted(() => {
-    currentUrl.value = window.location.href;
-
-    // Add JSON-LD script tag programmatically
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.textContent = JSON.stringify(blogJsonLd.value);
-    document.head.appendChild(script);
-});
-
-// Fonction pour gérer l'abonnement
-const handleSubscribe = () => {
-  subscribeForm.post(route('subscribe.store'), {
-    preserveScroll: true,
-    preserveState: false, // <-- Changez à false pour forcer le rechargement
-    onSuccess: () => {
-      // Réinitialiser le formulaire
-      subscribeForm.reset('email');
-      
-      // Forcer un toast de succès immédiat
-      $toast.success('Abonnement réussi ! Merci de vous être abonné à notre newsletter.', {
-        position: 'top-right',
-        duration: 4000,
-        dismissible: true,
-      });
-    },
-    onError: () => {
-      // Les erreurs sont gérées par le watch sur form.errors
-    },
-  });
-};
-
-// Computed properties for meta tags
-const metaTitle = computed(() => "Blog | TONGOLO TECHs - Conseils et Actualités Mariage");
-const metaDescription = computed(() => "Découvrez nos articles, conseils et actualités sur l'organisation de mariage à Dakar, Sénégal. Tendances, idées et inspiration pour votre mariage parfait.");
-
-// JSON-LD structured data for blog listing
-const blogJsonLd = computed(() => {
-    return {
-        '@context': 'https://schema.org',
-        '@type': 'Blog',
-        headline: 'Blog TONGOLO TECHs',
-        description: metaDescription.value,
-        url: currentUrl.value,
-        publisher: {
-            '@type': 'Organization',
-            name: 'TONGOLO TECHs',
-            logo: {
-                '@type': 'ImageObject',
-                url: `${window.location.origin}/images/logo.jpg`
-            }
-        },
-        blogPost: props.actualites.data.map(post => ({
-            '@type': 'BlogPosting',
-            headline: post.title,
-            description: getExcerpt(post.description, 150),
-            datePublished: post.published_at,
-            dateModified: post.updated_at,
-            image: post.image_path ? `${window.location.origin}/storage/${post.image_path}` : '',
-            url: `${window.location.origin}/blog/${post.id}`,
-            author: {
-                '@type': 'Organization',
-                name: 'TONGOLO TECHs'
-            }
-        }))
-    };
-});
 
 // Interface pour le modèle Actualite
 interface Actualite {
@@ -194,6 +60,7 @@ const selectedDate = ref(props.filters.date || 'all');
 const sortBy = ref(props.filters.sort || 'newest');
 const isLoading = ref(false);
 const showFilters = ref(false);
+const currentUrl = ref('');
 
 // Format de date français
 const formatDate = (dateString: string) => {
@@ -210,6 +77,42 @@ const getExcerpt = (text: string, maxLength: number = 150) => {
     if (text.length <= maxLength) return text;
     return text.substr(0, maxLength) + '...';
 };
+
+// Computed properties for meta tags
+const metaTitle = computed(() => "Blog | TONGOLO TECHs - Conseils et Actualités Mariage");
+const metaDescription = computed(() => "Découvrez nos articles, conseils et actualités sur l'organisation de mariage à Dakar, Sénégal. Tendances, idées et inspiration pour votre mariage parfait.");
+
+// JSON-LD structured data for blog listing
+const blogJsonLd = computed(() => {
+    return {
+        '@context': 'https://schema.org',
+        '@type': 'Blog',
+        headline: 'Blog TONGOLO TECHs',
+        description: metaDescription.value,
+        url: currentUrl.value,
+        publisher: {
+            '@type': 'Organization',
+            name: 'TONGOLO TECHs',
+            logo: {
+                '@type': 'ImageObject',
+                url: `${window.location.origin}/images/logo.jpg`
+            }
+        },
+        blogPost: props.actualites.data.map(post => ({
+            '@type': 'BlogPosting',
+            headline: post.title,
+            description: getExcerpt(post.description, 150),
+            datePublished: post.published_at,
+            dateModified: post.updated_at,
+            image: post.image_path ? `${window.location.origin}/storage/${post.image_path}` : '',
+            url: `${window.location.origin}/blog/${post.id}`,
+            author: {
+                '@type': 'Organization',
+                name: 'TONGOLO TECHs'
+            }
+        }))
+    };
+});
 
 // Date options pour le filtre
 const dateOptions = computed(() => {
@@ -231,37 +134,21 @@ const sortOptions = [
     { value: 'title-desc', label: 'Titre (Z-A)' },
 ];
 
-// Appliquer les filtres
-const applyFilters = () => {
-    isLoading.value = true;
+// Breadcrumb items
+const breadcrumbItems = [
+    { name: 'Accueil', href: '/', current: false },
+    { name: 'Blog', href: '/blog', current: true }
+];
 
-    const params: Record<string, string | null> = {
-        page: '1', // Retour à la première page pour les nouveaux filtres
-        search: searchQuery.value || null,
-        date: selectedDate.value === 'all' ? null : selectedDate.value,
-        sort: sortBy.value === 'newest' ? null : sortBy.value,
-    };
+// Add JSON-LD script on mounted
+onMounted(() => {
+    currentUrl.value = window.location.href;
 
-    // Nettoyer les paramètres null
-    Object.keys(params).forEach((key) => params[key] === null && delete params[key]);
-
-    // Redirection avec les nouveaux filtres
-    router.get(route('blog'), params, {
-        preserveState: true,
-        preserveScroll: false,
-        onSuccess: () => {
-            isLoading.value = false;
-        },
-    });
-};
-
-// Réinitialiser les filtres
-const resetFilters = () => {
-    searchQuery.value = '';
-    selectedDate.value = 'all';
-    sortBy.value = 'newest';
-    applyFilters();
-};
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.textContent = JSON.stringify(blogJsonLd.value);
+    document.head.appendChild(script);
+});
 
 // Fonction pour tronquer le HTML tout en conservant la structure
 const truncateHtml = (html: string, maxLength = 120) => {
@@ -331,10 +218,39 @@ const truncateHtml = (html: string, maxLength = 120) => {
 
     return truncated;
 };
-const breadcrumbItems = [
-    { name: 'Accueil', href: '/', current: false },
-    { name: 'Blog', href: '/blog', current: true }
-];
+
+// Appliquer les filtres
+const applyFilters = () => {
+    isLoading.value = true;
+
+    const params: Record<string, string | null> = {
+        page: '1',
+        search: searchQuery.value || null,
+        date: selectedDate.value === 'all' ? null : selectedDate.value,
+        sort: sortBy.value === 'newest' ? null : sortBy.value,
+    };
+
+    // Nettoyer les paramètres null
+    Object.keys(params).forEach((key) => params[key] === null && delete params[key]);
+
+    // Redirection avec les nouveaux filtres
+    router.get(route('blog'), params, {
+        preserveState: true,
+        preserveScroll: false,
+        onSuccess: () => {
+            isLoading.value = false;
+        },
+    });
+};
+
+// Réinitialiser les filtres
+const resetFilters = () => {
+    searchQuery.value = '';
+    selectedDate.value = 'all';
+    sortBy.value = 'newest';
+    applyFilters();
+};
+
 // Surveiller les changements de filtre
 watch([selectedDate, sortBy], () => {
     applyFilters();
@@ -358,66 +274,61 @@ watch([selectedDate, sortBy], () => {
             <meta name="twitter:card" content="summary_large_image" />
             <meta name="twitter:title" :content="metaTitle" />
             <meta name="twitter:description" :content="metaDescription" />
-
-            <!-- Structured Data is now added programmatically in the onMounted hook -->
         </Head>
 
         <!-- En-tête de la page avec image de fond -->
         <div class="relative bg-primary-bg-light py-16 overflow-hidden">
-        <!-- Image de fond avec overlay -->
-        <div class="absolute inset-0 z-0">
-            <img
-            src="/images/nav-second.jpeg"
-            alt="Technology Background"
-            class="w-full h-full object-cover"
-            />
-            <!-- Overlay gradient pour améliorer la lisibilité -->
-            <div class="absolute inset-0 bg-gradient-to-r from-blue-900/85 via-blue-800/75 to-purple-900/85"></div>
+            <!-- Image de fond avec overlay -->
+            <div class="absolute inset-0 z-0">
+                <img
+                    src="/images/nav-second.jpeg"
+                    alt="Technology Background"
+                    class="w-full h-full object-cover"
+                />
+                <!-- Overlay gradient pour améliorer la lisibilité -->
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-900/85 via-blue-800/75 to-purple-900/85"></div>
+            </div>
+
+            <!-- Contenu en avant-plan -->
+            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
+                <h1 class="text-4xl md:text-5xl font-serif font-bold text-white text-center mb-4 drop-shadow-lg">
+                    Blog
+                </h1>
+
+                <!-- Breadcrumb navigation -->
+                <nav class="flex" aria-label="Breadcrumb">
+                    <ol class="flex items-center space-x-2">
+                        <li v-for="(item, index) in breadcrumbItems" :key="item.name">
+                            <div class="flex items-center">
+                                <Link
+                                    :href="item.href"
+                                    :class="[
+                                        item.current ? 'text-white font-medium' : 'text-white/80 hover:text-white',
+                                        'text-sm md:text-base transition-colors drop-shadow-md'
+                                    ]"
+                                >
+                                    {{ item.name }}
+                                </Link>
+
+                                <!-- Séparateur, sauf pour le dernier élément -->
+                                <svg
+                                    v-if="index !== breadcrumbItems.length - 1"
+                                    class="h-5 w-5 text-white/70 mx-2 drop-shadow-md"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                >
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </div>
+                        </li>
+                    </ol>
+                </nav>
+            </div>
+
+            <!-- Élément décoratif -->
+            <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent"></div>
         </div>
-
-        <!-- Contenu en avant-plan -->
-        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
-            <h1 class="text-4xl md:text-5xl font-serif font-bold text-white text-center mb-4 drop-shadow-lg">
-            Blog
-            </h1>
-
-            <!-- Breadcrumb navigation -->
-            <nav class="flex" aria-label="Breadcrumb">
-            <ol class="flex items-center space-x-2">
-                <li v-for="(item, index) in breadcrumbItems" :key="item.name">
-                <div class="flex items-center">
-                    <Link
-                    :href="item.href"
-                    :class="[
-                        item.current ? 'text-white font-medium' : 'text-white/80 hover:text-white',
-                        'text-sm md:text-base transition-colors drop-shadow-md'
-                    ]"
-                    >
-                    {{ item.name }}
-                    </Link>
-
-                    <!-- Séparateur, sauf pour le dernier élément -->
-                    <svg
-                    v-if="index !== breadcrumbItems.length - 1"
-                    class="h-5 w-5 text-white/70 mx-2 drop-shadow-md"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                </div>
-                </li>
-            </ol>
-            </nav>
-        </div>
-
-        <!-- Élément décoratif -->
-        <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent"></div>
-        </div>
-
-        <!-- En-tête de la page -->
-
 
         <!-- Barre de recherche et filtres -->
         <section class="border-b bg-white py-8">
@@ -546,7 +457,6 @@ watch([selectedDate, sortBy], () => {
                             </h2>
                             <p class="mb-4 flex-grow text-gray-600">
                                 <span v-html="truncateHtml(actualite.description)"></span>
-
                             </p>
                             <Link
                                 :href="route('blog.show', actualite.id)"
@@ -590,55 +500,11 @@ watch([selectedDate, sortBy], () => {
             </div>
         </section>
 
-<!-- Section Newsletter -->
-<section class="py-16 bg-primary-bg-light">
-  <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-    <h2 class="text-2xl font-serif font-bold text-primary mb-4">
-      Vous avez aimé cet article ?
-    </h2>
-    <p class="text-lg text-gray-700 mb-8">
-      Abonnez-vous à notre newsletter pour suivre nos actualités, nos solutions technologiques et nos formations dédiées aux professionnels.
-    </p>
-
-    <div class="max-w-md mx-auto">
-      <!-- Formulaire d'abonnement -->
-      <form @submit.prevent="handleSubscribe" class="space-y-3">
-        <div class="flex">
-          <input
-            v-model="subscribeForm.email"
-            type="email"
-            placeholder="Votre adresse email"
-            required
-            :disabled="subscribeForm.processing"
-            class="flex-grow px-4 py-2 rounded-l-full border-y border-l border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100"
-            :class="subscribeForm.errors.email ? 'border-red-300' : 'border-gray-300'"
-          />
-          <button
-            type="submit"
-            :disabled="subscribeForm.processing"
-            class="px-6 py-2 bg-primary text-white rounded-r-full hover:bg-primary-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            <span v-if="subscribeForm.processing">...</span>
-            <span v-else>S'abonner</span>
-          </button>
-        </div>
-        
-        <!-- Message d'erreur -->
-        <p v-if="subscribeForm.errors.email" class="text-sm text-red-600 text-left">
-          {{ subscribeForm.errors.email }}
-        </p>
-        
-        <p class="text-sm text-gray-500 mt-2">
-          Nous respectons votre vie privée. Désabonnez-vous à tout moment.
-        </p>
-      </form>
-    </div>
-  </div>
-</section>
-
-
-
-
+        <!-- Section Newsletter -->
+        <NewsletterSubscribe
+            title="Vous avez aimé cet article ?"
+            description="Abonnez-vous à notre newsletter pour suivre nos actualités, nos solutions technologiques et nos formations dédiées aux professionnels."
+        />
     </LayoutFront>
 </template>
 
