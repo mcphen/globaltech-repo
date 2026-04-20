@@ -201,9 +201,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
 
                     <!-- Logo -->
                     <Link :href="route('home')" class="flex items-center gap-3 flex-shrink-0">
-                        <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-white text-lg" style="background: linear-gradient(135deg, #0B1437, #152050);">
-                            G
-                        </div>
+                        <img src="/images/logo_globaltech.jpeg" alt="GlobalTECH EDUCATION Africa" class="w-10 h-10 rounded-xl object-contain" />
                         <div class="leading-tight">
                             <div class="font-black text-sm tracking-tight" :style="`color: ${isDark ? '#F1F5F9' : '#0B1437'}; font-family: 'Plus Jakarta Sans', sans-serif;`">
                                 GlobalTECH
@@ -525,8 +523,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                     <!-- Brand Column -->
                     <div class="lg:col-span-1">
                         <Link :href="route('home')" class="flex items-center gap-3 mb-5">
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-white text-lg"
-                                style="background: linear-gradient(135deg, #1E2D6B, #2563EB);">G</div>
+                            <img src="/images/logo_globaltech.jpeg" alt="GlobalTECH EDUCATION Africa" class="w-10 h-10 rounded-xl object-contain" />
                             <div class="leading-tight">
                                 <div class="font-black text-sm text-white">GlobalTECH</div>
                                 <div class="text-xs font-bold tracking-widest" style="color: #E8A020;">EDUCATION AFRICA</div>
