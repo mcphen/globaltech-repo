@@ -37,7 +37,7 @@
         <link rel="shortcut icon" type="image/jpeg" href="{{ asset('images/logo.jpg') }}">
         <link rel="apple-touch-icon" href="{{ asset('images/logo.jpg') }}">
         <meta property="og:image" content="{{ url('/images/logo.jpg') }}" />
-        <meta property="og:image:alt" content="{{ config('app.name', 'TONGOLO TECH') }}" />
+        <meta property="og:image:alt" content="{{ config('app.name', 'GlobalTECH EDUCATION Africa') }}" />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content="{{ url('/images/logo.jpg') }}" />
 

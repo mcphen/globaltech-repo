@@ -17,7 +17,7 @@
 <body>
     <div class="container">
         <div class="header">
-            <h1>TongoloTech</h1>
+            <h1>GlobalTECH EDUCATION Africa</h1>
         </div>
         
         <div class="content">
@@ -48,8 +48,8 @@
         </div>
         
         <div class="footer">
-            <p>Cordialement,<br>L'équipe TongoloTech</p>
-            <p>© {{ date('Y') }} TongoloTech. Tous droits réservés.</p>
+            <p>Cordialement,<br>L'équipe GlobalTECH EDUCATION Africa</p>
+            <p>© {{ date('Y') }} GlobalTECH EDUCATION Africa. Tous droits réservés.</p>
             <p><small>Cet email a été envoyé à {{ $email }}</small></p>
         </div>
     </div>

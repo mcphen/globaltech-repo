@@ -70,7 +70,7 @@ const metaDescription = computed(() => {
 
     return props.product.description
         ? props.product.description.substring(0, 160)
-        : `Découvrez ${props.product.title} - Produit de qualité par TONGOLO TECHs`;
+        : `Découvrez ${props.product.title} - Produit de qualité par GlobalTECH EDUCATION Africa`;
 });
 
 // Helper function to get full image URL
@@ -98,7 +98,7 @@ const productJsonLd = computed(() => {
         },
         brand: {
             '@type': 'Brand',
-            name: 'TONGOLO TECHs'
+            name: 'GlobalTECH EDUCATION Africa'
         }
     };
 });

@@ -8,7 +8,7 @@
                             Prêts à transformer votre entreprise ?
                         </h2>
                         <p class="mt-4 max-w-3xl text-lg ">
-                             Contactez dès aujourd'hui l'équipe TONGOLO TECH pour une consultation personnalisée et découvrez comment nos solutions en ingénierie, télécommunications et réseaux peuvent optimiser vos projets et renforcer votre performance.
+                             Contactez dès aujourd'hui l'équipe GlobalTECH EDUCATION Africa pour une consultation personnalisée et découvrez comment nos formations certifiantes et solutions de consulting peuvent développer vos équipes et renforcer votre performance.
                         </p>
                     </div>
                     <div class="mt-12 sm:w-full sm:max-w-md lg:mt-0 lg:ml-8 lg:flex-1">

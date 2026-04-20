@@ -1,6 +1,6 @@
 <template>
   <Head>
-    <title>Mon Profil - TONGOLO TECH</title>
+    <title>Mon Profil - GlobalTECH EDUCATION Africa</title>
     <meta name="description" content="Consultez votre profil utilisateur." />
   </Head>
 

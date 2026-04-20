@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\FormationCategory;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -65,6 +66,8 @@ class HandleInertiaRequests extends Middleware
                 'location' => $request->url(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
+            'formationCategories' => fn () => FormationCategory::orderBy('sort_order')
+                ->get(['id', 'name', 'slug', 'icon', 'color', 'is_featured']),
             'cart' => [
                 'items' => array_values($cart),
                 'count' => $distinctCount, // show number of distinct items in UI

@@ -16,7 +16,12 @@ class Formation extends Model
         'description',
         'image_path',
         'attachment_path',
-        'date_mode', // 'single' or 'range'
+        'category_id',
+        'certification_type',
+        'level',
+        'is_featured',
+        'language',
+        'date_mode',
         'date',
         'start_time',
         'end_time',
@@ -37,12 +42,13 @@ class Formation extends Model
     }
 
     protected $casts = [
-        'date' => 'date',
-        'start_date' => 'date',
-        'end_date' => 'date',
-        'start_time' => 'string',
-        'end_time' => 'string',
-        'price' => 'decimal:2',
+        'date'        => 'date',
+        'start_date'  => 'date',
+        'end_date'    => 'date',
+        'start_time'  => 'string',
+        'end_time'    => 'string',
+        'price'       => 'decimal:2',
+        'is_featured' => 'boolean',
     ];
 
     protected static function booted()
@@ -65,6 +71,11 @@ class Formation extends Model
         });
     }
 
+    public function category()
+    {
+        return $this->belongsTo(FormationCategory::class, 'category_id');
+    }
+
     public function views()
     {
         return $this->hasMany(FormationView::class);
@@ -75,5 +86,10 @@ class Formation extends Model
         return $this->belongsToMany(Lead::class, 'lead_formation', 'formation_id', 'lead_id')
             ->withPivot('attentes', 'status', 'paid_at')
             ->withTimestamps();
+    }
+
+    public function b2bRequests()
+    {
+        return $this->hasMany(FormationB2bRequest::class);
     }
 }

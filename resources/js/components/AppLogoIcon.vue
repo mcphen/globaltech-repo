@@ -7,8 +7,8 @@ defineOptions({
 <template>
   <img
     src="/images/logotongolo.jpg"
-    class="w-auto"     
-    v-bind="$attrs"    
-    alt="TONGOLO-TECH Logo"
+    class="w-auto"
+    v-bind="$attrs"
+    alt="GlobalTECH EDUCATION Africa Logo"
   />
 </template>

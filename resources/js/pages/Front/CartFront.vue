@@ -16,14 +16,11 @@ type Totals = {
   total: number;
 };
 
-const { items, totals } = withDefaults(defineProps<{
-  items: CartItem[];
-  totals: Totals;
+const { items = [], totals = { count: 0, subtotal: 0, total: 0 } } = defineProps<{
+  items?: CartItem[];
+  totals?: Totals;
   contactSettings?: Record<string, unknown>;
-}>(), {
-  items: () => [],
-  totals: () => ({ count: 0, subtotal: 0, total: 0 }),
-});
+}>();
 
 const formatPrice = (price: number) => new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'XOF' }).format(price);
 
@@ -47,7 +44,7 @@ const checkout = () => {
 <template>
   <LayoutFront>
     <Head>
-      <title>Panier | TONGOLO TECHs</title>
+      <title>Panier | GlobalTECH EDUCATION Africa</title>
     </Head>
 
     <div class="relative bg-primary-bg-light py-16 overflow-hidden">

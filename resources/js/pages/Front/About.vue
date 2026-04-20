@@ -1,208 +1,243 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
+import { useDarkMode } from '@/composables/useDarkMode';
 import axios from 'axios';
-import { ref, onMounted } from 'vue';
-import Partners from '@/components/front/Partners.vue';
-import Temoignages from '@/components/front/Temoignages.vue';
-import CtaSection from '@/components/front/CtaSection.vue';
+import { ref, computed, onMounted } from 'vue';
 
-interface AboutData{
-    content: string;
-    image_path?: string;
-}
+interface AboutData { content: string; image_path?: string; image_url?: string; }
+interface TeamMember { id: number; firstname: string; lastname: string; position: string; bio?: string; image_path?: string; image_url?: string; }
 
-
-// Définir les props
-interface Props {
-    about: AboutData | null;
-}
-// Récupérer les props - c'est ici qu'on accède aux données passées par le contrôleur
-const props = defineProps<Props>();
-
-
-// Interface pour les membres de l'équipe
-interface TeamMember {
-    id: number;
-    firstname: string;
-    lastname: string;
-    position: string;
-    bio: string;
-    image_path: string;
-}
-// État pour stocker les membres de l'équipe
+const props = defineProps<{ about: AboutData | null }>();
 const teamMembers = ref<TeamMember[]>([]);
-const isLoadingTeam = ref(true);
-const teamError = ref<string | null>(null);
-// Fonction pour charger les membres de l'équipe depuis l'API
-const fetchTeamMembers = async () => {
+const { isDark } = useDarkMode();
+
+const offices = [
+    { country: 'Côte d\'Ivoire', city: 'Abidjan', flag: '🇨🇮', role: 'Siège Social', address: 'Plateau, Abidjan' },
+    { country: 'Sénégal', city: 'Dakar', flag: '🇸🇳', role: 'Bureau Régional', address: 'Plateau, Dakar' },
+    { country: 'Mali', city: 'Bamako', flag: '🇲🇱', role: 'Bureau Régional', address: 'ACI 2000, Bamako' },
+    { country: 'Cameroun', city: 'Douala', flag: '🇨🇲', role: 'Bureau Régional', address: 'Bonanjo, Douala' },
+    { country: 'Burkina Faso', city: 'Ouagadougou', flag: '🇧🇫', role: 'Bureau Régional', address: 'Ouaga 2000' },
+    { country: 'Togo', city: 'Lomé', flag: '🇹🇬', role: 'Représentation', address: 'Centre-ville, Lomé' },
+];
+
+const milestones = [
+    { year: '2010', event: 'Création de GlobalTECH EDUCATION Africa à Abidjan' },
+    { year: '2013', event: 'Accréditation PMI — premier centre agréé en Afrique de l\'Ouest' },
+    { year: '2016', event: 'Ouverture des bureaux de Dakar et Bamako' },
+    { year: '2018', event: 'Partenariat stratégique Microsoft et Cisco' },
+    { year: '2020', event: 'Lancement de la plateforme e-Learning panafricaine' },
+    { year: '2022', event: '5 000 professionnels certifiés — cap historique' },
+    { year: '2024', event: 'Expansion au Cameroun, Burkina Faso et Togo' },
+];
+
+const values = [
+    { icon: 'bi-award-fill',   color: '#2563EB', bgLight: '#EFF6FF', bgDark: 'rgba(37,99,235,0.15)',  title: 'Excellence',       desc: 'Standards internationaux dans chaque formation' },
+    { icon: 'bi-globe-africa', color: '#16A34A', bgLight: '#F0FDF4', bgDark: 'rgba(22,163,74,0.15)',  title: 'Afrique d\'abord', desc: 'Des contenus adaptés au contexte africain' },
+    { icon: 'bi-people-fill',  color: '#D97706', bgLight: '#FFFBEB', bgDark: 'rgba(217,119,6,0.15)',  title: 'Impact humain',    desc: 'Le développement des talents au cœur de tout' },
+    { icon: 'bi-shield-check', color: '#7C3AED', bgLight: '#F5F3FF', bgDark: 'rgba(124,58,237,0.15)', title: 'Intégrité',        desc: 'Certifications officielles et transparentes' },
+];
+
+// Dark-mode computed styles
+const sectionWhiteBg  = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
+const sectionGrayBg   = computed(() => isDark.value ? '#0B1437' : '#F8FAFC');
+const titleColor      = computed(() => isDark.value ? '#F1F5F9' : '#0B1437');
+const bodyColor       = computed(() => isDark.value ? '#94A3B8' : '#6B7280');
+const descColor       = computed(() => isDark.value ? '#64748B' : '#637084');
+const boldColor       = computed(() => isDark.value ? '#E2E8F0' : '#111827');
+const cardBg          = computed(() => isDark.value ? '#131F36' : '#FFFFFF');
+const cardBorder      = computed(() => isDark.value ? 'rgba(255,255,255,0.07)' : 'rgba(203,213,225,0.6)');
+const dotBorder       = computed(() => isDark.value ? '#0B1437' : '#FFFFFF');
+const timelineEvent   = computed(() => isDark.value ? '#CBD5E1' : '#0B1437');
+const officeHeadBg    = computed(() => isDark.value ? 'rgba(232,160,32,0.15)' : '#FEF7E8');
+const officeHeadColor = computed(() => isDark.value ? '#E8A020' : '#C68400');
+const officeBlueBg    = computed(() => isDark.value ? 'rgba(37,99,235,0.15)' : '#EFF6FF');
+const officeBlueColor = computed(() => isDark.value ? '#60A5FA' : '#2563EB');
+const teamAvatarBg    = computed(() => isDark.value ? 'linear-gradient(135deg,#1E2D50,#152050)' : 'linear-gradient(135deg,#EFF6FF,#DBEAFE)');
+
+onMounted(async () => {
     try {
-        isLoadingTeam.value = true;
-        teamError.value = null;
-
-        // Appel à l'API pour récupérer les membres de l'équipe
-        const response = await axios.get('/team-members/listes');
-
-        // Vérification de la réponse
-        if (response.status === 200 && response.data) {
-            teamMembers.value = response.data;
-        } else {
-            teamError.value = 'Impossible de charger les données de l\'équipe';
-        }
-    } catch (error) {
-        console.error('Erreur lors du chargement des membres de l\'équipe:', error);
-        teamError.value = 'Une erreur est survenue lors du chargement des données';
-    } finally {
-        isLoadingTeam.value = false;
-    }
-};
-
-// Charger les données au montage du composant
-onMounted(() => {
-    fetchTeamMembers();
+        const res = await axios.get('/team-members/listes');
+        if (res.data) teamMembers.value = res.data;
+    } catch {}
 });
-
-
-const partners = [
-    { name: 'Le Château des Rêves', type: 'Lieu de réception', image: '/images/partners/chateau.jpg' },
-    { name: 'Délices & Saveurs', type: 'Traiteur', image: '/images/partners/traiteur.jpg' },
-    { name: 'Clic Émotion', type: 'Photographie', image: '/images/partners/photo.jpg' }
-];
-
-const testimonials = [
-    { name: 'Marie & Jean', date: 'Juin 2023', content: 'L\'équipe d\'Amour Éternel a transformé notre mariage en un conte de fées. Chaque détail était parfait !', image: '/images/testimonials/couple1.jpg' },
-    { name: 'Sophie & Pierre', date: 'Septembre 2023', content: 'Un grand merci pour votre professionnalisme et votre créativité. Notre journée était magique grâce à vous.', image: '/images/testimonials/couple2.jpg' },
-    { name: 'Camille & Lucas', date: 'Mai 2024', content: 'Organisation impeccable, un stress en moins pour nous et des souvenirs inoubliables. Nous recommandons vivement !', image: '/images/testimonials/couple3.jpg' }
-];
-
-// Données pour le breadcrumb
-const breadcrumbItems = [
-    { name: 'Accueil', href: '/', current: false },
-    { name: 'À Propos', href: '/about', current: true }
-];
-
 </script>
 
 <template>
-    <Head>
-        <title>À Propos - TONGOLO TECH</title>
-        <meta name="description" content="Découvrez l'histoire d'Amour Éternel, notre équipe passionnée, nos partenaires de confiance et les témoignages de nos mariés" />
-    </Head>
-
+    <Head title="À Propos — GlobalTECH EDUCATION Africa" />
     <LayoutFront>
-        <!-- Bannière du breadcrumb avec image de fond -->
-        <!-- En-tête de la page avec image de fond -->
-<div class="relative bg-primary-bg-light py-16 overflow-hidden">
-  <!-- Image de fond avec overlay -->
-  <div class="absolute inset-0 z-0">
-    <img
-      src="/images/nav-second.jpeg"
-      alt="Technology Background"
-      class="w-full h-full object-cover"
-    />
-    <!-- Overlay gradient pour améliorer la lisibilité -->
-    <div class="absolute inset-0 bg-gradient-to-r from-blue-900/85 via-blue-800/75 to-purple-900/85"></div>
-  </div>
 
-  <!-- Contenu en avant-plan -->
-  <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
-    <h1 class="text-4xl md:text-5xl font-serif font-bold text-white text-center mb-4 drop-shadow-lg">
-      À Propos
-    </h1>
-
-    <!-- Breadcrumb navigation -->
-    <nav class="flex" aria-label="Breadcrumb">
-      <ol class="flex items-center space-x-2">
-        <li v-for="(item, index) in breadcrumbItems" :key="item.name">
-          <div class="flex items-center">
-            <Link
-              :href="item.href"
-              :class="[
-                item.current ? 'text-white font-medium' : 'text-white/80 hover:text-white',
-                'text-sm md:text-base transition-colors drop-shadow-md'
-              ]"
-            >
-              {{ item.name }}
-            </Link>
-
-            <!-- Séparateur, sauf pour le dernier élément -->
-            <svg
-              v-if="index !== breadcrumbItems.length - 1"
-              class="h-5 w-5 text-white/70 mx-2 drop-shadow-md"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </div>
-        </li>
-      </ol>
-    </nav>
-  </div>
-
-  <!-- Élément décoratif -->
-  <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent"></div>
-</div>
-
-        <div class="py-12 bg-white">
-            <!-- Section À Propos de Nous -->
-            <section id="about-us" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-16">
-                <h1 class="text-3xl md:text-4xl font-serif font-bold text-center text-primary mb-3">À Propos de Nous</h1>
-                <div class="w-24 h-1 bg-primary mx-auto mb-8"></div>
-
-                <div class="flex flex-col md:flex-row items-center gap-8">
-                    <div class="md:w-1/2">
-                        <img
-                            :src="props.about && props.about.image_path ? `${props.about.image_path}` : '/images/about-us.jpg'"
-                            alt="L'équipe TONGOLO TECH"
-                            class="rounded-lg shadow-lg w-full h-auto object-cover"
-                        >
-
-                        
-                    </div>
-                    <div class="md:w-1/2">
-                        <h2 class="text-2xl font-serif font-semibold text-gray-800 mb-4">Notre Histoire</h2>
-                        <div v-html="props.about && props.about.content ? props.about.content : ''"></div>
-                    </div>
+        <!-- Hero -->
+        <section class="py-28 relative overflow-hidden" style="background: linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(135deg,#060C22 0%,#0B1437 42%,#0E2060 72%,#091830 100%); background-size:60px 60px,60px 60px,100% 100%;">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center relative z-10">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-6"
+                    style="background: rgba(232, 160, 32, 0.15); color: #E8A020; border: 1px solid rgba(232, 160, 32, 0.3);">
+                    <i class="bi bi-globe-africa"></i>
+                    Présent dans 12 pays africains
                 </div>
-            </section>
+                <h1 class="text-5xl lg:text-6xl font-black text-white mb-6" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                    À propos de <span class="gt-text-gradient">GlobalTECH</span>
+                </h1>
+                <p class="text-xl text-white/70 max-w-3xl mx-auto leading-relaxed">
+                    Depuis 2010, nous formons et certifions les talents d'Afrique aux standards internationaux les plus exigeants.
+                </p>
+            </div>
+        </section>
 
-            <!-- Section Notre Équipe -->
-            <section id="our-team" class="bg-primary-bg-light py-16">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <h2 class="text-3xl font-serif font-bold text-center text-primary mb-3">Notre Équipe</h2>
-                    <div class="w-24 h-1 bg-primary mx-auto mb-8"></div>
-                    <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">
-                        Notre équipe de professionnels passionnés travaille avec dévouement pour transformer vos rêves en réalité. Chacun apporte son expertise unique pour créer des événements inoubliables.
-                    </p>
+        <!-- Mission & Vision -->
+        <section class="py-24" :style="`background: ${sectionWhiteBg};`">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8">
+                <div class="grid lg:grid-cols-2 gap-16 items-center">
+                    <!-- Content -->
+                    <div>
+                        <div class="gt-section-label">Notre Histoire</div>
+                        <h2 class="gt-section-title text-4xl lg:text-5xl mb-6">
+                            Former l'Afrique de demain
+                        </h2>
+                        <div v-if="about?.content" class="prose max-w-none leading-relaxed" :style="`color: ${bodyColor};`" v-html="about.content"></div>
+                        <div v-else class="space-y-4 leading-relaxed text-sm" :style="`color: ${bodyColor};`">
+                            <p>
+                                <strong :style="`color: ${boldColor};`">GlobalTECH EDUCATION Africa</strong> est une institution de formation certifiante de référence, fondée en 2010 à Abidjan, Côte d'Ivoire. Notre mission : élever le niveau de compétence professionnelle sur le continent africain en dispensant des formations certifiantes reconnues mondialement.
+                            </p>
+                            <p>
+                                Nous intervenons dans trois domaines d'excellence : l'Informatique & IT, le Management de Projet (PMP), et le Management & Leadership. Nos programmes sont conçus par des experts praticiens et alignés sur les standards PMI, CompTIA, Microsoft, Cisco et AWS.
+                            </p>
+                            <p>
+                                Avec plus de <strong :style="`color: ${boldColor};`">5 000 professionnels certifiés</strong> et <strong :style="`color: ${boldColor};`">500 entreprises clientes</strong> dans 12 pays africains, GlobalTECH est aujourd'hui le partenaire de formation de référence des grandes entreprises, institutions et groupes internationaux opérant en Afrique.
+                            </p>
+                        </div>
 
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <div v-for="member in teamMembers" :key="member.firstname" class="bg-white rounded-lg shadow-md overflow-hidden transition-transform hover:transform hover:scale-105">
-                            <img :src="`/storage/${member.image_path}`" :alt="member.firstname" class="w-full h-64 object-cover">
-                            <div class="p-6">
-                                <h3 class="text-xl font-semibold text-gray-800 mb-1">{{ member.firstname }} {{member.lastname}}</h3>
-                                <p class="text-primary font-medium mb-3">{{ member.position }}</p>
-                                <p class="text-gray-600" v-html="member.bio"></p>
+                        <div class="grid grid-cols-3 gap-6 mt-10">
+                            <div v-for="s in [{ v: '500+', l: 'Entreprises' }, { v: '5K+', l: 'Certifiés' }, { v: '12', l: 'Pays' }]" :key="s.l" class="text-center">
+                                <div class="text-3xl font-black mb-1" style="color: #E8A020;">{{ s.v }}</div>
+                                <div class="text-sm" :style="`color: ${descColor};`">{{ s.l }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image or Values -->
+                    <div class="relative">
+                        <img v-if="about?.image_url" :src="about.image_url" alt="GlobalTECH EDUCATION Africa" class="w-full rounded-3xl shadow-2xl object-cover h-96" />
+                        <div v-else class="grid grid-cols-2 gap-4">
+                            <div v-for="val in values" :key="val.title"
+                                class="p-6 rounded-2xl transition-shadow hover:shadow-lg"
+                                :style="`background: ${cardBg}; border: 1px solid ${cardBorder};`">
+                                <div class="w-12 h-12 rounded-xl flex items-center justify-center mb-4"
+                                    :style="`background: ${isDark ? val.bgDark : val.bgLight};`">
+                                    <i :class="['bi', val.icon, 'text-xl']" :style="`color: ${val.color};`"></i>
+                                </div>
+                                <h4 class="font-bold mb-1" :style="`color: ${titleColor};`">{{ val.title }}</h4>
+                                <p class="text-xs leading-relaxed" :style="`color: ${descColor};`">{{ val.desc }}</p>
                             </div>
                         </div>
                     </div>
                 </div>
-            </section>
+            </div>
+        </section>
 
-            <!-- Section Nos Partenaires -->
-            <Partners :class-names="'text-3xl font-serif font-bold text-center text-primary mb-3'" />
+        <!-- Timeline -->
+        <section class="py-24" :style="`background: ${sectionGrayBg};`">
+            <div class="max-w-5xl mx-auto px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <div class="gt-section-label justify-center">Notre Parcours</div>
+                    <h2 class="gt-section-title text-4xl mb-4">15 ans d'excellence</h2>
+                </div>
 
+                <div class="relative">
+                    <div class="absolute left-6 lg:left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2" style="background: linear-gradient(to bottom, #E8A020, #2563EB);"></div>
 
+                    <div class="space-y-8">
+                        <div v-for="(m, i) in milestones" :key="m.year"
+                            class="relative flex items-start gap-6"
+                            :class="i % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'">
+                            <div class="absolute left-6 lg:left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border-4 z-10 mt-1"
+                                :style="`background: #E8A020; border-color: ${dotBorder};`"></div>
 
-            <Temoignages
-                :bg-color="'bg-primary-bg-light'"
-                :class-names-title="'text-3xl font-serif font-bold text-center text-primary mb-3'"
-                :is-horizontal-div="true"
-            />
+                            <div class="ml-14 lg:ml-0 lg:w-1/2" :class="i % 2 === 0 ? 'lg:pr-12' : 'lg:pl-12'">
+                                <div class="gt-card p-6">
+                                    <div class="text-2xl font-black mb-2" style="color: #E8A020;">{{ m.year }}</div>
+                                    <p class="text-sm font-medium" :style="`color: ${timelineEvent};`">{{ m.event }}</p>
+                                </div>
+                            </div>
+                            <div class="hidden lg:block lg:w-1/2"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
 
-            <CtaSection />
-        </div>
+        <!-- International Offices -->
+        <section class="py-24" :style="`background: ${sectionWhiteBg};`">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <div class="gt-section-label justify-center">Présence Internationale</div>
+                    <h2 class="gt-section-title text-4xl lg:text-5xl mb-4">Nos bureaux en Afrique</h2>
+                    <p class="text-lg max-w-2xl mx-auto" :style="`color: ${descColor};`">
+                        Une présence locale forte pour mieux servir nos clients partout sur le continent.
+                    </p>
+                </div>
+
+                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div v-for="office in offices" :key="office.country" class="gt-card p-6 flex items-start gap-4">
+                        <div class="text-3xl flex-shrink-0">{{ office.flag }}</div>
+                        <div>
+                            <h3 class="font-bold mb-1" :style="`color: ${titleColor};`">{{ office.city }}, {{ office.country }}</h3>
+                            <span class="text-xs px-2 py-0.5 rounded-full font-semibold mb-2 inline-block"
+                                :style="office.role === 'Siège Social'
+                                    ? `background: ${officeHeadBg}; color: ${officeHeadColor};`
+                                    : `background: ${officeBlueBg}; color: ${officeBlueColor};`">
+                                {{ office.role }}
+                            </span>
+                            <p class="text-xs mt-1" :style="`color: ${descColor};`">{{ office.address }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Team -->
+        <section v-if="teamMembers.length" class="py-24" :style="`background: ${sectionGrayBg};`">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <div class="gt-section-label justify-center">Notre Équipe</div>
+                    <h2 class="gt-section-title text-4xl mb-4">Les experts qui vous forment</h2>
+                </div>
+                <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    <div v-for="member in teamMembers" :key="member.id" class="gt-card text-center p-6 group">
+                        <div class="w-20 h-20 rounded-full mx-auto mb-4 overflow-hidden" :style="`background: ${teamAvatarBg};`">
+                            <img v-if="member.image_url" :src="member.image_url" :alt="`${member.firstname} ${member.lastname}`" class="w-full h-full object-cover" />
+                            <div v-else class="w-full h-full flex items-center justify-center text-2xl font-black text-blue-400">
+                                {{ member.firstname?.charAt(0) }}
+                            </div>
+                        </div>
+                        <h3 class="font-bold mb-1" :style="`color: ${titleColor};`">{{ member.firstname }} {{ member.lastname }}</h3>
+                        <p class="text-xs font-semibold mb-3" style="color: #E8A020;">{{ member.position }}</p>
+                        <p v-if="member.bio" class="text-xs leading-relaxed" :style="`color: ${descColor};`">{{ member.bio }}</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="py-20 relative overflow-hidden" style="background: linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(135deg,#060C22 0%,#0B1437 50%,#091830 100%); background-size:60px 60px,60px 60px,100% 100%;">
+            <div class="absolute inset-0 opacity-10" style="background: radial-gradient(circle at 80% 50%, #E8A020, transparent 60%);"></div>
+            <div class="max-w-3xl mx-auto px-6 lg:px-8 text-center relative z-10">
+                <h2 class="text-3xl lg:text-4xl font-black text-white mb-4" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                    Faisons connaissance
+                </h2>
+                <p class="text-white/70 mb-8">
+                    Contactez nos conseillers pour discuter de vos besoins en formation et certification.
+                </p>
+                <div class="flex flex-wrap gap-4 justify-center">
+                    <Link href="/contact" class="gt-btn-gold px-8 py-3.5 rounded-xl">
+                        <i class="bi bi-envelope-fill"></i> Nous contacter
+                    </Link>
+                    <Link :href="route('formations')" class="gt-btn-outline px-8 py-3.5 rounded-xl">
+                        <i class="bi bi-mortarboard"></i> Nos formations
+                    </Link>
+                </div>
+            </div>
+        </section>
+
     </LayoutFront>
-
 </template>

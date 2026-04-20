@@ -27,15 +27,12 @@ type OrderSummary = {
   currency?: string;
 } | null;
 
-const { items, totals, order } = withDefaults(defineProps<{
-  items: CartItem[];
-  totals: Totals;
+const { items = [], totals = { count: 0, subtotal: 0, total: 0 }, order } = defineProps<{
+  items?: CartItem[];
+  totals?: Totals;
   contactSettings?: Record<string, unknown>;
   order?: OrderSummary;
-}>(), {
-  items: () => [],
-  totals: () => ({ count: 0, subtotal: 0, total: 0 }),
-});
+}>();
 
 const isSubmitting = ref(false);
 
@@ -54,7 +51,7 @@ const finalize = () => {
 <template>
   <LayoutFront>
     <Head>
-      <title>Validation de commande | TONGOLO TECHs</title>
+      <title>Validation de commande | GlobalTECH EDUCATION Africa</title>
     </Head>
 
     <div class="relative bg-primary-bg-light py-16 overflow-hidden">

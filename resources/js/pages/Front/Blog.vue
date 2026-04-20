@@ -1,534 +1,218 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
-import NewsletterSubscribe from '../Front/NewsletterSubscribe.vue';
-import { ref, watch, computed, onMounted } from 'vue';
+import { useDarkMode } from '@/composables/useDarkMode';
+import { ref, computed, watch } from 'vue';
 
-// Interface pour le modèle Actualite
 interface Actualite {
-    id: number;
-    title: string;
-    description: string;
-    image_path: string;
-    image_url: string;
-    published_at: string;
-    created_at: string;
-    updated_at: string;
+    id: number; title: string; description?: string;
+    image_path?: string; image_url?: string;
+    published_at?: string; created_at: string;
 }
 
-// Interface pour les données paginées
 interface PaginatedData {
     data: Actualite[];
-    links: {
-        url: string | null;
-        label: string;
-        active: boolean;
-    }[];
-    meta: {
-        current_page: number;
-        from: number | null;
-        last_page: number;
-        links: {
-            url: string | null;
-            label: string;
-            active: boolean;
-        }[];
-        path: string;
-        per_page: number;
-        to: number | null;
-        total: number;
-    };
+    links: { url: string | null; label: string; active: boolean }[];
+    current_page: number;
+    last_page: number;
+    total: number;
+    per_page: number;
 }
 
-// Interface pour les filtres
-interface Filters {
-    search: string | null;
-    date: string | null;
-    sort: string | null;
-}
+interface Filters { search?: string | null; date?: string | null; sort?: string | null; }
 
-// Définition des props
-const props = defineProps<{
-    actualites: PaginatedData;
-    filters: Filters;
-    categories?: string[];
-}>();
+const props = defineProps<{ actualites: PaginatedData; filters: Filters; }>();
+const { isDark } = useDarkMode();
 
-// États
 const searchQuery = ref(props.filters.search || '');
-const selectedDate = ref(props.filters.date || 'all');
 const sortBy = ref(props.filters.sort || 'newest');
-const isLoading = ref(false);
-const showFilters = ref(false);
-const currentUrl = ref('');
 
-// Format de date français
-const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('fr-FR', {
-        day: 'numeric',
-        month: 'long',
-        year: 'numeric',
-    });
+const doSearch = () => {
+    router.get(route('blog'), {
+        search: searchQuery.value || undefined,
+        sort: sortBy.value,
+    }, { preserveState: true, replace: true });
 };
 
-// Extraire un extrait de la description
-const getExcerpt = (text: string, maxLength: number = 150) => {
-    if (text.length <= maxLength) return text;
-    return text.substr(0, maxLength) + '...';
-};
+let timer: ReturnType<typeof setTimeout>;
+watch(searchQuery, () => { clearTimeout(timer); timer = setTimeout(doSearch, 400); });
+watch(sortBy, doSearch);
 
-// Computed properties for meta tags
-const metaTitle = computed(() => "Blog | TONGOLO TECHs - Conseils et Actualités Mariage");
-const metaDescription = computed(() => "Découvrez nos articles, conseils et actualités sur l'organisation de mariage à Dakar, Sénégal. Tendances, idées et inspiration pour votre mariage parfait.");
+const formatDate = (d: string) => new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+const excerpt = (html?: string) => (html || '').replace(/<[^>]*>?/gm, '').slice(0, 140) + '...';
 
-// JSON-LD structured data for blog listing
-const blogJsonLd = computed(() => {
-    return {
-        '@context': 'https://schema.org',
-        '@type': 'Blog',
-        headline: 'Blog TONGOLO TECHs',
-        description: metaDescription.value,
-        url: currentUrl.value,
-        publisher: {
-            '@type': 'Organization',
-            name: 'TONGOLO TECHs',
-            logo: {
-                '@type': 'ImageObject',
-                url: `${window.location.origin}/images/logo.jpg`
-            }
-        },
-        blogPost: props.actualites.data.map(post => ({
-            '@type': 'BlogPosting',
-            headline: post.title,
-            description: getExcerpt(post.description, 150),
-            datePublished: post.published_at,
-            dateModified: post.updated_at,
-            image: post.image_path ? `${window.location.origin}/storage/${post.image_path}` : '',
-            url: `${window.location.origin}/blog/${post.id}`,
-            author: {
-                '@type': 'Organization',
-                name: 'TONGOLO TECHs'
-            }
-        }))
-    };
-});
-
-// Date options pour le filtre
-const dateOptions = computed(() => {
-    const currentYear = new Date().getFullYear();
-    return [
-        { value: 'all', label: 'Toutes les dates' },
-        { value: 'this-month', label: 'Ce mois-ci' },
-        { value: 'last-month', label: 'Le mois dernier' },
-        { value: currentYear.toString(), label: 'Cette année' },
-        { value: (currentYear - 1).toString(), label: 'Année dernière' },
-    ];
-});
-
-// Trier les options
-const sortOptions = [
-    { value: 'newest', label: 'Plus récent' },
-    { value: 'oldest', label: 'Plus ancien' },
-    { value: 'title-asc', label: 'Titre (A-Z)' },
-    { value: 'title-desc', label: 'Titre (Z-A)' },
-];
-
-// Breadcrumb items
-const breadcrumbItems = [
-    { name: 'Accueil', href: '/', current: false },
-    { name: 'Blog', href: '/blog', current: true }
-];
-
-// Add JSON-LD script on mounted
-onMounted(() => {
-    currentUrl.value = window.location.href;
-
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.textContent = JSON.stringify(blogJsonLd.value);
-    document.head.appendChild(script);
-});
-
-// Fonction pour tronquer le HTML tout en conservant la structure
-const truncateHtml = (html: string, maxLength = 120) => {
-    // Retirer les balises HTML pour compter les caractères
-    const tempDiv = document.createElement('div');
-    tempDiv.innerHTML = html;
-    const textContent = tempDiv.textContent || tempDiv.innerText || '';
-
-    if (textContent.length <= maxLength) {
-        return html;
-    }
-
-    // Chercher où couper tout en gardant les balises intactes
-    let truncated = '';
-    let charCount = 0;
-    let inTag = false;
-
-    for (let i = 0; i < html.length; i++) {
-        const char = html[i];
-
-        if (char === '<') {
-            inTag = true;
-            truncated += char;
-        } else if (char === '>') {
-            inTag = false;
-            truncated += char;
-        } else if (!inTag) {
-            // On compte seulement les caractères hors des balises
-            if (charCount < maxLength) {
-                truncated += char;
-                charCount++;
-            } else if (charCount === maxLength) {
-                truncated += '...';
-                charCount++;
-            }
-        } else {
-            // Caractère à l'intérieur d'une balise
-            truncated += char;
-        }
-    }
-
-    // Assurer que toutes les balises sont fermées correctement
-    const openTags = [];
-    const regex = /<([^\/\s>]+)([^>]*)>/g;
-    const closeRegex = /<\/([^>]+)>/g;
-    let match;
-
-    while ((match = regex.exec(truncated)) !== null) {
-        // Ignorer les balises auto-fermantes comme <img/>
-        if (!/\/>$/.test(match[0])) {
-            openTags.push(match[1]);
-        }
-    }
-
-    while ((match = closeRegex.exec(truncated)) !== null) {
-        // Retirer la dernière occurrence de cette balise
-        const tagIndex = openTags.lastIndexOf(match[1]);
-        if (tagIndex !== -1) {
-            openTags.splice(tagIndex, 1);
-        }
-    }
-
-    // Fermer les balises restantes dans l'ordre inverse
-    while (openTags.length) {
-        truncated += `</${openTags.pop()}>`;
-    }
-
-    return truncated;
-};
-
-// Appliquer les filtres
-const applyFilters = () => {
-    isLoading.value = true;
-
-    const params: Record<string, string | null> = {
-        page: '1',
-        search: searchQuery.value || null,
-        date: selectedDate.value === 'all' ? null : selectedDate.value,
-        sort: sortBy.value === 'newest' ? null : sortBy.value,
-    };
-
-    // Nettoyer les paramètres null
-    Object.keys(params).forEach((key) => params[key] === null && delete params[key]);
-
-    // Redirection avec les nouveaux filtres
-    router.get(route('blog'), params, {
-        preserveState: true,
-        preserveScroll: false,
-        onSuccess: () => {
-            isLoading.value = false;
-        },
-    });
-};
-
-// Réinitialiser les filtres
-const resetFilters = () => {
-    searchQuery.value = '';
-    selectedDate.value = 'all';
-    sortBy.value = 'newest';
-    applyFilters();
-};
-
-// Surveiller les changements de filtre
-watch([selectedDate, sortBy], () => {
-    applyFilters();
-});
+// Dark-mode styles
+const filterBarBg    = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
+const filterBarBorder = computed(() => isDark.value ? 'rgba(255,255,255,0.08)' : '#E5E7EB');
+const gridBg         = computed(() => isDark.value ? '#0B1437' : '#F8FAFC');
+const ctaBg          = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
+const ctaBorder      = computed(() => isDark.value ? 'rgba(255,255,255,0.06)' : '#F1F5F9');
+const titleColor     = computed(() => isDark.value ? '#F1F5F9' : '#0B1437');
+const descColor      = computed(() => isDark.value ? '#94A3B8' : '#637084');
+const countBold      = computed(() => isDark.value ? '#F1F5F9' : '#0B1437');
+const inputStyle     = computed(() => isDark.value
+    ? 'background: #1E2D50; border-color: rgba(255,255,255,0.1); color: #F1F5F9;'
+    : 'background: #F8FAFC; border-color: #E5E7EB; color: #0B1437;');
+const selectStyle    = computed(() => isDark.value
+    ? 'background: #1E2D50; border-color: rgba(255,255,255,0.1); color: #F1F5F9;'
+    : 'background: #F8FAFC; border-color: #E5E7EB; color: #0B1437;');
+const featuredThumbBg = computed(() => isDark.value
+    ? 'linear-gradient(135deg, #1E2D50, #152050)'
+    : 'linear-gradient(135deg, #EFF6FF, #DBEAFE)');
+const cardThumbBg    = computed(() => isDark.value
+    ? 'linear-gradient(135deg, #131F36, #1E2D50)'
+    : 'linear-gradient(135deg, #F8FAFC, #EFF6FF)');
+const featuredBadgeBg = computed(() => isDark.value ? 'rgba(37,99,235,0.2)' : '#EFF6FF');
+const featuredBadgeColor = computed(() => isDark.value ? '#60A5FA' : '#2563EB');
+const hoverTitle     = computed(() => isDark.value ? 'group-hover:text-yellow-400' : 'group-hover:text-blue-600');
+const paginationInactive = computed(() => isDark.value ? 'color: #94A3B8;' : 'color: #374151;');
 </script>
 
 <template>
+    <Head title="Actualités — GlobalTECH EDUCATION Africa" />
     <LayoutFront>
-        <Head>
-            <title>{{ metaTitle }}</title>
-            <meta name="description" :content="metaDescription" />
-            <link rel="canonical" :href="currentUrl" />
 
-            <!-- Open Graph / Facebook -->
-            <meta property="og:type" content="website" />
-            <meta property="og:title" :content="metaTitle" />
-            <meta property="og:description" :content="metaDescription" />
-            <meta property="og:url" :content="currentUrl" />
-
-            <!-- Twitter -->
-            <meta name="twitter:card" content="summary_large_image" />
-            <meta name="twitter:title" :content="metaTitle" />
-            <meta name="twitter:description" :content="metaDescription" />
-        </Head>
-
-        <!-- En-tête de la page avec image de fond -->
-        <div class="relative bg-primary-bg-light py-16 overflow-hidden">
-            <!-- Image de fond avec overlay -->
-            <div class="absolute inset-0 z-0">
-                <img
-                    src="/images/nav-second.jpeg"
-                    alt="Technology Background"
-                    class="w-full h-full object-cover"
-                />
-                <!-- Overlay gradient pour améliorer la lisibilité -->
-                <div class="absolute inset-0 bg-gradient-to-r from-blue-900/85 via-blue-800/75 to-purple-900/85"></div>
-            </div>
-
-            <!-- Contenu en avant-plan -->
-            <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
-                <h1 class="text-4xl md:text-5xl font-serif font-bold text-white text-center mb-4 drop-shadow-lg">
-                    Blog
-                </h1>
-
-                <!-- Breadcrumb navigation -->
-                <nav class="flex" aria-label="Breadcrumb">
-                    <ol class="flex items-center space-x-2">
-                        <li v-for="(item, index) in breadcrumbItems" :key="item.name">
-                            <div class="flex items-center">
-                                <Link
-                                    :href="item.href"
-                                    :class="[
-                                        item.current ? 'text-white font-medium' : 'text-white/80 hover:text-white',
-                                        'text-sm md:text-base transition-colors drop-shadow-md'
-                                    ]"
-                                >
-                                    {{ item.name }}
-                                </Link>
-
-                                <!-- Séparateur, sauf pour le dernier élément -->
-                                <svg
-                                    v-if="index !== breadcrumbItems.length - 1"
-                                    class="h-5 w-5 text-white/70 mx-2 drop-shadow-md"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                                </svg>
-                            </div>
-                        </li>
-                    </ol>
-                </nav>
-            </div>
-
-            <!-- Élément décoratif -->
-            <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent"></div>
-        </div>
-
-        <!-- Barre de recherche et filtres -->
-        <section class="border-b bg-white py-8">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <!-- Version mobile: bouton pour afficher/masquer les filtres -->
-                <div class="mb-4 lg:hidden">
-                    <button @click="showFilters = !showFilters" class="flex w-full items-center justify-between rounded-lg bg-gray-100 px-4 py-3">
-                        <span class="font-medium">Filtres et recherche</span>
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            class="h-5 w-5"
-                            :class="showFilters ? 'rotate-180 transform' : ''"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
-                        >
-                            <path
-                                fill-rule="evenodd"
-                                d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                clip-rule="evenodd"
-                            />
-                        </svg>
-                    </button>
-                </div>
-
-                <!-- Filtres et recherche -->
-                <div :class="['lg:flex lg:flex-wrap lg:items-center lg:justify-between lg:space-x-4', showFilters ? 'block' : 'hidden lg:flex']">
-                    <!-- Barre de recherche -->
-                    <div class="mb-4 lg:mb-0 lg:max-w-md lg:flex-grow">
-                        <div class="relative">
-                            <input
-                                v-model="searchQuery"
-                                type="text"
-                                placeholder="Rechercher un article..."
-                                class="focus:ring-primary w-full rounded-full border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:outline-none"
-                            />
-                            <button @click="applyFilters" class="hover:text-primary absolute top-1 right-1 p-1.5 text-gray-500">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path
-                                        stroke-linecap="round"
-                                        stroke-linejoin="round"
-                                        stroke-width="2"
-                                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
+        <!-- Hero -->
+        <section class="py-24 relative overflow-hidden" style="background: linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(135deg,#060C22 0%,#0B1437 42%,#0E2060 72%,#091830 100%); background-size:60px 60px,60px 60px,100% 100%;">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+                <div class="max-w-2xl">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-5"
+                        style="background: rgba(232, 160, 32, 0.15); color: #E8A020; border: 1px solid rgba(232, 160, 32, 0.3);">
+                        <i class="bi bi-newspaper"></i>
+                        Actualités & Insights
                     </div>
-
-                    <!-- Sélecteurs de filtre -->
-                    <div class="flex flex-col gap-4 sm:flex-row">
-                        <!-- Filtre par date -->
-                        <select
-                            v-model="selectedDate"
-                            class="focus:ring-primary rounded-full border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:outline-none"
-                        >
-                            <option v-for="option in dateOptions" :key="option.value" :value="option.value">
-                                {{ option.label }}
-                            </option>
-                        </select>
-
-                        <!-- Tri -->
-                        <select
-                            v-model="sortBy"
-                            class="focus:ring-primary rounded-full border border-gray-300 px-4 py-2 focus:border-transparent focus:ring-2 focus:outline-none"
-                        >
-                            <option v-for="option in sortOptions" :key="option.value" :value="option.value">
-                                {{ option.label }}
-                            </option>
-                        </select>
-
-                        <!-- Bouton de réinitialisation -->
-                        <button
-                            @click="resetFilters"
-                            class="hover:text-primary hover:border-primary rounded-full border border-gray-300 px-4 py-2 text-sm text-gray-600 transition-colors"
-                        >
-                            Réinitialiser
-                        </button>
-                    </div>
+                    <h1 class="text-5xl lg:text-6xl font-black text-white mb-5 leading-tight" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                        Le blog <span class="gt-text-gradient">GlobalTECH</span>
+                    </h1>
+                    <p class="text-xl text-white/70">
+                        Restez informé des dernières nouvelles, tendances et événements du monde de la formation professionnelle en Afrique.
+                    </p>
                 </div>
             </div>
         </section>
 
-        <!-- Loader -->
-        <div v-if="isLoading" class="flex items-center justify-center py-20">
-            <div class="flex flex-col items-center">
-                <div class="border-primary h-16 w-16 animate-spin rounded-full border-t-2 border-b-2"></div>
-                <div class="text-primary mt-4 text-lg font-medium">Chargement des articles...</div>
+        <!-- Filters -->
+        <div class="sticky top-[72px] z-40 shadow-sm"
+            :style="`background: ${filterBarBg}; border-bottom: 1px solid ${filterBarBorder};`">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8 py-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+                <div class="relative">
+                    <i class="bi bi-search absolute left-3.5 top-1/2 -translate-y-1/2 text-sm" style="color: #94A3B8;"></i>
+                    <input v-model="searchQuery" type="text" placeholder="Rechercher un article..."
+                        class="pl-9 pr-4 py-2.5 rounded-xl border text-sm w-72 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                        :style="inputStyle" />
+                </div>
+                <select v-model="sortBy"
+                    class="px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    :style="selectStyle">
+                    <option value="newest">Plus récents</option>
+                    <option value="oldest">Plus anciens</option>
+                </select>
             </div>
         </div>
 
-        <!-- Liste des articles -->
-        <section v-else class="bg-white py-12">
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-                <!-- Message si aucun résultat -->
-                <div v-if="actualites.data.length === 0" class="py-16 text-center">
-                    <p class="text-xl text-gray-600">Aucun article ne correspond à vos critères de recherche.</p>
-                    <button @click="resetFilters" class="bg-primary hover:bg-primary-dark mt-4 rounded-full px-6 py-2 text-white transition-colors">
-                        Voir tous les articles
-                    </button>
-                </div>
+        <!-- Articles -->
+        <section class="py-16" :style="`background: ${gridBg};`">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8">
+                <p class="text-sm mb-8" :style="`color: ${descColor};`">
+                    <span class="font-bold" :style="`color: ${countBold};`">{{ actualites.total }}</span>
+                    article{{ actualites.total !== 1 ? 's' : '' }}
+                </p>
 
-                <!-- Grille d'articles -->
-                <div v-else class="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                    <div
-                        v-for="actualite in actualites.data"
-                        :key="actualite.id"
-                        class="group flex flex-col overflow-hidden rounded-lg bg-white shadow-md transition-shadow duration-300 hover:shadow-xl"
-                    >
-                        <!-- Image de l'article -->
-                        <div class="relative h-56 overflow-hidden">
-                            <img
-                                :src="`/storage/${actualite.image_path}`"
-                                :alt="actualite.title"
-                                class="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                loading="lazy"
-                            />
-                            <div class="bg-primary absolute bottom-0 left-0 px-4 py-1 text-white">
-                                {{ formatDate(actualite.published_at) }}
+                <!-- Grid -->
+                <div v-if="actualites.data.length" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Featured first post -->
+                    <Link v-if="actualites.current_page === 1 && actualites.data[0]"
+                        :href="`/${actualites.data[0].id}/blog`"
+                        class="md:col-span-2 lg:col-span-3 gt-card overflow-hidden group flex flex-col lg:flex-row">
+                        <div class="lg:w-1/2 h-64 lg:h-auto overflow-hidden" :style="`background: ${featuredThumbBg};`">
+                            <img v-if="actualites.data[0].image_url" :src="actualites.data[0].image_url" :alt="actualites.data[0].title"
+                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                            <div v-else class="w-full h-full flex items-center justify-center">
+                                <i class="bi bi-newspaper text-6xl opacity-20" style="color: #2563EB;"></i>
                             </div>
                         </div>
-
-                        <!-- Contenu de l'article -->
-                        <div class="flex flex-grow flex-col p-5">
-                            <h2 class="group-hover:text-primary mb-2 font-serif text-xl font-semibold text-gray-800 transition-colors">
-                                {{ actualite.title }}
+                        <div class="lg:w-1/2 p-8 flex flex-col justify-center">
+                            <span class="text-xs font-bold px-2.5 py-1 rounded-full mb-3 inline-block"
+                                :style="`background: ${featuredBadgeBg}; color: ${featuredBadgeColor};`">
+                                À la une
+                            </span>
+                            <h2 class="text-2xl font-black mb-3 transition-colors line-clamp-3"
+                                :class="hoverTitle"
+                                :style="`color: ${titleColor}; font-family: 'Plus Jakarta Sans', sans-serif;`">
+                                {{ actualites.data[0].title }}
                             </h2>
-                            <p class="mb-4 flex-grow text-gray-600">
-                                <span v-html="truncateHtml(actualite.description)"></span>
+                            <p class="text-sm leading-relaxed mb-4 line-clamp-3" :style="`color: ${descColor};`">
+                                {{ excerpt(actualites.data[0].description) }}
                             </p>
-                            <Link
-                                :href="route('blog.show', actualite.id)"
-                                class="text-primary group-hover:text-primary-dark mt-auto inline-flex items-center self-start font-medium"
-                            >
-                                Lire l'article
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    class="ml-1 h-5 w-5 transition-transform group-hover:translate-x-1"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                >
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                                </svg>
-                            </Link>
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs" style="color: #94A3B8;">{{ formatDate(actualites.data[0].published_at ?? actualites.data[0].created_at) }}</span>
+                                <span class="text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all" style="color: #E8A020;">
+                                    Lire l'article <i class="bi bi-arrow-right"></i>
+                                </span>
+                            </div>
                         </div>
-                    </div>
+                    </Link>
+
+                    <!-- Rest of articles -->
+                    <Link v-for="post in (actualites.current_page === 1 ? actualites.data.slice(1) : actualites.data)" :key="post.id"
+                        :href="`/${post.id}/blog`"
+                        class="gt-card overflow-hidden group flex flex-col">
+                        <div class="h-48 overflow-hidden" :style="`background: ${cardThumbBg};`">
+                            <img v-if="post.image_url" :src="post.image_url" :alt="post.title"
+                                class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" />
+                            <div v-else class="w-full h-full flex items-center justify-center">
+                                <i class="bi bi-newspaper text-4xl opacity-20" style="color: #2563EB;"></i>
+                            </div>
+                        </div>
+                        <div class="p-6 flex flex-col flex-1">
+                            <p class="text-xs mb-2" style="color: #94A3B8;">{{ formatDate(post.published_at ?? post.created_at) }}</p>
+                            <h3 class="text-base font-bold mb-2 line-clamp-2 transition-colors flex-1"
+                                :class="hoverTitle"
+                                :style="`color: ${titleColor}; font-family: 'Plus Jakarta Sans', sans-serif;`">
+                                {{ post.title }}
+                            </h3>
+                            <p v-if="post.description" class="text-sm line-clamp-2 mb-4" :style="`color: ${descColor};`">
+                                {{ excerpt(post.description) }}
+                            </p>
+                            <span class="text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all mt-auto" style="color: #E8A020;">
+                                Lire <i class="bi bi-arrow-right"></i>
+                            </span>
+                        </div>
+                    </Link>
+                </div>
+
+                <!-- Empty -->
+                <div v-else class="text-center py-24">
+                    <i class="bi bi-newspaper text-5xl mb-4 block" style="color: #CBD5E1;"></i>
+                    <h3 class="text-xl font-bold mb-2" :style="`color: ${titleColor};`">Aucun article trouvé</h3>
+                    <p class="mb-4" :style="`color: ${descColor};`">Essayez d'autres mots-clés.</p>
+                    <button @click="searchQuery = ''" class="gt-btn-primary rounded-xl">Effacer la recherche</button>
                 </div>
 
                 <!-- Pagination -->
-                <div v-if="actualites.meta && actualites.meta.last_page > 1" class="mt-12 flex justify-center">
-                    <nav class="flex items-center space-x-1">
-                        <Link
-                            v-for="link in actualites.links"
-                            :key="link.label"
-                            :href="link.url || '#'"
-                            :class="[
-                                'rounded-md border px-4 py-2 transition-colors',
-                                link.active
-                                    ? 'bg-primary border-primary text-white'
-                                    : link.url
-                                      ? 'border-gray-300 text-gray-700 hover:bg-gray-50'
-                                      : 'cursor-not-allowed border-gray-200 text-gray-400',
-                            ]"
-                        >
-                            <span v-html="link.label"></span>
-                        </Link>
-                    </nav>
+                <div v-if="actualites.last_page > 1" class="flex justify-center gap-2 mt-12">
+                    <Link v-for="link in actualites.links" :key="link.label"
+                        :href="link.url ?? '#'"
+                        class="px-4 py-2 rounded-lg text-sm font-semibold transition-all"
+                        :class="!link.url ? 'opacity-40 pointer-events-none' : ''"
+                        :style="link.active ? 'background: #0B1437; color: white;' : paginationInactive"
+                        v-html="link.label">
+                    </Link>
                 </div>
             </div>
         </section>
 
-        <!-- Section Newsletter -->
-        <NewsletterSubscribe
-            title="Vous avez aimé cet article ?"
-            description="Abonnez-vous à notre newsletter pour suivre nos actualités, nos solutions technologiques et nos formations dédiées aux professionnels."
-        />
+        <!-- Newsletter CTA -->
+        <section class="py-16" :style="`background: ${ctaBg}; border-top: 1px solid ${ctaBorder};`">
+            <div class="max-w-2xl mx-auto px-6 text-center">
+                <i class="bi bi-bell-fill text-3xl mb-4 block" style="color: #E8A020;"></i>
+                <h3 class="text-2xl font-black mb-3" :style="`color: ${titleColor};`">Ne manquez aucune actualité</h3>
+                <p class="mb-6" :style="`color: ${descColor};`">Recevez nos derniers articles, annonces de formations et insights directement dans votre boîte mail.</p>
+                <Link href="/contact" class="gt-btn-gold px-8 py-3.5 rounded-xl font-black">
+                    <i class="bi bi-envelope-fill"></i> S'abonner aux actualités
+                </Link>
+            </div>
+        </section>
+
     </LayoutFront>
 </template>
-
-<style scoped>
-/* Animations pour les cartes d'articles */
-.group:hover .group-hover\:scale-105 {
-    transform: scale(1.05);
-}
-
-.group:hover .group-hover\:translate-x-1 {
-    transform: translateX(0.25rem);
-}
-
-/* Animation pour le loader */
-@keyframes spin {
-    0% {
-        transform: rotate(0deg);
-    }
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-.animate-spin {
-    animation: spin 1s linear infinite;
-}
-</style>

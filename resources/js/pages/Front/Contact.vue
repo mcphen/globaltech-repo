@@ -1,406 +1,322 @@
 <script setup lang="ts">
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
-import NewsletterSubscribe from '../Front/NewsletterSubscribe.vue';
+import { useDarkMode } from '@/composables/useDarkMode';
 import { useToast } from 'vue-toast-notification';
 import { computed } from 'vue';
 
 const page = usePage();
 const $toast = useToast();
+const { isDark } = useDarkMode();
+const contactSettings = computed<any>(() => page.props.contactSettings);
 
-// Create form using Inertia's useForm
 const form = useForm({
     first_name: '',
     last_name: '',
     email: '',
     phone: '',
     subject: '',
-    description: ''
+    description: '',
+    company: '',
+    inquiry_type: 'general',
 });
 
-// Fonction pour gérer la soumission du formulaire
 const submitForm = () => {
     form.post(route('contact.store'), {
         preserveScroll: true,
-        preserveState: true,
         onSuccess: () => {
-            // Succès
-            $toast.success('Votre message a été envoyé avec succès. Nous vous répondrons dans les plus brefs délais.', {
-                position: 'top-right',
-                duration: 9000,
-                dismissible: true,
+            $toast.success('Message envoyé ! Nous vous répondrons sous 24h.', {
+                position: 'top-right', duration: 7000, dismissible: true,
             });
-
-            // Réinitialiser le formulaire
             form.reset();
             form.clearErrors();
         },
-        onError: (errors) => {
-            // Gérer les erreurs de champ spécifiques
-            Object.entries(errors).forEach(([field, message]) => {
-                if (field !== 'error') {
-                    $toast.error(`${field}: ${message}`, {
-                        position: 'top-right',
-                        duration: 10000,
-                        dismissible: true,
-                    });
-                }
+        onError: () => {
+            $toast.error('Veuillez corriger les erreurs avant de soumettre.', {
+                position: 'top-right', duration: 5000, dismissible: true,
             });
-
-            // Gérer les erreurs générales
-            if (errors.error) {
-                $toast.error(errors.error, {
-                    position: 'top-right',
-                    duration: 10000,
-                    dismissible: true,
-                });
-            }
         },
-        onFinish: () => {
-            // Nettoyer après traitement
-            form.clearErrors();
-        }
     });
 };
 
-// Breadcrumb data
-const breadcrumbItems = [
-    { name: 'Accueil', href: route('home'), current: false },
-    { name: 'Contact', href: route('contact'), current: true }
+const inquiryTypes = [
+    { value: 'general',     label: 'Demande générale' },
+    { value: 'formation',   label: 'Information sur une formation' },
+    { value: 'corporate',   label: 'Formation entreprise' },
+    { value: 'consulting',  label: 'Consulting / Projet' },
+    { value: 'partnership', label: 'Partenariat' },
 ];
 
-// Classes pour les champs avec erreurs
-const inputClass = (field: string) => {
-    const baseClass = 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 transition-colors duration-200';
+const offices = [
+    { country: 'Côte d\'Ivoire', city: 'Abidjan', flag: '🇨🇮', role: 'Siège',          address: 'Plateau, Abidjan',  email: 'abidjan@globaltech-edu.com' },
+    { country: 'Sénégal',        city: 'Dakar',   flag: '🇸🇳', role: 'Bureau régional', address: 'Plateau, Dakar',    email: 'dakar@globaltech-edu.com' },
+    { country: 'Mali',           city: 'Bamako',  flag: '🇲🇱', role: 'Bureau régional', address: 'ACI 2000',          email: 'bamako@globaltech-edu.com' },
+    { country: 'Cameroun',       city: 'Douala',  flag: '🇨🇲', role: 'Bureau régional', address: 'Bonanjo',           email: 'douala@globaltech-edu.com' },
+];
 
-    // Type assertion pour accéder aux erreurs de manière sécurisée
-    const errors = form.errors as Record<string, string>;
-    if (errors[field]) {
-        return `${baseClass} border-red-300 focus:ring-red-500`;
-    }
+// Dark-mode styles
+const sectionBg      = computed(() => isDark.value ? '#0B1437' : '#F8FAFC');
+const titleColor     = computed(() => isDark.value ? '#F1F5F9' : '#0B1437');
+const descColor      = computed(() => isDark.value ? '#94A3B8' : '#637084');
+const labelColor     = computed(() => isDark.value ? '#CBD5E1' : '#0B1437');
+const contactValueColor = computed(() => isDark.value ? '#E2E8F0' : '#0B1437');
+const sectionHeadColor = computed(() => isDark.value ? '#94A3B8' : '#0B1437');
 
-    return `${baseClass} border-gray-300 focus:border-primary`;
-};
+const iconBgGold     = computed(() => isDark.value ? 'rgba(232,160,32,0.15)'  : '#FEF7E8');
+const iconBgBlue     = computed(() => isDark.value ? 'rgba(37,99,235,0.15)'   : '#EFF6FF');
+const iconBgGreen    = computed(() => isDark.value ? 'rgba(22,163,74,0.15)'   : '#F0FDF4');
 
-const textareaClass = (field: string) => {
-    const baseClass = 'w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-primary focus:border-transparent disabled:bg-gray-100 transition-colors duration-200';
+const officeRoleBg   = computed(() => isDark.value ? 'rgba(37,99,235,0.15)' : '#EFF6FF');
+const officeRoleColor = computed(() => isDark.value ? '#60A5FA' : '#2563EB');
 
-    // Type assertion pour accéder aux erreurs de manière sécurisée
-    const errors = form.errors as Record<string, string>;
-    if (errors[field]) {
-        return `${baseClass} border-red-300 focus:ring-red-500`;
-    }
-
-    return `${baseClass} border-gray-300 focus:border-primary`;
-};
-
-// Helper pour accéder aux erreurs
-const getError = (field: string): string | undefined => {
-    const errors = form.errors as Record<string, string>;
-    return errors[field];
-};
-
-// Accès sécurisé aux props
-const contactSettings = computed(() => {
-    const props = page.props as any;
-    return props.contactSettings || {
-        contact_phone: '',
-        contact_phone_fixed: '',
-        contact_email: '',
-        social_facebook: '',
-        social_twitter: '',
-        social_youtube: '',
-        social_linkedin: '',
-        social_tiktok: '',
-        social_instagram: '',
-        contact_address: '',
-        opening_hours: ''
-    };
-});
+// Form inputs
+const inputBase      = computed(() => isDark.value
+    ? 'background: #1A2844; border-color: rgba(255,255,255,0.1); color: #F1F5F9;'
+    : 'background: white; border-color: #E5E7EB; color: #0B1437;');
+const inputError     = computed(() => isDark.value
+    ? 'background: rgba(239,68,68,0.1); border-color: #EF4444; color: #F1F5F9;'
+    : 'background: #FEF2F2; border-color: #F87171; color: #0B1437;');
+const pillActive     = 'background: #0B1437; color: white; border-color: #0B1437;';
+const pillInactive   = computed(() => isDark.value
+    ? 'background: rgba(255,255,255,0.06); color: #94A3B8; border-color: rgba(255,255,255,0.1);'
+    : 'background: white; color: #475569; border-color: #E2E8F0;');
 </script>
 
 <template>
-    <Head>
-        <title>Contact - TONGOLO TECH</title>
-        <meta name="description" content="Contactez TONGOLO TECH pour planifier votre mariage de rêve ou pour toute question concernant nos services." />
-    </Head>
-
+    <Head title="Contact — GlobalTECH EDUCATION Africa" />
     <LayoutFront>
-        <!-- Bannière du breadcrumb avec image de fond -->
-        <div class="relative bg-primary-bg-light py-16 overflow-hidden">
-        <!-- Image de fond avec overlay -->
-        <div class="absolute inset-0 z-0">
-            <img
-            src="https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1920&q=80"
-            alt="Technology Background"
-            class="w-full h-full object-cover"
-            />
-            <!-- Overlay gradient pour améliorer la lisibilité -->
-            <div class="absolute inset-0 bg-gradient-to-r from-blue-900/85 via-blue-800/75 to-purple-900/85"></div>
-        </div>
 
-        <!-- Contenu en avant-plan -->
-        <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center justify-center">
-            <h1 class="text-4xl md:text-5xl font-serif font-bold text-white text-center mb-4 drop-shadow-lg">
-            Contact
-            </h1>
-
-            <!-- Breadcrumb navigation -->
-            <nav class="flex" aria-label="Breadcrumb">
-            <ol class="flex items-center space-x-2">
-                <li v-for="(item, index) in breadcrumbItems" :key="item.name">
-                <div class="flex items-center">
-                    <Link
-                    :href="item.href"
-                    :class="[
-                        item.current ? 'text-white font-medium' : 'text-white/80 hover:text-white',
-                        'text-sm md:text-base transition-colors drop-shadow-md'
-                    ]"
-                    >
-                    {{ item.name }}
-                    </Link>
-
-                    <!-- Séparateur, sauf pour le dernier élément -->
-                    <svg
-                    v-if="index !== breadcrumbItems.length - 1"
-                    class="h-5 w-5 text-white/70 mx-2 drop-shadow-md"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    >
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-                    </svg>
-                </div>
-                </li>
-            </ol>
-            </nav>
-        </div>
-
-        <!-- Élément décoratif -->
-        <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent"></div>
-        </div>
-
-        <div class="py-12 bg-white">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <!-- Section Formulaire de Contact -->
-                <section class="mb-16">
-                    <h2 class="text-3xl font-serif font-bold text-center text-primary mb-3">Contactez-nous</h2>
-                    <div class="w-24 h-1 bg-primary mx-auto mb-8"></div>
-                    <p class="text-center text-gray-600 max-w-3xl mx-auto mb-12">
-                        Vous avez des questions ou souhaitez discuter de vos projets en ingénierie, télécommunications ou réseaux ? Contactez notre équipe TONGOLO TECH dès maintenant, soit en remplissant le formulaire ci-dessous, soit en nous appelant directement. Nous vous répondrons rapidement.
+        <!-- Hero -->
+        <section class="py-24 relative overflow-hidden" style="background: linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(135deg,#060C22 0%,#0B1437 42%,#0E2060 72%,#091830 100%); background-size:60px 60px,60px 60px,100% 100%;">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
+                <div class="max-w-2xl">
+                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-5"
+                        style="background: rgba(232, 160, 32, 0.15); color: #E8A020; border: 1px solid rgba(232, 160, 32, 0.3);">
+                        <i class="bi bi-chat-dots-fill"></i>
+                        Parlons de votre projet
+                    </div>
+                    <h1 class="text-5xl lg:text-6xl font-black text-white mb-5 leading-tight" style="font-family: 'Plus Jakarta Sans', sans-serif;">
+                        Contactez-nous
+                    </h1>
+                    <p class="text-xl text-white/70 leading-relaxed">
+                        Notre équipe est disponible pour répondre à toutes vos questions sur nos formations, consulting et projets.
                     </p>
+                </div>
+            </div>
+        </section>
 
-                    <div class="bg-white shadow-lg rounded-lg overflow-hidden max-w-4xl mx-auto">
-                        <form @submit.prevent="submitForm" class="p-8">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <!-- Prénom -->
-                                <div>
-                                    <label for="first_name" class="block text-sm font-medium text-gray-700 mb-1">Prénom *</label>
-                                    <input
-                                        type="text"
-                                        id="first_name"
-                                        v-model="form.first_name"
-                                        :class="inputClass('first_name')"
-                                        :disabled="form.processing"
-                                        required
-                                    >
-                                    <p v-if="getError('first_name')" class="mt-1 text-sm text-red-600 animate-fade-in">
-                                        {{ getError('first_name') }}
-                                    </p>
+        <!-- Contact Section -->
+        <section class="py-20" :style="`background: ${sectionBg};`">
+            <div class="max-w-7xl mx-auto px-6 lg:px-8">
+                <div class="grid lg:grid-cols-3 gap-12">
+
+                    <!-- Left: Info + Offices -->
+                    <div class="lg:col-span-1 space-y-8">
+
+                        <!-- Quick Contact -->
+                        <div class="gt-card p-6">
+                            <h3 class="text-lg font-black mb-5" :style="`color: ${titleColor}; font-family: 'Plus Jakarta Sans', sans-serif;`">
+                                Siège Social
+                            </h3>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-3" v-if="contactSettings?.contact_address">
+                                    <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" :style="`background: ${iconBgGold};`">
+                                        <i class="bi bi-geo-alt-fill text-sm" style="color: #E8A020;"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold uppercase tracking-wide mb-0.5" style="color: #94A3B8;">Adresse</p>
+                                        <p class="text-sm" :style="`color: ${contactValueColor};`">{{ contactSettings.contact_address }}</p>
+                                    </div>
                                 </div>
-
-                                <!-- Nom -->
-                                <div>
-                                    <label for="last_name" class="block text-sm font-medium text-gray-700 mb-1">Nom *</label>
-                                    <input
-                                        type="text"
-                                        id="last_name"
-                                        v-model="form.last_name"
-                                        :class="inputClass('last_name')"
-                                        :disabled="form.processing"
-                                        required
-                                    >
-                                    <p v-if="getError('last_name')" class="mt-1 text-sm text-red-600 animate-fade-in">
-                                        {{ getError('last_name') }}
-                                    </p>
+                                <div class="flex items-center gap-3" v-if="contactSettings?.contact_phone">
+                                    <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" :style="`background: ${iconBgBlue};`">
+                                        <i class="bi bi-telephone-fill text-sm" style="color: #2563EB;"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold uppercase tracking-wide mb-0.5" style="color: #94A3B8;">Téléphone</p>
+                                        <a :href="`tel:${contactSettings.contact_phone}`"
+                                            class="text-sm font-medium hover:text-blue-400 transition-colors"
+                                            :style="`color: ${contactValueColor};`">
+                                            {{ contactSettings.contact_phone }}
+                                        </a>
+                                    </div>
                                 </div>
-
-                                <!-- Email -->
-                                <div>
-                                    <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                                    <input
-                                        type="email"
-                                        id="email"
-                                        v-model="form.email"
-                                        :class="inputClass('email')"
-                                        :disabled="form.processing"
-                                        required
-                                    >
-                                    <p v-if="getError('email')" class="mt-1 text-sm text-red-600 animate-fade-in">
-                                        {{ getError('email') }}
-                                    </p>
+                                <div class="flex items-center gap-3" v-if="contactSettings?.contact_email">
+                                    <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" :style="`background: ${iconBgGreen};`">
+                                        <i class="bi bi-envelope-fill text-sm" style="color: #16A34A;"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold uppercase tracking-wide mb-0.5" style="color: #94A3B8;">Email</p>
+                                        <a :href="`mailto:${contactSettings.contact_email}`"
+                                            class="text-sm font-medium hover:text-green-400 transition-colors"
+                                            :style="`color: ${contactValueColor};`">
+                                            {{ contactSettings.contact_email }}
+                                        </a>
+                                    </div>
                                 </div>
-
-                                <!-- Téléphone -->
-                                <div>
-                                    <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Téléphone (optionnel)</label>
-                                    <input
-                                        type="tel"
-                                        id="phone"
-                                        v-model="form.phone"
-                                        :class="inputClass('phone')"
-                                        :disabled="form.processing"
-                                        placeholder="Ex: +221 77 123 45 67"
-                                    >
-                                    <p v-if="getError('phone')" class="mt-1 text-sm text-red-600 animate-fade-in">
-                                        {{ getError('phone') }}
-                                    </p>
-                                    <p v-else class="mt-1 text-xs text-gray-500">
-                                        Format accepté: +221 77 123 45 67
-                                    </p>
-                                </div>
-
-                                <!-- Objet -->
-                                <div class="md:col-span-2">
-                                    <label for="subject" class="block text-sm font-medium text-gray-700 mb-1">Objet *</label>
-                                    <input
-                                        type="text"
-                                        id="subject"
-                                        v-model="form.subject"
-                                        :class="inputClass('subject')"
-                                        :disabled="form.processing"
-                                        required
-                                    >
-                                    <p v-if="getError('subject')" class="mt-1 text-sm text-red-600 animate-fade-in">
-                                        {{ getError('subject') }}
-                                    </p>
-                                </div>
-
-                                <!-- Message -->
-                                <div class="md:col-span-2">
-                                    <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Message *</label>
-                                    <textarea
-                                        id="description"
-                                        v-model="form.description"
-                                        rows="6"
-                                        :class="textareaClass('description')"
-                                        :disabled="form.processing"
-                                        required
-                                        placeholder="Décrivez votre projet ou votre question en détail..."
-                                    ></textarea>
-                                    <div class="flex justify-between items-center mt-1">
-                                        <p v-if="getError('description')" class="text-sm text-red-600 animate-fade-in">
-                                            {{ getError('description') }}
-                                        </p>
-                                        <p v-else class="text-xs text-gray-500">
-                                            {{ form.description.length }}/1000 caractères
-                                        </p>
+                                <div v-if="!contactSettings?.contact_address && !contactSettings?.contact_phone && !contactSettings?.contact_email">
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" :style="`background: ${iconBgGold};`">
+                                            <i class="bi bi-geo-alt-fill text-sm" style="color: #E8A020;"></i>
+                                        </div>
+                                        <div>
+                                            <p class="text-xs font-bold uppercase tracking-wide mb-0.5" style="color: #94A3B8;">Adresse</p>
+                                            <p class="text-sm" :style="`color: ${contactValueColor};`">Plateau, Abidjan, Côte d'Ivoire</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <div class="mt-8 flex justify-center">
-                                <button
-                                    type="submit"
-                                    class="px-8 py-3 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    :disabled="form.processing"
-                                >
-                                    <span v-if="form.processing" class="flex items-center">
-                                        <svg class="animate-spin h-5 w-5 text-white mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
-                                        Envoi en cours...
-                                    </span>
-                                    <span v-else>Envoyer le message</span>
-                                </button>
+                        <!-- Offices -->
+                        <div>
+                            <h3 class="text-sm font-black uppercase tracking-widest mb-4" :style="`color: ${sectionHeadColor};`">Nos Bureaux</h3>
+                            <div class="space-y-3">
+                                <div v-for="office in offices" :key="office.country" class="gt-card p-4 flex items-start gap-3">
+                                    <span class="text-2xl flex-shrink-0">{{ office.flag }}</span>
+                                    <div class="min-w-0">
+                                        <div class="flex items-center gap-2 mb-0.5">
+                                            <span class="text-sm font-bold" :style="`color: ${titleColor};`">{{ office.city }}</span>
+                                            <span class="text-xs px-1.5 py-0.5 rounded-full font-semibold"
+                                                :style="`background: ${officeRoleBg}; color: ${officeRoleColor};`">
+                                                {{ office.role }}
+                                            </span>
+                                        </div>
+                                        <p class="text-xs" :style="`color: ${descColor};`">{{ office.address }}</p>
+                                        <a :href="`mailto:${office.email}`"
+                                            class="text-xs hover:text-blue-400 transition-colors"
+                                            style="color: #94A3B8;">
+                                            {{ office.email }}
+                                        </a>
+                                    </div>
+                                </div>
                             </div>
-                        </form>
-                    </div>
-                </section>
-
-                <!-- Section Informations de Contact -->
-                <section class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-                    <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center text-center">
-                        <div class="w-16 h-16 bg-primary-bg-light rounded-full flex items-center justify-center mb-4">
-                            <svg class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                            </svg>
                         </div>
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Téléphone</h3>
-                        <p class="text-gray-600 mb-1">Mobile: {{ contactSettings.contact_phone }}</p>
-                        <p class="text-gray-600" v-if="contactSettings.contact_phone_fixed">
-                            Fixe: {{ contactSettings.contact_phone_fixed }}
-                        </p>
+
+                        <!-- RDV CTA -->
+                        <div class="rounded-2xl p-5 text-white text-center" style="background: linear-gradient(135deg, #0B1437, #152050);">
+                            <i class="bi bi-calendar-check text-2xl mb-2 block" style="color: #E8A020;"></i>
+                            <h4 class="font-bold mb-2">Préférez un RDV ?</h4>
+                            <p class="text-xs text-white/70 mb-4">Réservez un entretien gratuit de 30 min avec un conseiller.</p>
+                            <Link :href="route('appointment.create')" class="gt-btn-gold w-full rounded-xl py-2.5 text-sm font-bold">
+                                Réserver maintenant
+                            </Link>
+                        </div>
                     </div>
 
-                    <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center text-center">
-                        <div class="w-16 h-16 bg-primary-bg-light rounded-full flex items-center justify-center mb-4">
-                            <svg class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
+                    <!-- Right: Contact Form -->
+                    <div class="lg:col-span-2">
+                        <div class="gt-card p-8 lg:p-10">
+                            <h2 class="text-2xl font-black mb-2" :style="`color: ${titleColor}; font-family: 'Plus Jakarta Sans', sans-serif;`">
+                                Envoyez-nous un message
+                            </h2>
+                            <p class="text-sm mb-8" :style="`color: ${descColor};`">Nous vous répondrons dans les 24 heures ouvrables.</p>
+
+                            <form @submit.prevent="submitForm" class="space-y-5">
+                                <!-- Type of inquiry -->
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wide mb-2" :style="`color: ${labelColor};`">
+                                        Type de demande
+                                    </label>
+                                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                                        <button v-for="type in inquiryTypes" :key="type.value" type="button"
+                                            @click="form.inquiry_type = type.value"
+                                            class="px-3 py-2.5 rounded-xl text-xs font-semibold border-2 transition-all text-center"
+                                            :style="form.inquiry_type === type.value ? pillActive : pillInactive">
+                                            {{ type.label }}
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <!-- Name -->
+                                <div class="grid sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase tracking-wide mb-1.5" :style="`color: ${labelColor};`">Prénom *</label>
+                                        <input v-model="form.first_name" type="text" required
+                                            class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                            :style="form.errors.first_name ? inputError : inputBase"
+                                            placeholder="Votre prénom" />
+                                        <p v-if="form.errors.first_name" class="text-xs text-red-400 mt-1">{{ form.errors.first_name }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase tracking-wide mb-1.5" :style="`color: ${labelColor};`">Nom *</label>
+                                        <input v-model="form.last_name" type="text" required
+                                            class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                            :style="form.errors.last_name ? inputError : inputBase"
+                                            placeholder="Votre nom" />
+                                        <p v-if="form.errors.last_name" class="text-xs text-red-400 mt-1">{{ form.errors.last_name }}</p>
+                                    </div>
+                                </div>
+
+                                <!-- Email + Phone -->
+                                <div class="grid sm:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase tracking-wide mb-1.5" :style="`color: ${labelColor};`">Email *</label>
+                                        <input v-model="form.email" type="email" required
+                                            class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                            :style="form.errors.email ? inputError : inputBase"
+                                            placeholder="votre@email.com" />
+                                        <p v-if="form.errors.email" class="text-xs text-red-400 mt-1">{{ form.errors.email }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-bold uppercase tracking-wide mb-1.5" :style="`color: ${labelColor};`">Téléphone</label>
+                                        <input v-model="form.phone" type="tel"
+                                            class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                            :style="inputBase"
+                                            placeholder="+225 XX XX XX XX" />
+                                    </div>
+                                </div>
+
+                                <!-- Company -->
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wide mb-1.5" :style="`color: ${labelColor};`">
+                                        Entreprise / Organisation
+                                        <span class="normal-case font-normal ml-1" style="color: #94A3B8;">(optionnel)</span>
+                                    </label>
+                                    <input v-model="form.company" type="text"
+                                        class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                        :style="inputBase"
+                                        placeholder="Nom de votre entreprise" />
+                                </div>
+
+                                <!-- Subject -->
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wide mb-1.5" :style="`color: ${labelColor};`">Objet *</label>
+                                    <input v-model="form.subject" type="text" required
+                                        class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                        :style="form.errors.subject ? inputError : inputBase"
+                                        placeholder="Ex : Demande de devis formation PMP®" />
+                                    <p v-if="form.errors.subject" class="text-xs text-red-400 mt-1">{{ form.errors.subject }}</p>
+                                </div>
+
+                                <!-- Message -->
+                                <div>
+                                    <label class="block text-xs font-bold uppercase tracking-wide mb-1.5" :style="`color: ${labelColor};`">Message *</label>
+                                    <textarea v-model="form.description" required rows="5"
+                                        class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all resize-none"
+                                        :style="form.errors.description ? inputError : inputBase"
+                                        placeholder="Décrivez votre besoin en détail..."></textarea>
+                                    <p v-if="form.errors.description" class="text-xs text-red-400 mt-1">{{ form.errors.description }}</p>
+                                </div>
+
+                                <!-- Submit -->
+                                <button type="submit" :disabled="form.processing"
+                                    class="w-full py-4 rounded-xl text-base font-black text-white flex items-center justify-center gap-2 transition-all duration-200 hover:shadow-xl disabled:opacity-60"
+                                    style="background: linear-gradient(135deg, #E8A020, #C68400);">
+                                    <svg v-if="form.processing" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                                    </svg>
+                                    <i v-else class="bi bi-send-fill"></i>
+                                    {{ form.processing ? 'Envoi en cours...' : 'Envoyer le message' }}
+                                </button>
+                            </form>
                         </div>
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Email</h3>
-                        <p class="text-gray-600">{{ contactSettings.contact_email }}</p>
                     </div>
 
-                    <div class="bg-white p-6 rounded-lg shadow-md flex flex-col items-center text-center">
-                        <div class="w-16 h-16 bg-primary-bg-light rounded-full flex items-center justify-center mb-4">
-                            <svg class="h-8 w-8 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                            </svg>
-                        </div>
-                        <h3 class="text-xl font-semibold text-gray-800 mb-2">Adresse</h3>
-                        <p class="text-gray-600">{{ contactSettings.contact_address }}</p>
-                    </div>
-                </section>
+                </div>
             </div>
-        </div>
+        </section>
 
-        <NewsletterSubscribe
-            :compact="true"
-            title="Abonnez-vous à notre newsletter"
-            description="Recevez les dernières nouvelles et mises à jour directement dans votre boîte de réception."
-        />
     </LayoutFront>
 </template>
-
-<style scoped>
-/* Animation pour le spinner */
-.animate-spin {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-/* Animation pour les messages d'erreur */
-.animate-fade-in {
-  animation: fadeIn 0.3s ease-out;
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(-5px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Transition pour le bouton */
-.transition-colors {
-  transition-property: background-color, border-color, color, fill, stroke;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-</style>

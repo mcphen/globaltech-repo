@@ -7,7 +7,7 @@
                 <div class="h-[600px] bg-gray-100">
                     <img
                         src="https://nasad.net/wp-content/uploads/2022/09/Admin-ReseauxSysteme.jpeg"
-                        alt="TONGOLO TECH Presentation"
+                        alt="GlobalTECH EDUCATION Africa Presentation"
                         class="w-full h-full object-cover"
                         style="object-position: top"
 
@@ -19,16 +19,14 @@
                 <div class="flex items-center bg-primary-dark">
                     <div class="p-12 max-w-xl">
                         <h1 class="text-3xl font-serif font-bold text-white mb-6">
-                            Présentation de TONGOLO TECH
+                            Présentation de GlobalTECH EDUCATION Africa
                         </h1>
                         <div class="prose prose-lg text-white/90">
                             <p>
-                                 Créée en 2015, TONGOLO Tech (l’Etoile de la technologie) est une société à responsabilité limitée 
-                                (SARL) dont le siège social est à Dakar, Fass Paillote.
+                                Fondée en 2010 à Abidjan, GlobalTECH EDUCATION Africa est l’institution de référence en formation certifiante et consulting sur le continent africain.
                             </p>
                             <p>
-                                 Elle est spécialisée dans l’Ingénierie, les prestations de services, la fourniture d’équipements et la 
-maintenance
+                                Spécialisée dans les formations IT, PMP, Management et Finance, elle accompagne plus de 500 entreprises et 5 000 professionnels certifiés dans 12 pays africains.
                             </p>
                             
                         </div>
@@ -58,7 +56,7 @@ maintenance
             <div class="h-[300px] bg-gray-100">
                 <img
                     src="https://nasad.net/wp-content/uploads/2022/09/Admin-ReseauxSysteme.jpeg"
-                    alt="TONGOLO-TECH Team"
+                    alt="GlobalTECH EDUCATION Africa Team"
                     class="w-full h-full object-cover"
                     style="object-position: top"
                     onerror="this.src='/images/banner/banner_maj.jpg'; this.onerror=null;"
@@ -68,16 +66,14 @@ maintenance
             <!-- Content -->
             <div class="bg-primary-dark p-6">
                 <h1 class="text-2xl font-serif font-bold text-white mb-4">
-                    Présentation de TONGOLO TECH
+                    Présentation de GlobalTECH EDUCATION Africa
                 </h1>
                 <div class="prose prose-sm text-white/90">
                     <p>
-                         Créée en 2015, TONGOLO Tech (l’Etoile de la technologie) est une société à responsabilité limitée 
-                        (SARL) dont le siège social est à Dakar, Fass Paillote.
+                        Fondée en 2010 à Abidjan, GlobalTECH EDUCATION Africa est l’institution de référence en formation certifiante et consulting en Afrique.
                     </p>
                     <p>
-                         Elle est spécialisée dans l’Ingénierie, les prestations de services, la fourniture d’équipements et la 
-maintenance
+                        Spécialisée dans les formations IT, PMP, Management et Finance — 500+ entreprises clientes, 12 pays africains.
                     </p>
                 </div>
                 <div class="mt-6 flex flex-wrap gap-3">
@@ -101,7 +97,7 @@ maintenance
         <!-- Why choose us section -->
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div class="text-center mb-12">
-                <h2 class="text-2xl font-serif font-bold text-gray-900">Pourquoi choisir TONGOLO TECH ?</h2>
+                <h2 class="text-2xl font-serif font-bold text-gray-900">Pourquoi choisir GlobalTECH EDUCATION Africa ?</h2>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">

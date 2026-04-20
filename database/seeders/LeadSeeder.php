@@ -16,7 +16,7 @@ class LeadSeeder extends Seeder
     {
         // Create a specific lead user with predictable credentials
         $leadUser = User::firstOrCreate(
-            ['email' => 'lead@tongolotech.test'],
+            ['email' => 'lead@globaltech-edu.test'],
             [
                 'name' => 'Lead NG',
                 'password' => Hash::make('password'),

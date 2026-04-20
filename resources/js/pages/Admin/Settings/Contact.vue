@@ -98,7 +98,7 @@ const submit = () => {
                                         v-model="form.contact_email"
                                         type="email"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                        placeholder="example@tongolotech.com"
+                                        placeholder="contact@globaltech-edu.com"
                                     >
                                 </div>
 
@@ -124,7 +124,7 @@ const submit = () => {
                                         v-model="form.social_facebook"
                                         type="url"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                        placeholder="https://www.facebook.com/tongolotech/"
+                                        placeholder="https://www.facebook.com/globaltecheducationafrica/"
                                     >
                                 </div>
 
@@ -135,7 +135,7 @@ const submit = () => {
                                         v-model="form.social_twitter"
                                         type="url"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                        placeholder="https://twitter.com/tongolotech"
+                                        placeholder="https://twitter.com/GlobalTECHEdu"
                                     >
                                 </div>
 
@@ -146,7 +146,7 @@ const submit = () => {
                                         v-model="form.social_instagram"
                                         type="url"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                        placeholder="https://www.instagram.com/tongolotech/"
+                                        placeholder="https://www.instagram.com/globaltecheducation/"
                                     >
                                 </div>
 
@@ -157,7 +157,7 @@ const submit = () => {
                                         v-model="form.social_linkedin"
                                         type="url"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                        placeholder="https://www.linkedin.com/company/tongolotech/"
+                                        placeholder="https://www.linkedin.com/company/globaltech-education-africa/"
                                     >
                                 </div>
 
@@ -168,7 +168,7 @@ const submit = () => {
                                         v-model="form.social_youtube"
                                         type="url"
                                         class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50"
-                                        placeholder="https://www.youtube.com/tongolotech"
+                                        placeholder="https://www.youtube.com/@globaltecheducationafrica"
                                     >
                                 </div>
 

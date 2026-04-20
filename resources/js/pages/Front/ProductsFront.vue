@@ -39,7 +39,7 @@ const sort = ref(props.filters?.sort || 'newest');
 const currentUrl = ref('');
 
 // Computed properties for meta tags
-const metaTitle = computed(() => "Produits de Mariage | TONGOLO TECHs");
+const metaTitle = computed(() => "Produits de Mariage | GlobalTECH EDUCATION Africa");
 const metaDescription = computed(() => "Découvrez notre collection de produits de mariage de haute qualité. Accessoires, décorations et plus pour rendre votre mariage parfait à Dakar, Sénégal.");
 
 // JSON-LD structured data for product listing
@@ -182,7 +182,7 @@ const addToCart = (productId: number, quantity: number = 1) => {
                 Nos Produits
             </h1>
             <p class="text-lg text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
-            Chez <strong class="text-yellow-300">TONGOLO TECH</strong>, Découvrez notre sélection de produits de qualité pour rendre votre mariage inoubliable
+            Chez <strong class="text-yellow-300">GlobalTECH EDUCATION Africa</strong>, Découvrez notre sélection de produits de qualité pour rendre votre mariage inoubliable
             </p>
         </div>
 

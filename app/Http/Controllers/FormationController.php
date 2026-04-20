@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Formation;
+use App\Models\FormationB2bRequest;
 use App\Models\Lead;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -198,6 +199,39 @@ class FormationController extends Controller
     }
 
     // Public listing page
+    public function apiFeatured()
+    {
+        $formations = Formation::with('category')
+            ->orderBy('is_featured', 'desc')
+            ->orderBy('created_at', 'desc')
+            ->limit(6)
+            ->get()
+            ->map(fn($f) => [
+                'id'             => $f->id,
+                'uuid'           => $f->uuid,
+                'slug'           => $f->slug,
+                'title'          => $f->title,
+                'description'    => strip_tags($f->description ?? ''),
+                'image_url'      => $f->image_url ?? $f->image_path,
+                'date_mode'      => $f->date_mode,
+                'date'           => $f->date?->toDateString(),
+                'start_date'     => $f->start_date?->toDateString(),
+                'end_date'       => $f->end_date?->toDateString(),
+                'duration_hours' => $f->duration_hours,
+                'price'          => $f->price,
+                'currency'       => $f->currency,
+                'category'       => $f->category ? [
+                    'name'       => $f->category->name,
+                    'slug'       => $f->category->slug,
+                    'icon'       => $f->category->icon,
+                    'color'      => $f->category->color,
+                    'background' => $f->category->background,
+                ] : null,
+            ]);
+
+        return response()->json($formations);
+    }
+
     public function frontIndex(Request $request)
     {
         $query = Formation::query()->orderBy('created_at', 'desc');
@@ -260,6 +294,10 @@ class FormationController extends Controller
     // Handle participation form submission (public or authenticated)
     public function participate(Request $request, Formation $formation)
     {
+        if ($request->input('type') === 'b2b') {
+            return $this->participateB2B($request, $formation);
+        }
+
         $validated = $request->validate([
             'first_name' => 'required|string|max:100',
             'last_name' => 'required|string|max:100',
@@ -372,6 +410,47 @@ class FormationController extends Controller
 
         return redirect()->route('prospect.dashboard')
             ->with('success', 'Votre participation a été enregistrée. Vous êtes maintenant connecté.');
+    }
+
+    private function participateB2B(Request $request, Formation $formation)
+    {
+        $validated = $request->validate([
+            'company_name'        => 'required|string|max:255',
+            'company_sector'      => 'nullable|string|max:255',
+            'contact_first_name'  => 'required|string|max:100',
+            'contact_last_name'   => 'required|string|max:100',
+            'contact_function'    => 'nullable|string|max:150',
+            'contact_email'       => 'required|email|max:255',
+            'contact_phone'       => 'nullable|string|max:50',
+            'attentes'            => 'nullable|string',
+            'participants'        => 'nullable|array|max:50',
+            'participants.*.first_name' => 'nullable|string|max:100',
+            'participants.*.last_name'  => 'nullable|string|max:100',
+            'participants.*.email'      => 'nullable|email|max:255',
+        ]);
+
+        FormationB2bRequest::create([
+            'formation_id'       => $formation->id,
+            'company_name'       => $validated['company_name'],
+            'company_sector'     => $validated['company_sector'] ?? null,
+            'contact_first_name' => $validated['contact_first_name'],
+            'contact_last_name'  => $validated['contact_last_name'],
+            'contact_function'   => $validated['contact_function'] ?? null,
+            'contact_email'      => $validated['contact_email'],
+            'contact_phone'      => $validated['contact_phone'] ?? null,
+            'participants'       => $validated['participants'] ?? [],
+            'attentes'           => $validated['attentes'] ?? null,
+            'status'             => 'pending',
+        ]);
+
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Demande entreprise enregistrée.',
+            ], 201);
+        }
+
+        return back()->with('success', 'Demande entreprise enregistrée.');
     }
 
     // Return current authenticated user's participation status for a formation

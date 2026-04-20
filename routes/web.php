@@ -40,6 +40,7 @@ Route::get('/blog', [HomeController::class, 'blog'])->name('blog');
 Route::get('/{id}/blog', [HomeController::class, 'blogShow'])->name('blog.show');
 
 // Public formations routes
+Route::get('/api/formations/featured', [FormationController::class, 'apiFeatured'])->name('api.formations.featured');
 Route::get('/formations', [FormationController::class, 'frontIndex'])->name('formations');
 Route::get('/formations/{slug}', [FormationController::class, 'show'])->name('formations.show');
 Route::get('/formations/{formation}/participation-status', [FormationController::class, 'participationStatus'])->name('formations.participation-status');

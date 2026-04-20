@@ -1,6 +1,6 @@
 <template>
   <Head>
-    <title>Paramètres du compte - TONGOLO TECH</title>
+    <title>Paramètres du compte - GlobalTECH EDUCATION Africa</title>
     <meta name="description" content="Modifiez vos informations de profil." />
   </Head>
 
