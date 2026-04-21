@@ -31,12 +31,6 @@
                             
                         </div>
                         <div class="mt-8 flex flex-wrap gap-4">
-                            <Link
-                                :href="route('appointment.create')"
-                                class="px-8 py-3 rounded-full bg-white text-primary-dark hover:bg-white/90 font-medium transition-colors"
-                            >
-                                Prendre rendez-vous
-                            </Link>
                             <a
                                 href="#services"
                                 class="px-8 py-3 rounded-full border border-white text-white hover:bg-white/10 font-medium transition-colors"
@@ -77,12 +71,6 @@
                     </p>
                 </div>
                 <div class="mt-6 flex flex-wrap gap-3">
-                    <Link
-                        :href="route('appointment.create')"
-                        class="px-6 py-2 rounded-full bg-white text-primary-dark hover:bg-white/90 font-medium transition-colors text-sm"
-                    >
-                        Prendre rendez-vous
-                    </Link>
                     <a
                         href="#services"
                         class="px-6 py-2 rounded-full border border-white text-white hover:bg-white/10 font-medium transition-colors text-sm"

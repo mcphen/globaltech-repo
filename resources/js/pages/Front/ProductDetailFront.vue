@@ -270,12 +270,6 @@ onMounted(() => {
                     </p>
                     <div class="flex flex-col sm:flex-row justify-center gap-4">
                         <Link
-                            :href="route('appointment.create')"
-                            class="px-8 py-3 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors font-medium"
-                        >
-                            Prendre rendez-vous
-                        </Link>
-                        <Link
                             :href="route('contact')"
                             class="px-8 py-3 bg-white text-primary border border-primary rounded-full hover:bg-gray-50 transition-colors font-medium"
                         >

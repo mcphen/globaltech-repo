@@ -135,6 +135,11 @@ const trainingManagementItems: NavItem[] = [
         href: route('admin.formations.index'),
         icon: GraduationCap,
     },
+    {
+        title: 'Catégories de formations',
+        href: route('admin.formation-categories.index'),
+        icon: Briefcase,
+    },
 ];
 
 // Groupe équipe et utilisateurs (hors "Équipes")

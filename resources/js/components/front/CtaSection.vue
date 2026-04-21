@@ -11,14 +11,6 @@
                              Contactez dès aujourd'hui l'équipe GlobalTECH EDUCATION Africa pour une consultation personnalisée et découvrez comment nos formations certifiantes et solutions de consulting peuvent développer vos équipes et renforcer votre performance.
                         </p>
                     </div>
-                    <div class="mt-12 sm:w-full sm:max-w-md lg:mt-0 lg:ml-8 lg:flex-1">
-                        <Link
-                            :href="route('appointment.create')"
-                            class="flex items-center justify-center px-8 py-4 border border-transparent text-base font-medium rounded-full text-primary-color bg-blue-950 text-white hover:bg-primary-bg-light md:py-4 md:text-lg md:px-10"
-                        >
-                            Prendre rendez-vous
-                        </Link>
-                    </div>
                 </div>
             </div>
         </div>

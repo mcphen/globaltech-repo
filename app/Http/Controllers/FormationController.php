@@ -198,6 +198,38 @@ class FormationController extends Controller
         }
     }
 
+    // Public pillars / categories for homepage
+    public function apiCategories()
+    {
+        $categories = \App\Models\FormationCategory::withCount('formations')
+            ->orderBy('sort_order')
+            ->get()
+            ->map(function ($c) {
+                $certifications = \App\Models\Formation::where('category_id', $c->id)
+                    ->whereNotNull('certification_type')
+                    ->distinct()
+                    ->pluck('certification_type')
+                    ->filter()
+                    ->unique()
+                    ->take(4)
+                    ->values();
+
+                return [
+                    'icon'           => $c->icon,
+                    'category'       => $c->label ?? $c->name,
+                    'title'          => $c->name,
+                    'color'          => $c->color ?? '#2563EB',
+                    'bg'             => $c->background ?? '#EFF6FF',
+                    'description'    => $c->description ?? '',
+                    'certifications' => $certifications,
+                    'href'           => '/formations?category=' . $c->slug,
+                    'featured'       => (bool) $c->is_featured,
+                ];
+            });
+
+        return response()->json($categories);
+    }
+
     // Public listing page
     public function apiFeatured()
     {

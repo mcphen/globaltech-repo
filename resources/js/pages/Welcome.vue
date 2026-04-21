@@ -41,10 +41,17 @@ interface Actualite {
     created_at: string; slug?: string;
 }
 
+interface Pillar {
+    icon?: string; category: string; title: string;
+    color: string; bg: string; description: string;
+    certifications: string[]; href: string; featured: boolean;
+}
+
 const formations = ref<Formation[]>([]);
 const testimonials = ref<Testimonial[]>([]);
 const partners = ref<Partner[]>([]);
 const latestPosts = ref<Actualite[]>([]);
+const pillars = ref<Pillar[]>([]);
 
 const statsAnimated = ref(false);
 const statsRef = ref<HTMLElement | null>(null);
@@ -70,61 +77,30 @@ const animateCounter = (index: number, target: number) => {
     }, duration / steps);
 };
 
-const pillars = [
-    {
-        icon: 'bi-cpu-fill',
-        category: 'Filière Star',
-        title: 'Informatique & IT',
-        color: '#2563EB',
-        bg: '#EFF6FF',
-        description: 'Formations certifiantes en développement, cybersécurité, cloud, réseaux et systèmes.',
-        certifications: ['CompTIA', 'Cisco CCNA', 'AWS', 'Microsoft Azure'],
-        href: '/formations?category=it',
-    },
-    {
-        icon: 'bi-diagram-3-fill',
-        category: 'PMP & Gestion',
-        title: 'Management de Projet',
-        color: '#16A34A',
-        bg: '#F0FDF4',
-        description: 'Maîtrisez les standards internationaux de gestion de projets et obtenez votre certification PMP.',
-        certifications: ['PMP®', 'CAPM®', 'PMI-ACP®', 'PRINCE2®'],
-        href: '/formations?category=pmp',
-        featured: true,
-    },
-    {
-        icon: 'bi-people-fill',
-        category: 'Leadership',
-        title: 'Management & RH',
-        color: '#D97706',
-        bg: '#FFFBEB',
-        description: 'Développez vos compétences en leadership, gestion RH, communication et stratégie.',
-        certifications: ['SHRM', 'ISO 9001', 'Lean Six Sigma', 'MBA Ready'],
-        href: '/formations?category=management',
-    },
-];
 
 const whyUs = [
-    { icon: 'bi-patch-check-fill', color: '#2563EB', title: 'Certifications reconnues', desc: 'Toutes nos formations débouchent sur des certifications mondialement reconnues par les employeurs.' },
+    { icon: 'bi-patch-check-fill', color: '#2563EB', title: 'Certifications reconnues', desc: 'Toutes nos formations débouchent sur des certifications mondialement reconnues.' },
     { icon: 'bi-people-fill', color: '#16A34A', title: 'Experts praticiens', desc: 'Nos formateurs sont des professionnels actifs avec une expérience terrain de 10+ ans.' },
     { icon: 'bi-building-fill', color: '#D97706', title: 'Formation corporate', desc: 'Solutions B2B sur-mesure pour former vos équipes directement en entreprise ou à distance.' },
     { icon: 'bi-globe-africa', color: '#7C3AED', title: 'Présence panafricaine', desc: 'Bureaux dans 12 pays africains avec une qualité de formation uniforme et internationale.' },
     { icon: 'bi-graph-up-arrow', color: '#0891B2', title: 'ROI mesurable', desc: 'Nos clients constatent en moyenne +35% de productivité après certification de leurs équipes.' },
-    { icon: 'bi-shield-fill-check', color: '#DC2626', title: 'Accrédité PMI', desc: 'Centre de formation accrédité par PMI, Pearson VUE et les grandes instances internationales.' },
+    //{ icon: 'bi-shield-fill-check', color: '#DC2626', title: 'Accrédité PMI', desc: 'Centre de formation accrédité par PMI, Pearson VUE et les grandes instances internationales.' },
 ];
 
 onMounted(async () => {
     try {
-        const [f, t, p, a] = await Promise.all([
+        const [f, t, p, a, cats] = await Promise.all([
             axios.get('/api/formations/featured').catch(() => ({ data: [] })),
             axios.get('/api/testimonials/latest').catch(() => ({ data: [] })),
             axios.get('/api/partners/list').catch(() => ({ data: [] })),
             axios.get('/api/actualites/latest').catch(() => ({ data: [] })),
+            axios.get('/api/formation-categories').catch(() => ({ data: [] })),
         ]);
         formations.value = f.data?.slice?.(0, 6) ?? [];
         testimonials.value = t.data?.slice?.(0, 3) ?? [];
         partners.value = p.data?.slice?.(0, 8) ?? [];
         latestPosts.value = a.data?.slice?.(0, 3) ?? [];
+        pillars.value = cats.data ?? [];
     } catch {}
 
     // Intersection Observer for stats animation
@@ -172,7 +148,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                             <div class="flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold tracking-widest uppercase"
                                 style="background: rgba(232, 160, 32, 0.1); border-color: rgba(232, 160, 32, 0.3); color: #F5BC4A;">
                                 <span class="w-2 h-2 rounded-full animate-pulse" style="background: #E8A020;"></span>
-                                Centre de formation accrédité PMI
+                                Leader dans les formations certifiantes & consulting en Afrique
                             </div>
                         </div>
 
@@ -184,7 +160,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                         </h1>
 
                         <p class="text-lg text-white/70 leading-relaxed mb-8 max-w-xl">
-                            GlobalTECH EDUCATION Africa est le leader panafricain des formations certifiantes en Informatique, PMP et Management.
+                            GLOBALTECH EDUCATION Africa est le leader panafricain des formations certifiantes en Technologie Numérique, en Management et en Leadership.
                             <strong class="text-white/90">+5 000 professionnels certifiés</strong> dans 12 pays.
                         </p>
 
@@ -199,36 +175,29 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                             </Link>
                         </div>
 
-                        <!-- Trust badges -->
+                        <!-- Trust badges-->
                         <div class="flex flex-wrap items-center gap-4">
-                            <div v-for="badge in ['PMI Accredited', 'ISO 9001', 'Pearson VUE']" :key="badge"
+                            <div v-for="badge in ['CISCO', 'EC-COUNCIL', 'ISC²']" :key="badge"
                                 class="flex items-center gap-2 text-xs font-semibold text-white/60">
                                 <i class="bi bi-patch-check-fill text-yellow-400"></i>
                                 {{ badge }}
                             </div>
-                        </div>
+                        </div> 
                     </div>
 
                     <!-- Right: Feature Cards -->
                     <div class="hidden lg:grid grid-cols-2 gap-4">
                         <div v-for="(p, i) in pillars" :key="p.title"
                             class="p-5 rounded-2xl backdrop-blur-sm border transition-all duration-300 hover:scale-105 cursor-pointer"
-                            :class="i === 1 ? 'col-span-2' : ''"
-                            style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1);"
+                                style="background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.1);"
                             @click="$inertia?.visit(p.href)">
                             <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-3"
                                 :style="`background: ${p.color}25;`">
                                 <i :class="['bi', p.icon, 'text-lg']" :style="`color: ${p.color};`"></i>
                             </div>
-                            <div class="text-xs font-bold uppercase tracking-widest mb-1" :style="`color: ${p.color};`">{{ p.category }}</div>
+                            
                             <h3 class="text-sm font-bold text-white mb-2">{{ p.title }}</h3>
-                            <div class="flex flex-wrap gap-1">
-                                <span v-for="cert in p.certifications.slice(0,2)" :key="cert"
-                                    class="text-xs px-2 py-0.5 rounded-full"
-                                    style="background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.7);">
-                                    {{ cert }}
-                                </span>
-                            </div>
+                            
                         </div>
 
                         <!-- Stats mini card -->
@@ -277,7 +246,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
         <section class="py-24" :style="`background: ${sectionBgAlt};`">
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
                 <div class="text-center mb-16">
-                    <div class="gt-section-label justify-center">Nos Filières</div>
+                    <div class="gt-section-label justify-center">Nos Programmes</div>
                     <h2 class="gt-section-title text-4xl lg:text-5xl mb-4">
                         Trois piliers d'excellence
                     </h2>
@@ -286,11 +255,11 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                     </p>
                 </div>
 
-                <div class="grid lg:grid-cols-3 gap-8">
+                <div class="grid sm:grid-cols-2 gap-8">
                     <div v-for="pillar in pillars" :key="pillar.title"
                         class="relative rounded-3xl overflow-hidden group hover:shadow-2xl transition-all duration-500 hover:-translate-y-2"
                         :class="pillar.featured ? 'ring-2 ring-offset-2' : ''"
-                        :style="`background: ${cardBg}; border: 1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#F1F5F9'};` + (pillar.featured ? ` ring-color: ${pillar.color}` : '')"
+                        :style="`background: ${cardBg}; border: 1px solid ${isDark ? 'rgba(255,255,255,0.08)' : '#F1F5F9'};`">
 
                         <!-- Featured banner -->
                         <div v-if="pillar.featured" class="absolute top-4 right-4 px-3 py-1 rounded-full text-xs font-bold text-white z-10"
@@ -343,7 +312,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
                 <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-12 gap-4">
                     <div>
-                        <div class="gt-section-label">Nos Programmes</div>
+                        <div class="gt-section-label">Nos Formations</div>
                         <h2 class="gt-section-title text-4xl lg:text-5xl">
                             Formations à la une
                         </h2>
@@ -381,7 +350,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                                 </span>
                             </div>
 
-                            <!-- Price badge top-right -->
+                            <!-- Price badge top-right 
                             <div class="absolute top-3 right-3">
                                 <span v-if="f.price" class="text-xs font-black px-2.5 py-1 rounded-full text-white shadow-sm" style="background: rgba(11,20,55,0.85);">
                                     {{ new Intl.NumberFormat('fr-FR').format(Number(f.price)) }} {{ f.currency || 'XOF' }}
@@ -389,7 +358,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                                 <span v-else class="text-xs font-bold px-2.5 py-1 rounded-full shadow-sm" style="background: rgba(22,163,74,0.9); color: white;">
                                     Sur devis
                                 </span>
-                            </div>
+                            </div>-->
 
                             <!-- Gradient overlay -->
                             <div class="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent pointer-events-none"></div>
@@ -529,10 +498,10 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                         <ul class="space-y-4 mb-10">
                             <li v-for="item in [
                                 'Programmes 100% personnalisés selon vos besoins métiers',
-                                'Formation en intra-entreprise sur votre site',
-                                'Suivi individuel et reporting détaillé',
-                                'Financement et prise en charge disponibles',
-                                'Attestations officielles reconnues internationalement',
+                                //'Formation en intra-entreprise sur votre site',
+                               // 'Suivi individuel et reporting détaillé',
+                               // 'Financement et prise en charge disponibles',
+                                'Certifications reconnues à l\'international',
                             ]" :key="item" class="flex items-center gap-3 text-white/80 text-sm">
                                 <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0"
                                     style="background: rgba(232, 160, 32, 0.2);">
@@ -557,7 +526,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                     <div class="grid grid-cols-2 gap-4">
                         <div v-for="item in [
                             { icon: 'bi-calendar-check', title: 'Planning flexible', desc: 'Sessions adaptées à vos contraintes' },
-                            { icon: 'bi-translate', title: 'Multilingue', desc: 'Français, Anglais, Portugais' },
+                            { icon: 'bi-translate', title: 'Multilingue', desc: 'Français, Anglais' },
                             { icon: 'bi-laptop', title: 'E-Learning', desc: 'Plateforme LMS intégrée' },
                             { icon: 'bi-bar-chart', title: 'ROI Garanti', desc: 'Suivi KPI et tableaux de bord' },
                         ]" :key="item.title"
@@ -584,7 +553,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                     <div class="gt-section-label justify-center">Pourquoi Nous</div>
                     <h2 class="gt-section-title text-4xl lg:text-5xl mb-4">L'excellence à chaque étape</h2>
                     <p class="text-lg max-w-2xl mx-auto" :style="`color: ${textBody};`">
-                        Rejoignez les milliers de professionnels et d'entreprises qui font confiance à GlobalTECH EDUCATION Africa.
+                        Rejoignez les milliers de professionnels et d'entreprises qui font confiance à GLOBALTECH EDUCATION Africa.
                     </p>
                 </div>
 
@@ -622,9 +591,9 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
 
                 <div class="grid lg:grid-cols-3 gap-6">
                     <div v-for="proj in [
-                        { country: '🇨🇮', tag: 'Ministère', title: 'Transformation digitale du Ministère de l\'Éducation', desc: 'Déploiement d\'une solution de formation en ligne pour 2 000 fonctionnaires en Côte d\'Ivoire.', icon: 'bi-laptop', color: '#2563EB', bg: '#EFF6FF' },
-                        { country: '🇸🇳', tag: 'Corporate', title: 'Programme PMP — Groupe Sonatel', desc: 'Formation et certification de 120 chefs de projet chez Sonatel / Orange Afrique.', icon: 'bi-award', color: '#16A34A', bg: '#F0FDF4' },
-                        { country: '🌍', tag: 'International', title: 'Déploiement e-Learning panafricain', desc: 'Architecture et mise en œuvre d\'une plateforme LMS multi-pays pour une ONG internationale.', icon: 'bi-globe', color: '#D97706', bg: '#FFFBEB' },
+                        { country: '🇨🇮', tag: 'Ministère', title: '', desc: '', icon: 'bi-laptop', color: '#2563EB', bg: '#EFF6FF' },
+                        { country: '🇸🇳', tag: 'Corporate', title: '', desc: '', icon: 'bi-award', color: '#16A34A', bg: '#F0FDF4' },
+                        { country: '🌍', tag: 'International', title: '', desc: '', icon: 'bi-globe', color: '#D97706', bg: '#FFFBEB' },
                     ]" :key="proj.title"
                         class="gt-card overflow-hidden group">
                         <div class="h-48 relative flex items-center justify-center" :style="`background: linear-gradient(135deg, ${proj.bg}, white);`">
@@ -676,9 +645,9 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
 
                 <div v-else class="grid md:grid-cols-3 gap-6">
                     <div v-for="t in [
-                        { name: 'Kouassi Jean-Marie', role: 'Directeur IT — Société Générale CI', quote: 'GlobalTECH a transformé notre équipe IT. En 6 mois, 8 collaborateurs certifiés AWS et CompTIA. Excellent retour sur investissement.' },
-                        { name: 'Aminata Diallo', role: 'Chef de Projet — Orange Sénégal', quote: 'J\'ai obtenu ma certification PMP® grâce à GlobalTECH. La pédagogie est irréprochable et les formateurs sont de vrais experts terrain.' },
-                        { name: 'Dr. Emmanuel Koffi', role: 'DRH — Groupe NSIA', quote: 'Nous avons formé 50 managers avec GlobalTECH. La qualité est au rendez-vous. Je recommande vivement à toute entreprise africaine ambitieuse.' },
+                        { name: '', role: '', quote: '' },
+                        { name: '', role: '', quote: '' },
+                        { name: '', role: '', quote: '' },
                     ]" :key="t.name" class="gt-card p-8">
                         <div class="flex mb-4 gap-0.5">
                             <i v-for="n in 5" :key="n" class="bi bi-star-fill text-sm" style="color: #E8A020;"></i>
@@ -705,10 +674,10 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
         <section class="py-16" :style="`background: ${sectionBgWhite}; border-top: 1px solid ${isDark ? 'rgba(255,255,255,0.07)' : '#F1F5F9'}; border-bottom: 1px solid ${isDark ? 'rgba(255,255,255,0.07)' : '#F1F5F9'};`">
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
                 <p class="text-center text-xs font-bold uppercase tracking-widest mb-10" style="color: #94A3B8;">
-                    Certifications & Partenaires officiels
+                    Partenaires officiels
                 </p>
                 <div class="flex flex-wrap items-center justify-center gap-8">
-                    <div v-for="partner in ['PMI', 'CompTIA', 'Cisco', 'Microsoft', 'AWS', 'Pearson VUE', 'PRINCE2', 'PMI-ACP']" :key="partner"
+                    <div v-for="partner in [ 'Cisco', 'Microsoft',  'EC-COUNCIL']" :key="partner"
                         class="px-5 py-3 rounded-2xl text-sm font-bold transition-all duration-200 cursor-default"
                         :style="`border: 1px solid ${isDark ? 'rgba(255,255,255,0.12)' : '#E5E7EB'}; color: ${isDark ? '#94A3B8' : '#6B7280'};`">
                         {{ partner }}
@@ -753,7 +722,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
 
                 <div v-else class="grid md:grid-cols-3 gap-6">
                     <div v-for="post in [
-                        { date: 'Avril 2026', title: 'GlobalTECH ouvre un nouveau centre de formation à Douala', tag: 'Expansion' },
+                        { date: 'Avril 2026', title: 'GLOBALTECH ouvre un nouveau centre de formation à Douala', tag: 'Expansion' },
                         { date: 'Mars 2026', title: '200 chefs de projet certifiés PMP® lors de la session Q1 2026', tag: 'Succès' },
                         { date: 'Mars 2026', title: 'Nouveau partenariat avec Microsoft pour les certifications Azure', tag: 'Partenariat' },
                     ]" :key="post.title" class="gt-card overflow-hidden group">
@@ -798,10 +767,6 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                     <Link :href="route('formations')" class="gt-btn-gold px-8 py-4 text-base rounded-xl font-black">
                         <i class="bi bi-mortarboard-fill"></i>
                         Voir les formations
-                    </Link>
-                    <Link :href="route('appointment.create')" class="gt-btn-outline px-8 py-4 text-base rounded-xl font-bold">
-                        <i class="bi bi-calendar-check"></i>
-                        Prendre un RDV gratuit
                     </Link>
                 </div>
             </div>

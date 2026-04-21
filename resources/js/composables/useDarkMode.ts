@@ -16,7 +16,7 @@ function resolve() {
 // Bootstrap once on import (client side)
 if (typeof window !== 'undefined') {
     const saved = localStorage.getItem('gt-theme') as Theme | null;
-    theme.value = saved ?? 'system';
+    theme.value = saved ?? 'light';
     resolve();
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', resolve);
 }

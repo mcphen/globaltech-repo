@@ -227,9 +227,6 @@ const ringOffset      = computed(() => isDark.value ? 'ring-offset-[#0B1437]' : 
                     <Link href="/contact" class="gt-btn-gold px-8 py-4 rounded-xl text-base font-black">
                         <i class="bi bi-send-fill"></i> Demander un devis
                     </Link>
-                    <Link :href="route('appointment.create')" class="gt-btn-outline px-8 py-4 rounded-xl text-base">
-                        <i class="bi bi-calendar-check"></i> Prendre RDV
-                    </Link>
                 </div>
             </div>
         </section>

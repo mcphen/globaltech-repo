@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 class FormationCategory extends Model
 {
     protected $fillable = [
-        'name', 'slug', 'icon', 'color', 'background',
+        'name', 'label', 'slug', 'icon', 'color', 'background',
         'description', 'is_featured', 'sort_order',
     ];
 

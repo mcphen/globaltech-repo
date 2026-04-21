@@ -123,6 +123,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
 
 <template>
     <Head>
+        <link rel="icon" type="image/jpeg" href="/images/logo_globaltech.jpeg" />
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <meta name="description" content="GlobalTECH EDUCATION Africa — Leader en formations certifiantes PMP, Informatique et Management en Afrique. Certifiez votre excellence professionnelle." />
@@ -197,19 +198,11 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
             :style="`background: ${headerBg}; border-bottom: 1px solid ${headerBorder}; box-shadow: ${headerShadow};`"
         >
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
-                <div class="flex items-center justify-between" style="height: 72px;">
+                <div class="flex items-center justify-between h-16 md:h-24">
 
                     <!-- Logo -->
-                    <Link :href="route('home')" class="flex items-center gap-3 flex-shrink-0">
-                        <img src="/images/logo_globaltech.jpeg" alt="GlobalTECH EDUCATION Africa" class="w-10 h-10 rounded-xl object-contain" />
-                        <div class="leading-tight">
-                            <div class="font-black text-sm tracking-tight" :style="`color: ${isDark ? '#F1F5F9' : '#0B1437'}; font-family: 'Plus Jakarta Sans', sans-serif;`">
-                                GlobalTECH
-                            </div>
-                            <div class="text-xs font-semibold tracking-widest" style="color: #E8A020; letter-spacing: 0.12em;">
-                                EDUCATION AFRICA
-                            </div>
-                        </div>
+                    <Link :href="route('home')" class="flex items-center flex-shrink-0">
+                        <img src="/images/logo_globaltech.jpeg" alt="GlobalTECH EDUCATION Africa" class="h-12 md:h-20 w-auto object-contain" />
                     </Link>
 
                     <!-- Desktop Nav -->
@@ -242,7 +235,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                                     class="absolute top-full left-0 mt-1 w-72 rounded-2xl shadow-xl p-2 z-50"
                                     :style="`background: ${dropdownBg}; border: 1px solid ${dropdownBorder};`">
                                     <div class="px-3 py-2 mb-1">
-                                        <p class="text-xs font-bold uppercase tracking-widest" style="color: #E8A020;">Nos filières</p>
+                                        <p class="text-xs font-bold uppercase tracking-widest" style="color: #E8A020;">Nos programmes</p>
                                     </div>
                                     <Link v-for="cat in formationCategories" :key="cat.href" :href="cat.href"
                                         class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group"
@@ -398,11 +391,6 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                             </div>
                         </template>
                         <template v-else>
-                            <Link :href="route('appointment.create')"
-                                class="px-5 py-2.5 rounded-xl text-sm font-bold text-white transition-all duration-200 hover:shadow-lg"
-                                style="background: linear-gradient(135deg, #E8A020, #C68400);">
-                                Prendre RDV
-                            </Link>
                         </template>
                     </div>
 
@@ -522,12 +510,8 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
 
                     <!-- Brand Column -->
                     <div class="lg:col-span-1">
-                        <Link :href="route('home')" class="flex items-center gap-3 mb-5">
-                            <img src="/images/logo_globaltech.jpeg" alt="GlobalTECH EDUCATION Africa" class="w-10 h-10 rounded-xl object-contain" />
-                            <div class="leading-tight">
-                                <div class="font-black text-sm text-white">GlobalTECH</div>
-                                <div class="text-xs font-bold tracking-widest" style="color: #E8A020;">EDUCATION AFRICA</div>
-                            </div>
+                        <Link :href="route('home')" class="flex items-center mb-5">
+                            <img src="/images/logo_globaltech.jpeg" alt="GlobalTECH EDUCATION Africa" class="h-12 md:h-20 w-auto object-contain" />
                         </Link>
                         <p class="text-sm leading-relaxed mb-6" style="color: #94A3B8;">
                             Leader en formations certifiantes et consulting en Afrique. Nous certifions l'excellence professionnelle depuis Abidjan.
@@ -593,7 +577,6 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                                 { label: 'Nos Projets', href: '/portfolio' },
                                 { label: 'Actualités', href: '/blog' },
                                 { label: 'Contact', href: '/contact' },
-                                { label: 'Prendre RDV', href: '/appointment' },
                             ]" :key="link.href">
                                 <Link :href="link.href" class="text-sm flex items-center gap-2 group" style="color: #94A3B8;">
                                     <i class="bi bi-chevron-right text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>

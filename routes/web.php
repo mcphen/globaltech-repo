@@ -41,6 +41,7 @@ Route::get('/{id}/blog', [HomeController::class, 'blogShow'])->name('blog.show')
 
 // Public formations routes
 Route::get('/api/formations/featured', [FormationController::class, 'apiFeatured'])->name('api.formations.featured');
+Route::get('/api/formation-categories', [FormationController::class, 'apiCategories'])->name('api.formation-categories');
 Route::get('/formations', [FormationController::class, 'frontIndex'])->name('formations');
 Route::get('/formations/{slug}', [FormationController::class, 'show'])->name('formations.show');
 Route::get('/formations/{formation}/participation-status', [FormationController::class, 'participationStatus'])->name('formations.participation-status');
@@ -184,6 +185,17 @@ Route::middleware(['auth'])->group(function () {
                 'edit' => 'admin.actualites.edit',
                 'update' => 'admin.actualites.update',
                 'destroy' => 'admin.actualites.destroy',
+            ]);
+
+        // Formation categories management
+        Route::resource('formation-categories', \App\Http\Controllers\Admin\FormationCategoryController::class)
+            ->names([
+                'index'   => 'admin.formation-categories.index',
+                'create'  => 'admin.formation-categories.create',
+                'store'   => 'admin.formation-categories.store',
+                'edit'    => 'admin.formation-categories.edit',
+                'update'  => 'admin.formation-categories.update',
+                'destroy' => 'admin.formation-categories.destroy',
             ]);
 
         // Formations management routes

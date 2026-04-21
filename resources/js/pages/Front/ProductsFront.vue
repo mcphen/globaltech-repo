@@ -311,12 +311,6 @@ const addToCart = (productId: number, quantity: number = 1) => {
                                     <i class="bi bi-cart-plus text-lg"></i>
                                 </button>
                             </div>
-                            <Link
-                                :href="route('appointment.create')"
-                                class="w-full text-center px-4 py-2 bg-secondary text-white rounded-md hover:opacity-90 transition-colors hidden"
-                            >
-                                Prendre rendez-vous
-                            </Link>
                         </div>
                     </div>
                 </div>
@@ -357,12 +351,6 @@ const addToCart = (productId: number, quantity: number = 1) => {
                     Contactez-nous pour obtenir des conseils dans le choix des meilleures  produits et services, et formations.
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <Link
-                        :href="route('appointment.create')"
-                        class="px-8 py-3 bg-primary text-white rounded-full hover:bg-primary-dark transition-colors font-medium"
-                    >
-                        Prendre rendez-vous
-                    </Link>
                     <Link
                         :href="route('contact')"
                         class="px-8 py-3 bg-white text-primary border border-primary rounded-full hover:bg-gray-50 transition-colors font-medium"
