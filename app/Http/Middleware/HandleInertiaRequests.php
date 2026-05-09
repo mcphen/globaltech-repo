@@ -66,8 +66,11 @@ class HandleInertiaRequests extends Middleware
                 'location' => $request->url(),
             ],
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
-            'formationCategories' => fn () => FormationCategory::orderBy('sort_order')
-                ->get(['id', 'name', 'slug', 'icon', 'color', 'is_featured']),
+            'formationCategories' => fn () => rescue(
+                fn () => FormationCategory::orderBy('sort_order')
+                    ->get(['id', 'name', 'slug', 'icon', 'color', 'is_featured']),
+                collect([])
+            ),
             'cart' => [
                 'items' => array_values($cart),
                 'count' => $distinctCount, // show number of distinct items in UI

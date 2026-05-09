@@ -201,67 +201,75 @@ class FormationController extends Controller
     // Public pillars / categories for homepage
     public function apiCategories()
     {
-        $categories = \App\Models\FormationCategory::withCount('formations')
-            ->orderBy('sort_order')
-            ->get()
-            ->map(function ($c) {
-                $certifications = \App\Models\Formation::where('category_id', $c->id)
-                    ->whereNotNull('certification_type')
-                    ->distinct()
-                    ->pluck('certification_type')
-                    ->filter()
-                    ->unique()
-                    ->take(4)
-                    ->values();
+        try {
+            $categories = \App\Models\FormationCategory::withCount('formations')
+                ->orderBy('sort_order')
+                ->get()
+                ->map(function ($c) {
+                    $certifications = \App\Models\Formation::where('category_id', $c->id)
+                        ->whereNotNull('certification_type')
+                        ->distinct()
+                        ->pluck('certification_type')
+                        ->filter()
+                        ->unique()
+                        ->take(4)
+                        ->values();
 
-                return [
-                    'icon'           => $c->icon,
-                    'category'       => $c->label ?? $c->name,
-                    'title'          => $c->name,
-                    'color'          => $c->color ?? '#2563EB',
-                    'bg'             => $c->background ?? '#EFF6FF',
-                    'description'    => $c->description ?? '',
-                    'certifications' => $certifications,
-                    'href'           => '/formations?category=' . $c->slug,
-                    'featured'       => (bool) $c->is_featured,
-                ];
-            });
+                    return [
+                        'icon'           => $c->icon,
+                        'category'       => $c->label ?? $c->name,
+                        'title'          => $c->name,
+                        'color'          => $c->color ?? '#2563EB',
+                        'bg'             => $c->background ?? '#EFF6FF',
+                        'description'    => $c->description ?? '',
+                        'certifications' => $certifications,
+                        'href'           => '/formations?category=' . $c->slug,
+                        'featured'       => (bool) $c->is_featured,
+                    ];
+                });
 
-        return response()->json($categories);
+            return response()->json($categories);
+        } catch (\Throwable $e) {
+            return response()->json([]);
+        }
     }
 
     // Public listing page
     public function apiFeatured()
     {
-        $formations = Formation::with('category')
-            ->orderBy('is_featured', 'desc')
-            ->orderBy('created_at', 'desc')
-            ->limit(6)
-            ->get()
-            ->map(fn($f) => [
-                'id'             => $f->id,
-                'uuid'           => $f->uuid,
-                'slug'           => $f->slug,
-                'title'          => $f->title,
-                'description'    => strip_tags($f->description ?? ''),
-                'image_url'      => $f->image_url ?? $f->image_path,
-                'date_mode'      => $f->date_mode,
-                'date'           => $f->date?->toDateString(),
-                'start_date'     => $f->start_date?->toDateString(),
-                'end_date'       => $f->end_date?->toDateString(),
-                'duration_hours' => $f->duration_hours,
-                'price'          => $f->price,
-                'currency'       => $f->currency,
-                'category'       => $f->category ? [
-                    'name'       => $f->category->name,
-                    'slug'       => $f->category->slug,
-                    'icon'       => $f->category->icon,
-                    'color'      => $f->category->color,
-                    'background' => $f->category->background,
-                ] : null,
-            ]);
+        try {
+            $formations = Formation::with('category')
+                ->orderBy('is_featured', 'desc')
+                ->orderBy('created_at', 'desc')
+                ->limit(6)
+                ->get()
+                ->map(fn($f) => [
+                    'id'             => $f->id,
+                    'uuid'           => $f->uuid ?? null,
+                    'slug'           => $f->slug ?? null,
+                    'title'          => $f->title,
+                    'description'    => strip_tags($f->description ?? ''),
+                    'image_url'      => $f->image_url ?? $f->image_path,
+                    'date_mode'      => $f->date_mode,
+                    'date'           => $f->date?->toDateString(),
+                    'start_date'     => $f->start_date?->toDateString(),
+                    'end_date'       => $f->end_date?->toDateString(),
+                    'duration_hours' => $f->duration_hours,
+                    'price'          => $f->price,
+                    'currency'       => $f->currency,
+                    'category'       => $f->category ? [
+                        'name'       => $f->category->name,
+                        'slug'       => $f->category->slug,
+                        'icon'       => $f->category->icon,
+                        'color'      => $f->category->color,
+                        'background' => $f->category->background,
+                    ] : null,
+                ]);
 
-        return response()->json($formations);
+            return response()->json($formations);
+        } catch (\Throwable $e) {
+            return response()->json([]);
+        }
     }
 
     public function frontIndex(Request $request)

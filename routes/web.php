@@ -372,6 +372,8 @@ Route::get('/api/services/all-with-items', [ServiceController::class, 'getAllSer
 Route::get('/api/products', [ProductController::class, 'getProducts'])->name('api.products');
 Route::get('/api/schedules/available', [App\Http\Controllers\Admin\ScheduleController::class, 'getAvailableSchedules'])->name('api.schedules.available');
 Route::get('/api/actualites/latest', [ActualiteController::class, 'latest'])->name('api.actualites.latest');
+Route::get('/api/testimonials/latest', [TestimonialController::class, 'latest'])->name('api.testimonials.latest');
+Route::get('/api/partners/list', [PartnerController::class, 'list'])->name('api.partners.list');
 
 // Visitor tracking route
 Route::post('/api/track-action', [App\Http\Controllers\VisitorTrackerController::class, 'trackAction'])->name('api.track-action');

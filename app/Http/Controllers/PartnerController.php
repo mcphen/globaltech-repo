@@ -23,6 +23,14 @@ class PartnerController extends Controller
         return response()->json($partners);
     }
 
+    public function list()
+    {
+        $partners = Partner::orderBy('created_at', 'asc')
+            ->get(['id', 'name', 'website_url', 'logo_path']);
+
+        return response()->json($partners);
+    }
+
     public function store(Request $request)
     {
         $data = $request->validate([

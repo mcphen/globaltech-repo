@@ -23,6 +23,15 @@ class TestimonialController extends Controller
         return response()->json($testimonials);
     }
 
+    public function latest()
+    {
+        $testimonials = Testimonial::orderBy('created_at', 'desc')
+            ->limit(6)
+            ->get(['id', 'author_name', 'author_title', 'content', 'image_path']);
+
+        return response()->json($testimonials);
+    }
+
     public function create()
     {
         return Inertia::render('Admin/Testimonials/TestimonialCreate');
