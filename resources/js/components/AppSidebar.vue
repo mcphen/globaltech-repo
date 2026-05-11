@@ -18,6 +18,12 @@ import {
     Mail,
     Settings,
     GraduationCap,
+    Award,
+    BarChart2,
+    Globe,
+    Layers,
+    BadgeCheck,
+    Target,
     ChevronDown,
     ChevronUp
 } from 'lucide-vue-next';
@@ -94,6 +100,18 @@ const showConfiguration = ref(false);
 const showServiceManagement = ref(false);
 const showProductManagement = ref(false);
 const showTrainingManagement = ref(false);
+const showMasterclassManagement = ref(false);
+
+// Groupe Executive Masterclass
+const masterclassItems: NavItem[] = [
+    { title: 'Bannière & CTA',     href: route('admin.masterclass.page.edit'),               icon: Layers },
+    { title: 'Domaines',           href: route('admin.masterclass.domaines.index'),           icon: Globe },
+    { title: 'Formats',            href: route('admin.masterclass.formats.index'),            icon: Layers },
+    { title: 'Partenaires',        href: route('admin.masterclass.partenaires.index'),        icon: Award },
+    { title: 'Certifications',     href: route('admin.masterclass.certifications.index'),     icon: BadgeCheck },
+    { title: 'Public cible',       href: route('admin.masterclass.public-cibles.index'),      icon: Target },
+    { title: 'Statistiques clés',  href: route('admin.masterclass.stats.index'),              icon: BarChart2 },
+];
 
 // Groupe gestion des produits (replié par défaut)
 const productManagementItems: NavItem[] = [
@@ -260,6 +278,27 @@ const configurationItems: NavItem[] = [
                 </SidebarMenuItem>
                 <template v-if="showTrainingManagement">
                     <SidebarMenuItem v-for="item in trainingManagementItems" :key="item.title">
+                        <SidebarMenuButton as-child>
+                            <Link :href="item.href">
+                                <component :is="item.icon" class="mr-2 h-4 w-4" />
+                                <span>{{ item.title }}</span>
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </template>
+            </SidebarMenu>
+
+            <!-- Executive Masterclass (replié par défaut) -->
+            <SidebarMenu>
+                <SidebarMenuItem>
+                    <SidebarMenuButton @click="showMasterclassManagement = !showMasterclassManagement">
+                        <Award class="mr-2 h-4 w-4" />
+                        <span>Executive Masterclass</span>
+                        <component :is="showMasterclassManagement ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+                <template v-if="showMasterclassManagement">
+                    <SidebarMenuItem v-for="item in masterclassItems" :key="item.title">
                         <SidebarMenuButton as-child>
                             <Link :href="item.href">
                                 <component :is="item.icon" class="mr-2 h-4 w-4" />

@@ -5,9 +5,16 @@ namespace App\Http\Controllers;
 use App\Models\About;
 use App\Models\Actualite;
 use App\Models\Album;
+use App\Models\MasterclassCertification;
+use App\Models\MasterclassDomaine;
+use App\Models\MasterclassFormat;
+use App\Models\MasterclassPage;
+use App\Models\MasterclassPartenaire;
+use App\Models\MasterclassPublicCible;
+use App\Models\MasterclassSession;
+use App\Models\MasterclassStat;
 use App\Models\Photo;
 use App\Models\Product;
-use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Inertia\Inertia;
@@ -53,6 +60,20 @@ class HomeController extends Controller
         return Inertia::render('Front/About',[
             'about' => $about,
             'contactSettings' => $this->getContactSettings()
+        ]);
+    }
+
+    public function executiveMasterclass(){
+        return Inertia::render('Front/ExecutiveMasterclass', [
+            'contactSettings' => $this->getContactSettings(),
+            'page'            => MasterclassPage::first(),
+            'stats'           => MasterclassStat::orderBy('sort_order')->get(),
+            'domaines'        => MasterclassDomaine::where('is_active', true)->orderBy('sort_order')->get(),
+            'formats'         => MasterclassFormat::where('is_active', true)->orderBy('sort_order')->get(),
+            'partenaires'     => MasterclassPartenaire::where('is_active', true)->orderBy('sort_order')->get(),
+            'certifications'  => MasterclassCertification::where('is_active', true)->orderBy('sort_order')->get(),
+            'publicCibles'    => MasterclassPublicCible::where('is_active', true)->orderBy('sort_order')->get(),
+            'session'         => MasterclassSession::where('is_active', true)->first(),
         ]);
     }
 

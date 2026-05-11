@@ -33,6 +33,7 @@ Route::get('/services', [HomeController::class,'services'])->name('services');
 Route::get('/products', [HomeController::class,'products'])->name('products');
 Route::get('/products/{id}', [HomeController::class,'productShow'])->name('product.show');
 Route::get('/portfolio', [HomeController::class,'portfolio'])->name('portfolio');
+Route::get('/executive-masterclass', [HomeController::class,'executiveMasterclass'])->name('executive-masterclass');
 Route::get('/team-members/listes', [TeamMemberController::class,'getListeDatas'])->name('api.team-members.listes');
 Route::get('/partners/listes', [PartnerController::class,'getListeDatas'])->name('api.team-members.listes');
 Route::get('/testimonials/listes', [TestimonialController::class,'getListeDatas'])->name('api.team-members.listes');
@@ -347,6 +348,88 @@ Route::middleware(['auth'])->group(function () {
 
 
 
+
+        // ══ Executive Masterclass management ══
+        Route::prefix('masterclass')->name('admin.masterclass.')->group(function () {
+
+            // Page settings & session CTA (single-record forms)
+            Route::get('page', [\App\Http\Controllers\Admin\MasterclassPageController::class, 'edit'])->name('page.edit');
+            Route::post('page/update-page', [\App\Http\Controllers\Admin\MasterclassPageController::class, 'updatePage'])->name('page.update-page');
+            Route::post('page/update-session', [\App\Http\Controllers\Admin\MasterclassPageController::class, 'updateSession'])->name('page.update-session');
+
+            // Domaines
+            Route::resource('domaines', \App\Http\Controllers\Admin\MasterclassDomaineController::class)
+                ->except(['show'])
+                ->names([
+                    'index'   => 'domaines.index',
+                    'create'  => 'domaines.create',
+                    'store'   => 'domaines.store',
+                    'edit'    => 'domaines.edit',
+                    'update'  => 'domaines.update',
+                    'destroy' => 'domaines.destroy',
+                ]);
+
+            // Formats
+            Route::resource('formats', \App\Http\Controllers\Admin\MasterclassFormatController::class)
+                ->except(['show'])
+                ->names([
+                    'index'   => 'formats.index',
+                    'create'  => 'formats.create',
+                    'store'   => 'formats.store',
+                    'edit'    => 'formats.edit',
+                    'update'  => 'formats.update',
+                    'destroy' => 'formats.destroy',
+                ]);
+
+            // Partenaires
+            Route::resource('partenaires', \App\Http\Controllers\Admin\MasterclassPartenaireController::class)
+                ->except(['show'])
+                ->names([
+                    'index'   => 'partenaires.index',
+                    'create'  => 'partenaires.create',
+                    'store'   => 'partenaires.store',
+                    'edit'    => 'partenaires.edit',
+                    'update'  => 'partenaires.update',
+                    'destroy' => 'partenaires.destroy',
+                ]);
+
+            // Certifications
+            Route::resource('certifications', \App\Http\Controllers\Admin\MasterclassCertificationController::class)
+                ->except(['show'])
+                ->names([
+                    'index'   => 'certifications.index',
+                    'create'  => 'certifications.create',
+                    'store'   => 'certifications.store',
+                    'edit'    => 'certifications.edit',
+                    'update'  => 'certifications.update',
+                    'destroy' => 'certifications.destroy',
+                ]);
+
+            // Public cibles
+            Route::resource('public-cibles', \App\Http\Controllers\Admin\MasterclassPublicCibleController::class)
+                ->except(['show'])
+                ->parameters(['public-cibles' => 'publicCible'])
+                ->names([
+                    'index'   => 'public-cibles.index',
+                    'create'  => 'public-cibles.create',
+                    'store'   => 'public-cibles.store',
+                    'edit'    => 'public-cibles.edit',
+                    'update'  => 'public-cibles.update',
+                    'destroy' => 'public-cibles.destroy',
+                ]);
+
+            // Stats
+            Route::resource('stats', \App\Http\Controllers\Admin\MasterclassStatController::class)
+                ->except(['show'])
+                ->names([
+                    'index'   => 'stats.index',
+                    'create'  => 'stats.create',
+                    'store'   => 'stats.store',
+                    'edit'    => 'stats.edit',
+                    'update'  => 'stats.update',
+                    'destroy' => 'stats.destroy',
+                ]);
+        });
 
         // Users management routes
         Route::resource('users', \App\Http\Controllers\Admin\UserController::class)

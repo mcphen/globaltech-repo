@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             ProductSeeder::class,
             FormationCategorySeeder::class,
             FormationSeeder::class,
+            MasterclassSeeder::class,
         ]);
     }
 }

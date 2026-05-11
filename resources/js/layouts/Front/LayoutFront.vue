@@ -260,10 +260,10 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                             Consulting
                         </Link>
 
-                        <Link :href="route('portfolio')"
+                        <Link href="/executive-masterclass"
                             class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200"
-                            :class="page.url.startsWith('/portfolio') ? navActiveClass : navLinkClass">
-                            Projets
+                            :class="page.url.startsWith('/executive-masterclass') ? navActiveClass : navLinkClass">
+                            Executive Masterclass
                         </Link>
 
                         <Link :href="route('blog')"
@@ -435,10 +435,10 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                             :class="isDark ? 'text-slate-300 hover:bg-white/6' : 'text-gray-700 hover:bg-gray-50'">
                             <i class="bi bi-briefcase w-5 text-center"></i> Consulting
                         </Link>
-                        <Link :href="route('portfolio')" @click="mobileMenuOpen = false"
+                        <Link href="/executive-masterclass" @click="mobileMenuOpen = false"
                             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors"
                             :class="isDark ? 'text-slate-300 hover:bg-white/6' : 'text-gray-700 hover:bg-gray-50'">
-                            <i class="bi bi-folder2 w-5 text-center"></i> Projets
+                            <i class="bi bi-award w-5 text-center"></i> Executive Masterclass
                         </Link>
                         <Link :href="route('blog')" @click="mobileMenuOpen = false"
                             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors"
@@ -574,7 +574,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                                 { label: 'Accueil', href: '/' },
                                 { label: 'À Propos', href: '/about' },
                                 { label: 'Consulting', href: '/services' },
-                                { label: 'Nos Projets', href: '/portfolio' },
+                                { label: 'Executive Masterclass', href: '/executive-masterclass' },
                                 { label: 'Actualités', href: '/blog' },
                                 { label: 'Contact', href: '/contact' },
                             ]" :key="link.href">
