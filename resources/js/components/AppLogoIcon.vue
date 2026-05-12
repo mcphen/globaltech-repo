@@ -6,7 +6,7 @@ defineOptions({
 
 <template>
   <img
-    src="/images/logotongolo.jpg"
+    src="/images/logo_globaltech.jpeg"
     class="w-auto"
     v-bind="$attrs"
     alt="GlobalTECH EDUCATION Africa Logo"

@@ -12,6 +12,14 @@ class Actualite extends Model
         'description',
         'image_path',
         'published_at',
+        'category',
+    ];
+
+    public const CATEGORIES = [
+        'actualite'   => 'Actualité',
+        'projet'      => 'Projet',
+        'partenariat' => 'Partenariat',
+        'evenement'   => 'Événement',
     ];
 
     // Accessor for image URL

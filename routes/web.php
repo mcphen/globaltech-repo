@@ -8,6 +8,7 @@ use App\Http\Controllers\AboutController;
 use App\Http\Controllers\AlbumController;
 use App\Http\Controllers\BannerController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\WhyUsController;
 use App\Http\Controllers\PartnerController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ServiceController;
@@ -175,6 +176,17 @@ Route::middleware(['auth'])->group(function () {
                 'edit' => 'admin.testimonials.edit',
                 'update' => 'admin.testimonials.update',
                 'destroy' => 'admin.testimonials.destroy',
+            ]);
+
+        Route::resource('why-us', WhyUsController::class)
+            ->except(['show'])
+            ->names([
+                'index'   => 'admin.why-us.index',
+                'create'  => 'admin.why-us.create',
+                'store'   => 'admin.why-us.store',
+                'edit'    => 'admin.why-us.edit',
+                'update'  => 'admin.why-us.update',
+                'destroy' => 'admin.why-us.destroy',
             ]);
 
         Route::resource('actualites', ActualiteController::class)
@@ -455,6 +467,8 @@ Route::get('/api/services/all-with-items', [ServiceController::class, 'getAllSer
 Route::get('/api/products', [ProductController::class, 'getProducts'])->name('api.products');
 Route::get('/api/schedules/available', [App\Http\Controllers\Admin\ScheduleController::class, 'getAvailableSchedules'])->name('api.schedules.available');
 Route::get('/api/actualites/latest', [ActualiteController::class, 'latest'])->name('api.actualites.latest');
+Route::get('/api/actualites/projects', [ActualiteController::class, 'projects'])->name('api.actualites.projects');
+Route::get('/api/why-us', [WhyUsController::class, 'api'])->name('api.why-us');
 Route::get('/api/testimonials/latest', [TestimonialController::class, 'latest'])->name('api.testimonials.latest');
 Route::get('/api/partners/list', [PartnerController::class, 'list'])->name('api.partners.list');
 

@@ -2,7 +2,7 @@
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItemType } from '@/types';
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, computed } from 'vue';
 import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
 
@@ -18,7 +18,22 @@ const form = useForm({
     title: '',
     description: '',
     image: null as File | null,
-    published_at: new Date().toISOString().split('T')[0] // Date du jour par défaut
+    published_at: new Date().toISOString().split('T')[0], // Date du jour par défaut
+    category: 'actualite',
+});
+
+// Props (catégories depuis le serveur)
+const props = defineProps<{ categories?: Record<string, string> }>();
+const categoryOptions = computed(() => {
+    if (props.categories) {
+        return Object.entries(props.categories).map(([value, label]) => ({ value, label }));
+    }
+    return [
+        { value: 'actualite',   label: 'Actualité' },
+        { value: 'projet',      label: 'Projet' },
+        { value: 'partenariat', label: 'Partenariat' },
+        { value: 'evenement',   label: 'Événement' },
+    ];
 });
 
 // Prévisualisation de l'image
@@ -137,6 +152,19 @@ function submit() {
                                 required
                             >
                             <p v-if="form.errors.title" class="mt-2 text-sm text-red-600">{{ form.errors.title }}</p>
+                        </div>
+
+                        <!-- Catégorie -->
+                        <div class="bg-gray-50 p-4 rounded-lg shadow-sm">
+                            <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Catégorie <span class="text-red-600">*</span></label>
+                            <select
+                                id="category"
+                                v-model="form.category"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition bg-white"
+                            >
+                                <option v-for="opt in categoryOptions" :key="opt.value" :value="opt.value">{{ opt.label }}</option>
+                            </select>
+                            <p v-if="form.errors.category" class="mt-2 text-sm text-red-600">{{ form.errors.category }}</p>
                         </div>
 
                         <!-- Date de publication -->

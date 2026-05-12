@@ -3,8 +3,8 @@ import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
 import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
 import { type NavItem } from '@/types';
-import { Link } from '@inertiajs/vue3';
-import { ref } from 'vue';
+import { Link, usePage } from '@inertiajs/vue3';
+import { computed, ref } from 'vue';
 import {
     LayoutGrid,
     Briefcase,
@@ -25,7 +25,8 @@ import {
     BadgeCheck,
     Target,
     ChevronDown,
-    ChevronUp
+    ChevronUp,
+    ThumbsUp
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
@@ -49,7 +50,7 @@ const interactionItems: NavItem[] = [
         href: route('admin.contacts.index'),
         icon: Mail,
     },
-    {
+    /*{
         title: 'Prospects',
         href: route('admin.leads.index'),
         icon: Users,
@@ -58,7 +59,7 @@ const interactionItems: NavItem[] = [
         title: 'Abonnements',
         href: route('admin.subscribes.index'),
         icon: Users,
-    },
+    },*/
 ];
 
 // Nouveau groupe: Gestion du site web (replié par défaut)
@@ -93,14 +94,41 @@ const siteManagementItems: NavItem[] = [
         href: route('admin.team-members.index'),
         icon: Users,
     },
+    {
+        title: 'Pourquoi nous',
+        href: route('admin.why-us.index'),
+        icon: ThumbsUp,
+    },
 ];
 
-const showSiteManagement = ref(false);
-const showConfiguration = ref(false);
-const showServiceManagement = ref(false);
-const showProductManagement = ref(false);
-const showTrainingManagement = ref(false);
-const showMasterclassManagement = ref(false);
+const page = usePage();
+
+const isItemActive = (href: string): boolean => {
+    try {
+        const itemPath = new URL(href).pathname;
+        return page.url === itemPath || page.url.startsWith(itemPath + '/');
+    } catch {
+        return page.url === href || page.url.startsWith(href + '/');
+    }
+};
+
+const _showSiteManagement = ref(false);
+const showSiteManagement = computed(() => _showSiteManagement.value || siteManagementItems.some(item => isItemActive(item.href)));
+
+const _showConfiguration = ref(false);
+const showConfiguration = computed(() => _showConfiguration.value || configurationItems.some(item => isItemActive(item.href)));
+
+const _showServiceManagement = ref(false);
+const showServiceManagement = computed(() => _showServiceManagement.value || serviceManagementItems.some(item => isItemActive(item.href)));
+
+const _showProductManagement = ref(false);
+const showProductManagement = computed(() => _showProductManagement.value || productManagementItems.some(item => isItemActive(item.href)));
+
+const _showTrainingManagement = ref(false);
+const showTrainingManagement = computed(() => _showTrainingManagement.value || trainingManagementItems.some(item => isItemActive(item.href)));
+
+const _showMasterclassManagement = ref(false);
+const showMasterclassManagement = computed(() => _showMasterclassManagement.value || masterclassItems.some(item => isItemActive(item.href)));
 
 // Groupe Executive Masterclass
 const masterclassItems: NavItem[] = [
@@ -134,16 +162,7 @@ const serviceManagementItems: NavItem[] = [
         href: route('admin.services.index'),
         icon: Briefcase,
     },
-    {
-        title: 'Créneaux',
-        href: route('admin.schedules.index'),
-        icon: Calendar,
-    },
-    {
-        title: 'Rendez-vous',
-        href: route('admin.appointments.index'),
-        icon: CalendarClock,
-    },
+  
 ];
 
 // Groupe gestion des formations (replié par défaut)
@@ -208,37 +227,19 @@ const configurationItems: NavItem[] = [
             <!-- Contenu et médias -->
 
 
-            <!-- Gestion des produits (replié par défaut) -->
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton @click="showProductManagement = !showProductManagement">
-                        <span>Gestion des produits</span>
-                        <component :is="showProductManagement ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-                <template v-if="showProductManagement">
-                    <SidebarMenuItem v-for="item in productManagementItems" :key="item.title">
-                        <SidebarMenuButton as-child>
-                            <Link :href="item.href">
-                                <component :is="item.icon" class="mr-2 h-4 w-4" />
-                                <span>{{ item.title }}</span>
-                            </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </template>
-            </SidebarMenu>
+            
 
             <!-- Gestion du site web (replié par défaut) -->
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton @click="showSiteManagement = !showSiteManagement">
+                    <SidebarMenuButton @click="_showSiteManagement = !showSiteManagement">
                         <span>Gestion du site web</span>
                         <component :is="showSiteManagement ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
                     </SidebarMenuButton>
                 </SidebarMenuItem>
                 <template v-if="showSiteManagement">
                     <SidebarMenuItem v-for="item in siteManagementItems" :key="item.title">
-                        <SidebarMenuButton as-child>
+                        <SidebarMenuButton as-child :is-active="isItemActive(item.href)">
                             <Link :href="item.href">
                                 <component :is="item.icon" class="mr-2 h-4 w-4" />
                                 <span>{{ item.title }}</span>
@@ -251,14 +252,14 @@ const configurationItems: NavItem[] = [
             <!-- Gestion des services (replié par défaut) -->
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton @click="showServiceManagement = !showServiceManagement">
+                    <SidebarMenuButton @click="_showServiceManagement = !showServiceManagement">
                         <span>Gestion des services</span>
                         <component :is="showServiceManagement ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
                     </SidebarMenuButton>
                 </SidebarMenuItem>
                 <template v-if="showServiceManagement">
                     <SidebarMenuItem v-for="item in serviceManagementItems" :key="item.title">
-                        <SidebarMenuButton as-child>
+                        <SidebarMenuButton as-child :is-active="isItemActive(item.href)">
                             <Link :href="item.href">
                                 <component :is="item.icon" class="mr-2 h-4 w-4" />
                                 <span>{{ item.title }}</span>
@@ -271,14 +272,14 @@ const configurationItems: NavItem[] = [
             <!-- Gestion des formations (replié par défaut) -->
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton @click="showTrainingManagement = !showTrainingManagement">
+                    <SidebarMenuButton @click="_showTrainingManagement = !showTrainingManagement">
                         <span>Gestion des formations</span>
                         <component :is="showTrainingManagement ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
                     </SidebarMenuButton>
                 </SidebarMenuItem>
                 <template v-if="showTrainingManagement">
                     <SidebarMenuItem v-for="item in trainingManagementItems" :key="item.title">
-                        <SidebarMenuButton as-child>
+                        <SidebarMenuButton as-child :is-active="isItemActive(item.href)">
                             <Link :href="item.href">
                                 <component :is="item.icon" class="mr-2 h-4 w-4" />
                                 <span>{{ item.title }}</span>
@@ -291,7 +292,7 @@ const configurationItems: NavItem[] = [
             <!-- Executive Masterclass (replié par défaut) -->
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton @click="showMasterclassManagement = !showMasterclassManagement">
+                    <SidebarMenuButton @click="_showMasterclassManagement = !showMasterclassManagement">
                         <Award class="mr-2 h-4 w-4" />
                         <span>Executive Masterclass</span>
                         <component :is="showMasterclassManagement ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
@@ -299,7 +300,7 @@ const configurationItems: NavItem[] = [
                 </SidebarMenuItem>
                 <template v-if="showMasterclassManagement">
                     <SidebarMenuItem v-for="item in masterclassItems" :key="item.title">
-                        <SidebarMenuButton as-child>
+                        <SidebarMenuButton as-child :is-active="isItemActive(item.href)">
                             <Link :href="item.href">
                                 <component :is="item.icon" class="mr-2 h-4 w-4" />
                                 <span>{{ item.title }}</span>
@@ -324,14 +325,14 @@ const configurationItems: NavItem[] = [
             <!-- Configuration (replié par défaut) -->
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton @click="showConfiguration = !showConfiguration">
+                    <SidebarMenuButton @click="_showConfiguration = !showConfiguration">
                         <span>Configuration</span>
                         <component :is="showConfiguration ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
                     </SidebarMenuButton>
                 </SidebarMenuItem>
                 <template v-if="showConfiguration">
                     <SidebarMenuItem v-for="item in configurationItems" :key="item.title">
-                        <SidebarMenuButton as-child>
+                        <SidebarMenuButton as-child :is-active="isItemActive(item.href)">
                             <Link :href="item.href">
                                 <component :is="item.icon" class="mr-2 h-4 w-4" />
                                 <span>{{ item.title }}</span>

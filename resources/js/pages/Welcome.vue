@@ -41,6 +41,11 @@ interface Actualite {
     created_at: string; slug?: string;
 }
 
+interface Project {
+    id: number; title: string; description?: string | null;
+    image_url?: string | null; published_at?: string | null;
+}
+
 interface Pillar {
     icon?: string; category: string; title: string;
     color: string; bg: string; description: string;
@@ -52,6 +57,7 @@ const testimonials = ref<Testimonial[]>([]);
 const partners = ref<Partner[]>([]);
 const latestPosts = ref<Actualite[]>([]);
 const pillars = ref<Pillar[]>([]);
+const projects = ref<Project[]>([]);
 
 const statsAnimated = ref(false);
 const statsRef = ref<HTMLElement | null>(null);
@@ -78,29 +84,36 @@ const animateCounter = (index: number, target: number) => {
 };
 
 
-const whyUs = [
+interface WhyUsItem {
+    id?: number; icon: string; color: string; title: string; desc: string;
+}
+
+const whyUs = ref<WhyUsItem[]>([
     { icon: 'bi-patch-check-fill', color: '#2563EB', title: 'Certifications reconnues', desc: 'Toutes nos formations débouchent sur des certifications mondialement reconnues.' },
     { icon: 'bi-people-fill', color: '#16A34A', title: 'Experts praticiens', desc: 'Nos formateurs sont des professionnels actifs avec une expérience terrain de 10+ ans.' },
     { icon: 'bi-building-fill', color: '#D97706', title: 'Formation corporate', desc: 'Solutions B2B sur-mesure pour former vos équipes directement en entreprise ou à distance.' },
     { icon: 'bi-globe-africa', color: '#7C3AED', title: 'Présence panafricaine', desc: 'Bureaux dans 12 pays africains avec une qualité de formation uniforme et internationale.' },
     { icon: 'bi-graph-up-arrow', color: '#0891B2', title: 'ROI mesurable', desc: 'Nos clients constatent en moyenne +35% de productivité après certification de leurs équipes.' },
-    //{ icon: 'bi-shield-fill-check', color: '#DC2626', title: 'Accrédité PMI', desc: 'Centre de formation accrédité par PMI, Pearson VUE et les grandes instances internationales.' },
-];
+]);
 
 onMounted(async () => {
     try {
-        const [f, t, p, a, cats] = await Promise.all([
+        const [f, t, p, a, cats, proj, why] = await Promise.all([
             axios.get('/api/formations/featured').catch(() => ({ data: [] })),
             axios.get('/api/testimonials/latest').catch(() => ({ data: [] })),
             axios.get('/api/partners/list').catch(() => ({ data: [] })),
             axios.get('/api/actualites/latest').catch(() => ({ data: [] })),
             axios.get('/api/formation-categories').catch(() => ({ data: [] })),
+            axios.get('/api/actualites/projects').catch(() => ({ data: [] })),
+            axios.get('/api/why-us').catch(() => ({ data: [] })),
         ]);
         formations.value = f.data?.slice?.(0, 6) ?? [];
         testimonials.value = t.data?.slice?.(0, 3) ?? [];
         partners.value = p.data?.slice?.(0, 8) ?? [];
         latestPosts.value = a.data?.slice?.(0, 3) ?? [];
         pillars.value = cats.data ?? [];
+        projects.value = proj.data?.slice?.(0, 3) ?? [];
+        if (Array.isArray(why.data) && why.data.length) whyUs.value = why.data;
     } catch {}
 
     // Intersection Observer for stats animation
@@ -590,24 +603,48 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                 </div>
 
                 <div class="grid lg:grid-cols-3 gap-6">
-                    <div v-for="proj in [
-                        { country: '🇨🇮', tag: 'Ministère', title: '', desc: '', icon: 'bi-laptop', color: '#2563EB', bg: '#EFF6FF' },
-                        { country: '🇸🇳', tag: 'Corporate', title: '', desc: '', icon: 'bi-award', color: '#16A34A', bg: '#F0FDF4' },
-                        { country: '🌍', tag: 'International', title: '', desc: '', icon: 'bi-globe', color: '#D97706', bg: '#FFFBEB' },
-                    ]" :key="proj.title"
-                        class="gt-card overflow-hidden group">
-                        <div class="h-48 relative flex items-center justify-center" :style="`background: linear-gradient(135deg, ${proj.bg}, white);`">
-                            <i :class="['bi', proj.icon, 'text-6xl opacity-20']" :style="`color: ${proj.color};`"></i>
-                            <div class="absolute top-4 left-4 flex items-center gap-2">
-                                <span class="text-lg">{{ proj.country }}</span>
-                                <span class="text-xs font-bold px-2 py-1 rounded-full text-white" :style="`background: ${proj.color};`">{{ proj.tag }}</span>
+                    <!-- Real project cards -->
+                    <template v-if="projects.length">
+                        <Link v-for="proj in projects" :key="proj.id"
+                            :href="route('portfolio')"
+                            class="gt-card overflow-hidden group transition-all duration-300 hover:-translate-y-1 hover:shadow-xl">
+                            <div class="h-48 relative flex items-center justify-center overflow-hidden"
+                                :style="`background: linear-gradient(135deg, #EFF6FF, ${isDark ? '#0D1526' : 'white'});`">
+                                <img v-if="proj.image_url" :src="proj.image_url" :alt="proj.title"
+                                    class="w-full h-full object-cover absolute inset-0 transition-transform duration-500 group-hover:scale-105" />
+                                <i v-else class="bi bi-folder-fill text-6xl opacity-20" style="color: #2563EB;"></i>
+                                <div class="absolute top-4 left-4">
+                                    <span class="text-xs font-bold px-2 py-1 rounded-full text-white" style="background: #2563EB;">Projet</span>
+                                </div>
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-base font-bold mb-2 line-clamp-2" :style="`color: ${textHeading};`">{{ proj.title }}</h3>
+                                <div v-if="proj.description" class="text-sm leading-relaxed line-clamp-3" :style="`color: ${textBody};`" v-html="proj.description"></div>
+                            </div>
+                        </Link>
+                    </template>
+
+                    <!-- Fallback placeholder cards -->
+                    <template v-else>
+                        <div v-for="proj in [
+                            { tag: 'Ministère', title: '', desc: '', icon: 'bi-laptop', color: '#2563EB', bg: '#EFF6FF' },
+                            { tag: 'Corporate',   title: '', desc: '', icon: 'bi-award',  color: '#16A34A', bg: '#F0FDF4' },
+                            { tag: 'International', title: '', desc: '', icon: 'bi-globe', color: '#D97706', bg: '#FFFBEB' },
+                        ]" :key="proj.tag"
+                            class="gt-card overflow-hidden group">
+                            <div class="h-48 relative flex items-center justify-center" :style="`background: linear-gradient(135deg, ${proj.bg}, white);`">
+                                <i :class="['bi', proj.icon, 'text-6xl opacity-20']" :style="`color: ${proj.color};`"></i>
+                                <div class="absolute top-4 left-4">
+                                    <span class="text-xs font-bold px-2 py-1 rounded-full text-white" :style="`background: ${proj.color};`">{{ proj.tag }}</span>
+                                </div>
+                            </div>
+                            <div class="p-6">
+                                <h3 class="text-base font-bold mb-2 line-clamp-2" :style="`color: ${textHeading};`">{{ proj.title }}</h3>
+                                <p class="text-sm leading-relaxed" :style="`color: ${textBody};`">{{ proj.desc }}</p>
                             </div>
                         </div>
-                        <div class="p-6">
-                            <h3 class="text-base font-bold mb-2 line-clamp-2" :style="`color: ${textHeading};`">{{ proj.title }}</h3>
-                            <p class="text-sm leading-relaxed" :style="`color: ${textBody};`">{{ proj.desc }}</p>
-                        </div>
-                    </div>
+                    </template>
                 </div>
             </div>
         </section>
