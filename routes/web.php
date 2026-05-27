@@ -352,6 +352,14 @@ Route::middleware(['auth'])->group(function () {
             ->name('admin.leads.appels.destroy');
 
 
+            // Route Home Page
+        Route::get('/admin/home-page', [\App\Http\Controllers\HomePageController::class, 'edit'])->name('admin.home-page.edit');
+        Route::post('/admin/home-page', [\App\Http\Controllers\HomePageController::class, 'update'])->name('admin.home-page.update');
+
+            // Route Service Page
+        Route::get('/admin/service-page', [\App\Http\Controllers\ServicePageController::class, 'edit'])->name('admin.service-page.edit');
+        Route::post('/admin/service-page', [\App\Http\Controllers\ServicePageController::class, 'update'])->name('admin.service-page.update');
+
             //Route About
         Route::get('/admin/about', [AboutController::class, 'edit'])->name('admin.about.edit');
         Route::get('/admin/about/edit', [AboutController::class, 'edit'])->name('admin.about.edit');

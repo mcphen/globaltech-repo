@@ -9,12 +9,11 @@ use Illuminate\Support\Facades\Storage;
 
 class AboutController extends Controller
 {
-    // Affiche la page About via Inertia
     public function index()
     {
         $about = About::first();
-        return Inertia::render('About', [
-            'about' => $about
+        return Inertia::render('Front/About', [
+            'about' => $about,
         ]);
     }
 
@@ -22,49 +21,73 @@ class AboutController extends Controller
     {
         $about = About::first();
         return Inertia::render('Admin/About/Index', [
-            'about' => $about
+            'about' => $about,
         ]);
     }
 
-    // Affiche la page d'édition en back-office
     public function edit()
     {
         $about = About::first();
         return Inertia::render('Admin/About/Edit', [
-            'about' => $about
+            'about' => $about,
         ]);
     }
 
-    // Mise à jour du contenu depuis le BO
     public function update(Request $request)
     {
+        // Decode JSON array fields sent as strings from FormData
+        foreach (['stats', 'values', 'milestones', 'offices'] as $field) {
+            if ($request->has($field) && is_string($request->input($field))) {
+                $request->merge([$field => json_decode($request->input($field), true) ?? []]);
+            }
+        }
+
         $data = $request->validate([
-            'content' => 'required|string',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'content'          => 'nullable|string',
+            'image'            => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+            'hero_badge'       => 'nullable|string|max:255',
+            'hero_title'       => 'nullable|string|max:255',
+            'hero_subtitle'    => 'nullable|string',
+            'history_label'    => 'nullable|string|max:255',
+            'history_title'    => 'nullable|string|max:255',
+            'stats'            => 'nullable|array',
+            'stats.*.value'    => 'nullable|string|max:50',
+            'stats.*.label'    => 'nullable|string|max:100',
+            'values'           => 'nullable|array',
+            'values.*.icon'    => 'nullable|string|max:100',
+            'values.*.color'   => 'nullable|string|max:50',
+            'values.*.title'   => 'nullable|string|max:255',
+            'values.*.desc'    => 'nullable|string',
+            'timeline_label'   => 'nullable|string|max:255',
+            'timeline_title'   => 'nullable|string|max:255',
+            'milestones'       => 'nullable|array',
+            'milestones.*.year'  => 'nullable|string|max:10',
+            'milestones.*.event' => 'nullable|string',
+            'offices_title'    => 'nullable|string|max:255',
+            'offices_subtitle' => 'nullable|string',
+            'offices'          => 'nullable|array',
+            'offices.*.country' => 'nullable|string|max:100',
+            'offices.*.city'    => 'nullable|string|max:100',
+            'offices.*.flag'    => 'nullable|string|max:10',
+            'offices.*.role'    => 'nullable|string|max:100',
+            'offices.*.address' => 'nullable|string|max:255',
+            'cta_title'        => 'nullable|string|max:255',
+            'cta_subtitle'     => 'nullable|string',
         ]);
 
-        $aboutData = ['content' => $data['content']];
+        $aboutData = collect($data)->except('image')->toArray();
 
-        // Traitement de l'image si elle est présente
         if ($request->hasFile('image')) {
             $about = About::first();
-
-            // Suppression de l'ancienne image si elle existe
-            if ($about && $about->image_path) {
-                Storage::disk('public')->delete($about->image_path);
+            if ($about?->getRawOriginal('image_path')) {
+                Storage::disk('public')->delete($about->getRawOriginal('image_path'));
             }
-
-            // Stockage de la nouvelle image
-            $path = $request->file('image')->store('about', 'public');
-            $aboutData['image_path'] = $path;
+            $aboutData['image_path'] = $request->file('image')->store('about', 'public');
         }
 
         About::updateOrCreate([], $aboutData);
 
-        $about = About::first();
-        return Inertia::render('Admin/About/Edit', [
-            'about' => $about,
-            'flash' => ['success' => 'Contenu mis à jour.'],
-        ]);
+        return redirect()->route('admin.about.index')
+            ->with('success', 'Page À propos mise à jour.');
     }
 }

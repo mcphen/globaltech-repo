@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\About;
+use App\Models\HomePage;
+use App\Models\ServicePage;
 use App\Models\Actualite;
 use App\Models\Album;
 use App\Models\MasterclassCertification;
@@ -29,8 +31,9 @@ class HomeController extends Controller
             ->get(['id', 'image_path', 'caption']);
 
         return Inertia::render('Welcome', [
-            'bannerPhotos' => $bannerPhotos,
-            'contactSettings' => $this->getContactSettings()
+            'bannerPhotos'    => $bannerPhotos,
+            'contactSettings' => $this->getContactSettings(),
+            'homePage'        => HomePage::first(),
         ]);
     }
 
@@ -79,7 +82,8 @@ class HomeController extends Controller
 
     public function services(){
         return Inertia::render('Front/ServiceFront', [
-            'contactSettings' => $this->getContactSettings()
+            'contactSettings' => $this->getContactSettings(),
+            'servicePage'     => ServicePage::first(),
         ]);
     }
 

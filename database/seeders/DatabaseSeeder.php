@@ -20,6 +20,9 @@ class DatabaseSeeder extends Seeder
             FormationCategorySeeder::class,
             FormationSeeder::class,
             MasterclassSeeder::class,
+            AboutSeeder::class,
+            HomePageSeeder::class,
+            ServicePageSeeder::class,
         ]);
     }
 }

@@ -7,99 +7,29 @@ import { Link, usePage } from '@inertiajs/vue3';
 import { computed, ref } from 'vue';
 import {
     LayoutGrid,
-    Briefcase,
-    ShoppingCart,
-    Users,
-    MessageSquare,
-    Newspaper,
-    Image,
-    Calendar,
-    CalendarClock,
-    Mail,
-    Settings,
+    Monitor,
+    Info,
     GraduationCap,
-    Award,
-    BarChart2,
-    Globe,
     Layers,
+    MessageSquare,
+    Handshake,
+    Newspaper,
+    ThumbsUp,
+    Users,
+    Image,
+    Award,
+    Globe,
     BadgeCheck,
     Target,
+    BarChart2,
+    Mail,
+    Briefcase,
+    ShoppingCart,
+    Settings,
     ChevronDown,
     ChevronUp,
-    ThumbsUp
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
-
-// Groupe principal - Tableau de bord
-const mainNavItems: NavItem[] = [
-    {
-        title: 'Dashboard',
-        href: '/dashboard',
-        icon: LayoutGrid,
-    }
-];
-
-// Groupe contenu et médias (items restants en dehors de "Gestion du site web")
-const contentMediaItems: NavItem[] = [
-];
-
-// Groupe interactions et contacts (items restants en dehors de "Gestion du site web")
-const interactionItems: NavItem[] = [
-    {
-        title: 'Contacts',
-        href: route('admin.contacts.index'),
-        icon: Mail,
-    },
-    /*{
-        title: 'Prospects',
-        href: route('admin.leads.index'),
-        icon: Users,
-    },
-    {
-        title: 'Abonnements',
-        href: route('admin.subscribes.index'),
-        icon: Users,
-    },*/
-];
-
-// Nouveau groupe: Gestion du site web (replié par défaut)
-const siteManagementItems: NavItem[] = [
-    {
-        title: 'Actualités',
-        href: route('admin.actualites.index'),
-        icon: Newspaper,
-    },
-    {
-        title: 'Albums photos',
-        href: route('admin.albums.index'),
-        icon: Image,
-    },
-    {
-        title: 'Témoignages',
-        href: route('admin.testimonials.index'),
-        icon: MessageSquare,
-    },
-    {
-        title: 'À propos',
-        href: route('admin.about.index'),
-        icon: Newspaper,
-    },
-    {
-        title: 'Partner',
-        href: route('admin.partners.index'),
-        icon: Users,
-    },
-    {
-        title: 'Équipes',
-        href: route('admin.team-members.index'),
-        icon: Users,
-    },
-    {
-        title: 'Pourquoi nous',
-        href: route('admin.why-us.index'),
-        icon: ThumbsUp,
-    },
-];
 
 const page = usePage();
 
@@ -112,95 +42,72 @@ const isItemActive = (href: string): boolean => {
     }
 };
 
-const _showSiteManagement = ref(false);
-const showSiteManagement = computed(() => _showSiteManagement.value || siteManagementItems.some(item => isItemActive(item.href)));
+// ── 1. PRINCIPAL ────────────────────────────────────────────────────────────
+const mainNavItems: NavItem[] = [
+    { title: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
+];
 
-const _showConfiguration = ref(false);
-const showConfiguration = computed(() => _showConfiguration.value || configurationItems.some(item => isItemActive(item.href)));
+// ── 2. PAGES DU SITE (toujours visible) ────────────────────────────────────
+const pagesItems: NavItem[] = [
+    { title: 'Page d\'accueil', href: route('admin.home-page.edit'),    icon: Monitor },
+    { title: 'Page À propos',   href: route('admin.about.index'),        icon: Info },
+    { title: 'Page Consulting', href: route('admin.service-page.edit'), icon: Briefcase },
+];
 
-const _showServiceManagement = ref(false);
-const showServiceManagement = computed(() => _showServiceManagement.value || serviceManagementItems.some(item => isItemActive(item.href)));
+// ── 3. FORMATIONS ───────────────────────────────────────────────────────────
+const formationItems: NavItem[] = [
+    { title: 'Formations',            href: route('admin.formations.index'),          icon: GraduationCap },
+    { title: 'Catégories',            href: route('admin.formation-categories.index'), icon: Layers },
+];
 
-const _showProductManagement = ref(false);
-const showProductManagement = computed(() => _showProductManagement.value || productManagementItems.some(item => isItemActive(item.href)));
+// ── 4. CONTENU ÉDITORIAL ───────────────────────────────────────────────────
+const contentItems: NavItem[] = [
+    { title: 'Témoignages',   href: route('admin.testimonials.index'), icon: MessageSquare },
+    { title: 'Partenaires',   href: route('admin.partners.index'),     icon: Handshake },
+    { title: 'Actualités',    href: route('admin.actualites.index'),   icon: Newspaper },
+    { title: 'Pourquoi nous', href: route('admin.why-us.index'),       icon: ThumbsUp },
+    { title: 'Équipe',        href: route('admin.team-members.index'), icon: Users },
+    { title: 'Albums photos', href: route('admin.albums.index'),       icon: Image },
+];
 
-const _showTrainingManagement = ref(false);
-const showTrainingManagement = computed(() => _showTrainingManagement.value || trainingManagementItems.some(item => isItemActive(item.href)));
-
-const _showMasterclassManagement = ref(false);
-const showMasterclassManagement = computed(() => _showMasterclassManagement.value || masterclassItems.some(item => isItemActive(item.href)));
-
-// Groupe Executive Masterclass
+// ── 5. EXECUTIVE MASTERCLASS ────────────────────────────────────────────────
 const masterclassItems: NavItem[] = [
-    { title: 'Bannière & CTA',     href: route('admin.masterclass.page.edit'),               icon: Layers },
-    { title: 'Domaines',           href: route('admin.masterclass.domaines.index'),           icon: Globe },
-    { title: 'Formats',            href: route('admin.masterclass.formats.index'),            icon: Layers },
-    { title: 'Partenaires',        href: route('admin.masterclass.partenaires.index'),        icon: Award },
-    { title: 'Certifications',     href: route('admin.masterclass.certifications.index'),     icon: BadgeCheck },
-    { title: 'Public cible',       href: route('admin.masterclass.public-cibles.index'),      icon: Target },
-    { title: 'Statistiques clés',  href: route('admin.masterclass.stats.index'),              icon: BarChart2 },
+    { title: 'Bannière & CTA',    href: route('admin.masterclass.page.edit'),            icon: Layers },
+    { title: 'Domaines',          href: route('admin.masterclass.domaines.index'),        icon: Globe },
+    { title: 'Formats',           href: route('admin.masterclass.formats.index'),         icon: Layers },
+    { title: 'Partenaires MC',    href: route('admin.masterclass.partenaires.index'),     icon: Award },
+    { title: 'Certifications',    href: route('admin.masterclass.certifications.index'),  icon: BadgeCheck },
+    { title: 'Public cible',      href: route('admin.masterclass.public-cibles.index'),   icon: Target },
+    { title: 'Statistiques clés', href: route('admin.masterclass.stats.index'),           icon: BarChart2 },
 ];
 
-// Groupe gestion des produits (replié par défaut)
-const productManagementItems: NavItem[] = [
-    {
-        title: 'Produits',
-        href: route('admin.products.index'),
-        icon: ShoppingCart,
-    },
-    {
-        title: 'Commandes',
-        href: route('admin.orders.index'),
-        icon: ShoppingCart,
-    },
+// ── 6. OPÉRATIONNEL ─────────────────────────────────────────────────────────
+const operationalItems: NavItem[] = [
+    { title: 'Contacts',  href: route('admin.contacts.index'), icon: Mail },
+    { title: 'Services',  href: route('admin.services.index'), icon: Briefcase },
+    { title: 'Produits',  href: route('admin.products.index'), icon: ShoppingCart },
+    { title: 'Commandes', href: route('admin.orders.index'),   icon: ShoppingCart },
 ];
 
-// Groupe gestion des services (replié par défaut)
-const serviceManagementItems: NavItem[] = [
-    {
-        title: 'Services',
-        href: route('admin.services.index'),
-        icon: Briefcase,
-    },
-  
+// ── 7. ADMINISTRATION ────────────────────────────────────────────────────────
+const adminItems: NavItem[] = [
+    { title: 'Utilisateurs',          href: route('admin.users.index'),        icon: Users },
+    { title: 'Config Contact & Réseaux', href: route('admin.contact-settings'), icon: Settings },
+    { title: 'Config SMTP',           href: route('admin.mail-settings'),      icon: Settings },
 ];
 
-// Groupe gestion des formations (replié par défaut)
-const trainingManagementItems: NavItem[] = [
-    {
-        title: 'Formations',
-        href: route('admin.formations.index'),
-        icon: GraduationCap,
-    },
-    {
-        title: 'Catégories de formations',
-        href: route('admin.formation-categories.index'),
-        icon: Briefcase,
-    },
-];
+// ── Collapsed state ──────────────────────────────────────────────────────────
+const _showFormations    = ref(false);
+const _showContent       = ref(false);
+const _showMasterclass   = ref(false);
+const _showOperational   = ref(false);
+const _showAdmin         = ref(false);
 
-// Groupe équipe et utilisateurs (hors "Équipes")
-const teamItems: NavItem[] = [
-    {
-        title: 'Utilisateurs',
-        href: route('admin.users.index'),
-        icon: Users,
-    },
-];
-
-// Groupe configuration
-const configurationItems: NavItem[] = [
-    {
-        title: 'Configuration • Contact & Réseaux',
-        href: route('admin.contact-settings'),
-        icon: Settings,
-    },
-    {
-        title: 'Configuration • SMTP',
-        href: route('admin.mail-settings'),
-        icon: Settings,
-    },
-];
+const showFormations  = computed(() => _showFormations.value  || formationItems.some(i => isItemActive(i.href)));
+const showContent     = computed(() => _showContent.value     || contentItems.some(i => isItemActive(i.href)));
+const showMasterclass = computed(() => _showMasterclass.value || masterclassItems.some(i => isItemActive(i.href)));
+const showOperational = computed(() => _showOperational.value || operationalItems.some(i => isItemActive(i.href)));
+const showAdmin       = computed(() => _showAdmin.value       || adminItems.some(i => isItemActive(i.href)));
 </script>
 
 <template>
@@ -218,27 +125,24 @@ const configurationItems: NavItem[] = [
         </SidebarHeader>
 
         <SidebarContent>
-            <!-- Tableau de bord -->
-            <NavMain
-                :items="mainNavItems"
-                group-title="Principal"
-            />
 
-            <!-- Contenu et médias -->
+            <!-- ① Dashboard -->
+            <NavMain :items="mainNavItems" group-title="Principal" />
 
+            <!-- ② Pages du site — toujours visible, pas de toggle -->
+            <NavMain :items="pagesItems" group-title="Pages du site" />
 
-            
-
-            <!-- Gestion du site web (replié par défaut) -->
+            <!-- ③ Formations -->
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton @click="_showSiteManagement = !showSiteManagement">
-                        <span>Gestion du site web</span>
-                        <component :is="showSiteManagement ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
+                    <SidebarMenuButton @click="_showFormations = !showFormations">
+                        <GraduationCap class="mr-2 h-4 w-4" />
+                        <span>Formations</span>
+                        <component :is="showFormations ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
                     </SidebarMenuButton>
                 </SidebarMenuItem>
-                <template v-if="showSiteManagement">
-                    <SidebarMenuItem v-for="item in siteManagementItems" :key="item.title">
+                <template v-if="showFormations">
+                    <SidebarMenuItem v-for="item in formationItems" :key="item.title">
                         <SidebarMenuButton as-child :is-active="isItemActive(item.href)">
                             <Link :href="item.href">
                                 <component :is="item.icon" class="mr-2 h-4 w-4" />
@@ -249,16 +153,17 @@ const configurationItems: NavItem[] = [
                 </template>
             </SidebarMenu>
 
-            <!-- Gestion des services (replié par défaut) -->
+            <!-- ④ Contenu éditorial -->
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton @click="_showServiceManagement = !showServiceManagement">
-                        <span>Gestion des services</span>
-                        <component :is="showServiceManagement ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
+                    <SidebarMenuButton @click="_showContent = !showContent">
+                        <Newspaper class="mr-2 h-4 w-4" />
+                        <span>Contenu</span>
+                        <component :is="showContent ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
                     </SidebarMenuButton>
                 </SidebarMenuItem>
-                <template v-if="showServiceManagement">
-                    <SidebarMenuItem v-for="item in serviceManagementItems" :key="item.title">
+                <template v-if="showContent">
+                    <SidebarMenuItem v-for="item in contentItems" :key="item.title">
                         <SidebarMenuButton as-child :is-active="isItemActive(item.href)">
                             <Link :href="item.href">
                                 <component :is="item.icon" class="mr-2 h-4 w-4" />
@@ -269,36 +174,16 @@ const configurationItems: NavItem[] = [
                 </template>
             </SidebarMenu>
 
-            <!-- Gestion des formations (replié par défaut) -->
+            <!-- ⑤ Executive Masterclass -->
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton @click="_showTrainingManagement = !showTrainingManagement">
-                        <span>Gestion des formations</span>
-                        <component :is="showTrainingManagement ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-                <template v-if="showTrainingManagement">
-                    <SidebarMenuItem v-for="item in trainingManagementItems" :key="item.title">
-                        <SidebarMenuButton as-child :is-active="isItemActive(item.href)">
-                            <Link :href="item.href">
-                                <component :is="item.icon" class="mr-2 h-4 w-4" />
-                                <span>{{ item.title }}</span>
-                            </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </template>
-            </SidebarMenu>
-
-            <!-- Executive Masterclass (replié par défaut) -->
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton @click="_showMasterclassManagement = !showMasterclassManagement">
+                    <SidebarMenuButton @click="_showMasterclass = !showMasterclass">
                         <Award class="mr-2 h-4 w-4" />
                         <span>Executive Masterclass</span>
-                        <component :is="showMasterclassManagement ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
+                        <component :is="showMasterclass ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
                     </SidebarMenuButton>
                 </SidebarMenuItem>
-                <template v-if="showMasterclassManagement">
+                <template v-if="showMasterclass">
                     <SidebarMenuItem v-for="item in masterclassItems" :key="item.title">
                         <SidebarMenuButton as-child :is-active="isItemActive(item.href)">
                             <Link :href="item.href">
@@ -310,28 +195,17 @@ const configurationItems: NavItem[] = [
                 </template>
             </SidebarMenu>
 
-            <!-- Interactions -->
-            <NavMain
-                :items="interactionItems"
-                group-title="Interactions"
-            />
-
-            <!-- Équipe -->
-            <NavMain
-                :items="teamItems"
-                group-title="Équipe & Utilisateurs"
-            />
-
-            <!-- Configuration (replié par défaut) -->
+            <!-- ⑥ Opérationnel -->
             <SidebarMenu>
                 <SidebarMenuItem>
-                    <SidebarMenuButton @click="_showConfiguration = !showConfiguration">
-                        <span>Configuration</span>
-                        <component :is="showConfiguration ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
+                    <SidebarMenuButton @click="_showOperational = !showOperational">
+                        <Briefcase class="mr-2 h-4 w-4" />
+                        <span>Opérationnel</span>
+                        <component :is="showOperational ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
                     </SidebarMenuButton>
                 </SidebarMenuItem>
-                <template v-if="showConfiguration">
-                    <SidebarMenuItem v-for="item in configurationItems" :key="item.title">
+                <template v-if="showOperational">
+                    <SidebarMenuItem v-for="item in operationalItems" :key="item.title">
                         <SidebarMenuButton as-child :is-active="isItemActive(item.href)">
                             <Link :href="item.href">
                                 <component :is="item.icon" class="mr-2 h-4 w-4" />
@@ -341,6 +215,28 @@ const configurationItems: NavItem[] = [
                     </SidebarMenuItem>
                 </template>
             </SidebarMenu>
+
+            <!-- ⑦ Administration -->
+            <SidebarMenu>
+                <SidebarMenuItem>
+                    <SidebarMenuButton @click="_showAdmin = !showAdmin">
+                        <Settings class="mr-2 h-4 w-4" />
+                        <span>Administration</span>
+                        <component :is="showAdmin ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+                <template v-if="showAdmin">
+                    <SidebarMenuItem v-for="item in adminItems" :key="item.title">
+                        <SidebarMenuButton as-child :is-active="isItemActive(item.href)">
+                            <Link :href="item.href">
+                                <component :is="item.icon" class="mr-2 h-4 w-4" />
+                                <span>{{ item.title }}</span>
+                            </Link>
+                        </SidebarMenuButton>
+                    </SidebarMenuItem>
+                </template>
+            </SidebarMenu>
+
         </SidebarContent>
 
         <SidebarFooter>
