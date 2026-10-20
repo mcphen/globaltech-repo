@@ -30,16 +30,32 @@
             }
         </style>
 
-        <title inertia>{{ config('app.name', 'Laravel') }}</title>
+        <title inertia>GlobalTECH EDUCATION Africa</title>
 
         {{-- Favicon and social sharing images --}}
-        <link rel="icon" type="image/jpeg" href="{{ asset('images/logo.jpg') }}">
-        <link rel="shortcut icon" type="image/jpeg" href="{{ asset('images/logo.jpg') }}">
-        <link rel="apple-touch-icon" href="{{ asset('images/logo.jpg') }}">
-        <meta property="og:image" content="{{ url('/images/logo.jpg') }}" />
-        <meta property="og:image:alt" content="{{ config('app.name', 'GlobalTECH EDUCATION Africa') }}" />
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:image" content="{{ url('/images/logo.jpg') }}" />
+        @php
+            $siteName = 'GlobalTECH EDUCATION Africa';
+            $siteDescription = 'Leader en formations certifiantes PMP, Informatique et Management en Afrique.';
+            $shareImage = asset('images/logo_globaltech.jpeg');
+        @endphp
+        <meta name="description" content="{{ $siteDescription }}" />
+        <link rel="icon" type="image/jpeg" href="{{ $shareImage }}">
+        <link rel="shortcut icon" type="image/jpeg" href="{{ $shareImage }}">
+        <link rel="apple-touch-icon" href="{{ $shareImage }}">
+
+        {{-- Rendered server-side: social crawlers (WhatsApp, Facebook, LinkedIn…) don't execute JS --}}
+        <meta property="og:type" content="website" />
+        <meta property="og:site_name" content="{{ $siteName }}" />
+        <meta property="og:title" content="{{ $siteName }}" />
+        <meta property="og:description" content="{{ $siteDescription }}" />
+        <meta property="og:url" content="{{ url()->current() }}" />
+        <meta property="og:locale" content="fr_FR" />
+        <meta property="og:image" content="{{ $shareImage }}" />
+        <meta property="og:image:alt" content="{{ $siteName }}" />
+        <meta name="twitter:card" content="summary" />
+        <meta name="twitter:title" content="{{ $siteName }}" />
+        <meta name="twitter:description" content="{{ $siteDescription }}" />
+        <meta name="twitter:image" content="{{ $shareImage }}" />
 
         <link rel="preconnect" href="https://fonts.bunny.net">
         <link href="https://fonts.bunny.net/css?family=instrument-sans:400,500,600" rel="stylesheet" />

@@ -464,8 +464,53 @@ const tabs = [
 </template>
 
 <style scoped>
-.gt-label  { @apply block text-sm font-medium text-gray-700 mb-1; }
-.gt-input  { @apply w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500; }
-.gt-btn-sm { @apply px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700; }
-.gt-btn-danger { @apply px-2 py-1 text-sm bg-red-100 text-red-600 rounded hover:bg-red-200; }
+.gt-label {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: rgb(55 65 81);
+    font-size: 0.875rem;
+    font-weight: 500;
+    line-height: 1.25rem;
+}
+
+.gt-input {
+    width: 100%;
+    border: 1px solid rgb(209 213 219);
+    border-radius: 0.375rem;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.gt-input:focus {
+    outline: none;
+    border-color: rgb(59 130 246);
+    box-shadow: 0 0 0 2px rgb(59 130 246 / 0.5);
+}
+
+.gt-btn-sm {
+    border-radius: 0.25rem;
+    background: rgb(37 99 235);
+    color: #fff;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    line-height: 1rem;
+}
+
+.gt-btn-sm:hover {
+    background: rgb(29 78 216);
+}
+
+.gt-btn-danger {
+    border-radius: 0.25rem;
+    background: rgb(254 226 226);
+    color: rgb(220 38 38);
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+}
+
+.gt-btn-danger:hover {
+    background: rgb(254 202 202);
+}
 </style>
