@@ -108,8 +108,8 @@ function submitSession() {
             <!-- Header -->
             <div class="rounded-2xl p-6 text-white" style="background: linear-gradient(135deg, #0B1437, #1E3A8A);">
                 <div class="flex items-center gap-4">
-                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: rgba(232,160,32,0.2);">
-                        <i class="bi bi-award text-3xl" style="color: #E8A020;"></i>
+                    <div class="w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0" style="background: rgba(230,57,70,0.2);">
+                        <i class="bi bi-award text-3xl" style="color: #E63946;"></i>
                     </div>
                     <div>
                         <h1 class="text-2xl font-black text-white">Executive Masterclass</h1>
@@ -117,7 +117,7 @@ function submitSession() {
                     </div>
                     <a href="/executive-masterclass" target="_blank"
                         class="ml-auto flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition-all"
-                        style="background: rgba(232,160,32,0.15); color: #E8A020; border: 1px solid rgba(232,160,32,0.3);">
+                        style="background: rgba(230,57,70,0.15); color: #E63946; border: 1px solid rgba(230,57,70,0.3);">
                         <i class="bi bi-eye"></i> Voir la page
                     </a>
                 </div>

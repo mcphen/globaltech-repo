@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
-import { ref, onMounted, onUnmounted, computed } from 'vue';
-import { useDarkMode } from '@/composables/useDarkMode';
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
+import { useDarkMode, setForcedTheme } from '@/composables/useDarkMode';
+import { useSiteSettings } from '@/composables/useSiteSettings';
 
 interface ContactSettings {
     contact_phone: string;
@@ -32,9 +33,23 @@ const cart = computed<any>(() => (page.props as any).cart ?? { items: [], count:
 const auth = computed<any>(() => (page.props as any).auth);
 const dbCategories = computed<FormationCategoryProp[]>(() => (page.props as any).formationCategories ?? []);
 
-const { isDark, theme, cycle, icon, label } = useDarkMode();
+const { isDark, isForced, theme, cycle, icon, label } = useDarkMode();
 type Theme = 'system' | 'light' | 'dark';
 const setTheme = (t: Theme) => { theme.value = t; };
+
+const { site, contactEnabled, blogEnabled } = useSiteSettings();
+watch(() => site.value.theme_mode, (mode) => {
+    setForcedTheme(mode === 'dark' || mode === 'light' ? mode : null);
+}, { immediate: true });
+
+const footerLinks = computed(() => [
+    { label: 'Accueil', href: '/' },
+    { label: 'À Propos', href: '/about' },
+    { label: 'Consulting', href: '/services' },
+    { label: 'Executive Masterclass', href: '/executive-masterclass' },
+    ...(blogEnabled.value ? [{ label: 'Actualités', href: '/blog' }] : []),
+    ...(contactEnabled.value ? [{ label: 'Contact', href: '/contact' }] : []),
+]);
 
 const isLoading = ref(false);
 const isScrolled = ref(false);
@@ -184,7 +199,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                         <Link :href="route('login')" class="text-white/70 hover:text-white text-xs font-medium transition-colors">
                             Connexion
                         </Link>
-                        <Link :href="route('prospect.register')" class="px-3 py-1 text-xs font-semibold rounded" style="background: #E8A020; color: white;">
+                        <Link :href="route('prospect.register')" class="px-3 py-1 text-xs font-semibold rounded" style="background: #E63946; color: white;">
                             S'inscrire
                         </Link>
                     </div>
@@ -235,7 +250,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                                     class="absolute top-full left-0 mt-1 w-72 rounded-2xl shadow-xl p-2 z-50"
                                     :style="`background: ${dropdownBg}; border: 1px solid ${dropdownBorder};`">
                                     <div class="px-3 py-2 mb-1">
-                                        <p class="text-xs font-bold uppercase tracking-widest" style="color: #E8A020;">Nos programmes</p>
+                                        <p class="text-xs font-bold uppercase tracking-widest" style="color: #E63946;">Nos programmes</p>
                                     </div>
                                     <Link v-for="cat in formationCategories" :key="cat.href" :href="cat.href"
                                         class="flex items-center gap-3 px-3 py-2.5 rounded-xl transition-colors group"
@@ -248,7 +263,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                                             :class="isDark ? 'text-slate-300 group-hover:text-white' : 'text-gray-700 group-hover:text-gray-900'">
                                             {{ cat.label }}
                                         </span>
-                                        <span v-if="cat.badge" class="ml-auto text-xs font-bold px-1.5 py-0.5 rounded-md" style="background: #FEF7E8; color: #C68400;">{{ cat.badge }}</span>
+                                        <span v-if="cat.badge" class="ml-auto text-xs font-bold px-1.5 py-0.5 rounded-md" style="background: #FDECEE; color: #C1121F;">{{ cat.badge }}</span>
                                     </Link>
                                 </div>
                             </Transition>
@@ -266,13 +281,13 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                             Executive Masterclass
                         </Link>
 
-                        <Link :href="route('blog')"
+                        <Link v-if="blogEnabled" :href="route('blog')"
                             class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200"
                             :class="page.url.startsWith('/blog') ? navActiveClass : navLinkClass">
                             Actualités
                         </Link>
 
-                        <Link :href="route('contact')"
+                        <Link v-if="contactEnabled" :href="route('contact')"
                             class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200"
                             :class="page.url.startsWith('/contact') ? navActiveClass : navLinkClass">
                             Contact
@@ -283,7 +298,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                     <div class="hidden lg:flex items-center gap-2">
 
                         <!-- Dark mode toggle -->
-                        <button @click="cycle"
+                        <button v-if="!isForced" @click="cycle"
                             class="relative p-2 rounded-lg transition-all group"
                             :class="isDark ? 'text-slate-300 hover:text-yellow-400 hover:bg-white/8' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'"
                             :title="`Thème : ${label}`">
@@ -303,7 +318,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                                 <i class="bi bi-bag text-lg"></i>
                                 <span v-if="cart.count > 0"
                                     class="absolute -top-1 -right-1 w-5 h-5 rounded-full text-white text-xs font-bold flex items-center justify-center"
-                                    style="background: #E8A020;">
+                                    style="background: #E63946;">
                                     {{ cart.count }}
                                 </span>
                             </button>
@@ -396,7 +411,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
 
                     <!-- Mobile right: dark toggle + hamburger -->
                     <div class="lg:hidden flex items-center gap-1">
-                        <button @click="cycle"
+                        <button v-if="!isForced" @click="cycle"
                             class="p-2 rounded-lg transition-all"
                             :class="isDark ? 'text-slate-300 hover:text-yellow-400' : 'text-gray-500 hover:text-gray-900'"
                             :title="`Thème : ${label}`">
@@ -440,19 +455,19 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                             :class="isDark ? 'text-slate-300 hover:bg-white/6' : 'text-gray-700 hover:bg-gray-50'">
                             <i class="bi bi-award w-5 text-center"></i> Executive Masterclass
                         </Link>
-                        <Link :href="route('blog')" @click="mobileMenuOpen = false"
+                        <Link v-if="blogEnabled" :href="route('blog')" @click="mobileMenuOpen = false"
                             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors"
                             :class="isDark ? 'text-slate-300 hover:bg-white/6' : 'text-gray-700 hover:bg-gray-50'">
                             <i class="bi bi-newspaper w-5 text-center"></i> Actualités
                         </Link>
-                        <Link :href="route('contact')" @click="mobileMenuOpen = false"
+                        <Link v-if="contactEnabled" :href="route('contact')" @click="mobileMenuOpen = false"
                             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors"
                             :class="isDark ? 'text-slate-300 hover:bg-white/6' : 'text-gray-700 hover:bg-gray-50'">
                             <i class="bi bi-envelope w-5 text-center"></i> Contact
                         </Link>
 
                         <!-- Theme selector row -->
-                        <div class="flex items-center gap-2 px-4 py-3" :style="`border-top: 1px solid ${headerBorder}; margin-top: 4px;`">
+                        <div v-if="!isForced" class="flex items-center gap-2 px-4 py-3" :style="`border-top: 1px solid ${headerBorder}; margin-top: 4px;`">
                             <span class="text-xs font-semibold flex-1" :class="isDark ? 'text-slate-400' : 'text-gray-500'">Apparence</span>
                             <div class="flex gap-1">
                                 <button v-for="t in ['system', 'light', 'dark'] as const" :key="t" @click="setTheme(t); mobileMenuOpen = false"
@@ -460,7 +475,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                                     :class="theme === t
                                         ? 'text-white'
                                         : (isDark ? 'text-slate-400 hover:bg-white/8' : 'text-gray-500 hover:bg-gray-100')"
-                                    :style="theme === t ? 'background: #E8A020;' : ''">
+                                    :style="theme === t ? 'background: #E63946;' : ''">
                                     <i :class="['bi', t === 'system' ? 'bi-display' : t === 'light' ? 'bi-sun-fill' : 'bi-moon-stars-fill']"></i>
                                     {{ t === 'system' ? 'Auto' : t === 'light' ? 'Clair' : 'Sombre' }}
                                 </button>
@@ -488,7 +503,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                                 </Link>
                                 <Link :href="route('prospect.register')" @click="mobileMenuOpen = false"
                                     class="px-4 py-3 text-center rounded-xl text-sm font-bold text-white"
-                                    style="background: #E8A020;">
+                                    style="background: #E63946;">
                                     S'inscrire
                                 </Link>
                             </template>
@@ -516,11 +531,11 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                         <p class="text-sm leading-relaxed mb-6" style="color: #94A3B8;">
                             Leader en formations certifiantes et consulting en Afrique. Nous certifions l'excellence professionnelle depuis Abidjan.
                         </p>
-                        <div class="mb-5">
-                            <p class="text-xs font-bold uppercase tracking-widest mb-3" style="color: #E8A020;">Notre présence</p>
+                        <div v-if="site.presence_countries.length" class="mb-5">
+                            <p class="text-xs font-bold uppercase tracking-widest mb-3" style="color: #E63946;">Notre présence</p>
                             <div class="flex flex-wrap gap-2">
-                                <span v-for="c in ['🇨🇮 Côte d\'Ivoire', '🇸🇳 Sénégal', '🇲🇱 Mali', '🇨🇲 Cameroun', '🇧🇫 Burkina']" :key="c"
-                                    class="text-xs px-2 py-1 rounded-lg" style="background: rgba(255,255,255,0.06); color: #CBD5E1;">{{ c }}</span>
+                                <span v-for="c in site.presence_countries" :key="c.name"
+                                    class="text-xs px-2 py-1 rounded-lg" style="background: rgba(255,255,255,0.06); color: #CBD5E1;">{{ c.flag ? `${c.flag} ${c.name}` : c.name }}</span>
                             </div>
                         </div>
                         <div class="flex items-center gap-3">
@@ -558,7 +573,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                                 </Link>
                             </li>
                             <li>
-                                <Link :href="route('formations')" class="text-sm transition-colors flex items-center gap-2 group" style="color: #E8A020;">
+                                <Link :href="route('formations')" class="text-sm transition-colors flex items-center gap-2 group" style="color: #E63946;">
                                     <i class="bi bi-arrow-right text-xs"></i>
                                     <span class="group-hover:underline">Toutes les formations</span>
                                 </Link>
@@ -570,14 +585,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                     <div>
                         <h4 class="text-sm font-bold text-white mb-5 uppercase tracking-widest">Navigation</h4>
                         <ul class="space-y-3">
-                            <li v-for="link in [
-                                { label: 'Accueil', href: '/' },
-                                { label: 'À Propos', href: '/about' },
-                                { label: 'Consulting', href: '/services' },
-                                { label: 'Executive Masterclass', href: '/executive-masterclass' },
-                                { label: 'Actualités', href: '/blog' },
-                                { label: 'Contact', href: '/contact' },
-                            ]" :key="link.href">
+                            <li v-for="link in footerLinks" :key="link.href">
                                 <Link :href="link.href" class="text-sm flex items-center gap-2 group" style="color: #94A3B8;">
                                     <i class="bi bi-chevron-right text-xs opacity-0 group-hover:opacity-100 transition-opacity"></i>
                                     <span class="group-hover:text-white transition-colors -ml-3 group-hover:ml-0 transition-all duration-200">{{ link.label }}</span>
@@ -591,29 +599,29 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                         <h4 class="text-sm font-bold text-white mb-5 uppercase tracking-widest">Contact</h4>
                         <ul class="space-y-4">
                             <li class="flex items-start gap-3">
-                                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style="background: rgba(232, 160, 32, 0.15);">
-                                    <i class="bi bi-geo-alt text-sm" style="color: #E8A020;"></i>
+                                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" style="background: rgba(230, 57, 70, 0.15);">
+                                    <i class="bi bi-geo-alt text-sm" style="color: #E63946;"></i>
                                 </div>
                                 <span class="text-sm" style="color: #94A3B8;">{{ contactSettings?.contact_address || 'Abidjan, Côte d\'Ivoire' }}</span>
                             </li>
                             <li v-if="contactSettings?.contact_phone" class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background: rgba(232, 160, 32, 0.15);">
-                                    <i class="bi bi-telephone text-sm" style="color: #E8A020;"></i>
+                                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background: rgba(230, 57, 70, 0.15);">
+                                    <i class="bi bi-telephone text-sm" style="color: #E63946;"></i>
                                 </div>
                                 <span class="text-sm" style="color: #94A3B8;">{{ contactSettings.contact_phone }}</span>
                             </li>
                             <li v-if="contactSettings?.contact_email" class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background: rgba(232, 160, 32, 0.15);">
-                                    <i class="bi bi-envelope text-sm" style="color: #E8A020;"></i>
+                                <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0" style="background: rgba(230, 57, 70, 0.15);">
+                                    <i class="bi bi-envelope text-sm" style="color: #E63946;"></i>
                                 </div>
                                 <span class="text-sm" style="color: #94A3B8;">{{ contactSettings.contact_email }}</span>
                             </li>
                         </ul>
-                        <div class="mt-6">
+                        <div v-if="contactEnabled" class="mt-6">
                             <p class="text-xs font-semibold text-white mb-2">Restez informé</p>
                             <Link :href="route('contact')"
                                 class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all duration-200 hover:shadow-lg hover:shadow-yellow-900/20"
-                                style="background: linear-gradient(135deg, #E8A020, #C68400);">
+                                style="background: linear-gradient(135deg, #E63946, #C1121F);">
                                 <i class="bi bi-bell"></i>
                                 Nous contacter
                             </Link>
@@ -631,7 +639,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                     <div class="flex items-center gap-4">
                         <span class="text-xs" style="color: #475569;">Abidjan · Dakar · Bamako · Douala</span>
                         <div class="flex items-center gap-1 text-xs" style="color: #475569;">
-                            <i class="bi bi-shield-check" style="color: #E8A020;"></i>
+                            <i class="bi bi-shield-check" style="color: #E63946;"></i>
                             Certifications Officielles
                         </div>
                     </div>

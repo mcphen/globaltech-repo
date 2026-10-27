@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
+import { useSiteSettings } from '@/composables/useSiteSettings';
 import { ref, watch, computed, onMounted } from 'vue';
 import debounce from 'lodash/debounce';
 import { router } from '@inertiajs/vue3';
+
+const { contactEnabled } = useSiteSettings();
 
 
 
@@ -182,12 +185,12 @@ const addToCart = (productId: number, quantity: number = 1) => {
                 Nos Produits
             </h1>
             <p class="text-lg text-white/95 max-w-3xl mx-auto leading-relaxed drop-shadow-md">
-            Chez <strong class="text-yellow-300">GlobalTECH EDUCATION Africa</strong>, Découvrez notre sélection de produits de qualité pour rendre votre mariage inoubliable
+            Chez <strong class="text-[#FF6B75]">GlobalTECH EDUCATION Africa</strong>, Découvrez notre sélection de produits de qualité pour rendre votre mariage inoubliable
             </p>
         </div>
 
         <!-- Élément décoratif (optionnel) -->
-        <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent"></div>
+        <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-[#E63946]/50 to-transparent"></div>
         </div>
         <!-- <div class="bg-primary-bg-light py-16">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -351,7 +354,7 @@ const addToCart = (productId: number, quantity: number = 1) => {
                     Contactez-nous pour obtenir des conseils dans le choix des meilleures  produits et services, et formations.
                 </p>
                 <div class="flex flex-col sm:flex-row justify-center gap-4">
-                    <Link
+                    <Link v-if="contactEnabled"
                         :href="route('contact')"
                         class="px-8 py-3 bg-white text-primary border border-primary rounded-full hover:bg-gray-50 transition-colors font-medium"
                     >

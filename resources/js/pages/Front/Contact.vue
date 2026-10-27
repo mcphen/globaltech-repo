@@ -62,7 +62,7 @@ const labelColor     = computed(() => isDark.value ? '#CBD5E1' : '#0B1437');
 const contactValueColor = computed(() => isDark.value ? '#E2E8F0' : '#0B1437');
 const sectionHeadColor = computed(() => isDark.value ? '#94A3B8' : '#0B1437');
 
-const iconBgGold     = computed(() => isDark.value ? 'rgba(232,160,32,0.15)'  : '#FEF7E8');
+const iconBgGold     = computed(() => isDark.value ? 'rgba(230,57,70,0.15)'  : '#FDECEE');
 const iconBgBlue     = computed(() => isDark.value ? 'rgba(37,99,235,0.15)'   : '#EFF6FF');
 const iconBgGreen    = computed(() => isDark.value ? 'rgba(22,163,74,0.15)'   : '#F0FDF4');
 
@@ -91,7 +91,7 @@ const pillInactive   = computed(() => isDark.value
             <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
                 <div class="max-w-2xl">
                     <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-5"
-                        style="background: rgba(232, 160, 32, 0.15); color: #E8A020; border: 1px solid rgba(232, 160, 32, 0.3);">
+                        style="background: rgba(230, 57, 70, 0.15); color: #E63946; border: 1px solid rgba(230, 57, 70, 0.3);">
                         <i class="bi bi-chat-dots-fill"></i>
                         Parlons de votre projet
                     </div>
@@ -121,7 +121,7 @@ const pillInactive   = computed(() => isDark.value
                             <div class="space-y-4">
                                 <div class="flex items-start gap-3" v-if="contactSettings?.contact_address">
                                     <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" :style="`background: ${iconBgGold};`">
-                                        <i class="bi bi-geo-alt-fill text-sm" style="color: #E8A020;"></i>
+                                        <i class="bi bi-geo-alt-fill text-sm" style="color: #E63946;"></i>
                                     </div>
                                     <div>
                                         <p class="text-xs font-bold uppercase tracking-wide mb-0.5" style="color: #94A3B8;">Adresse</p>
@@ -157,7 +157,7 @@ const pillInactive   = computed(() => isDark.value
                                 <div v-if="!contactSettings?.contact_address && !contactSettings?.contact_phone && !contactSettings?.contact_email">
                                     <div class="flex items-center gap-3">
                                         <div class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" :style="`background: ${iconBgGold};`">
-                                            <i class="bi bi-geo-alt-fill text-sm" style="color: #E8A020;"></i>
+                                            <i class="bi bi-geo-alt-fill text-sm" style="color: #E63946;"></i>
                                         </div>
                                         <div>
                                             <p class="text-xs font-bold uppercase tracking-wide mb-0.5" style="color: #94A3B8;">Adresse</p>
@@ -195,7 +195,7 @@ const pillInactive   = computed(() => isDark.value
 
                         <!-- RDV CTA -->
                         <div class="rounded-2xl p-5 text-white text-center" style="background: linear-gradient(135deg, #0B1437, #152050);">
-                            <i class="bi bi-calendar-check text-2xl mb-2 block" style="color: #E8A020;"></i>
+                            <i class="bi bi-calendar-check text-2xl mb-2 block" style="color: #E63946;"></i>
                             <h4 class="font-bold mb-2">Préférez un RDV ?</h4>
                             <p class="text-xs text-white/70 mb-4">Réservez un entretien gratuit de 30 min avec un conseiller.</p>
                             <Link :href="route('appointment.create')" class="gt-btn-gold w-full rounded-xl py-2.5 text-sm font-bold">
@@ -302,7 +302,7 @@ const pillInactive   = computed(() => isDark.value
                                 <!-- Submit -->
                                 <button type="submit" :disabled="form.processing"
                                     class="w-full py-4 rounded-xl text-base font-black text-white flex items-center justify-center gap-2 transition-all duration-200 hover:shadow-xl disabled:opacity-60"
-                                    style="background: linear-gradient(135deg, #E8A020, #C68400);">
+                                    style="background: linear-gradient(135deg, #E63946, #C1121F);">
                                     <svg v-if="form.processing" class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
                                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>

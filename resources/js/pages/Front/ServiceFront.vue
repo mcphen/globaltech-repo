@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
+import { useSiteSettings } from '@/composables/useSiteSettings';
 import { useDarkMode } from '@/composables/useDarkMode';
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
+
+const { contactEnabled } = useSiteSettings();
 
 interface Service {
     id: number; title: string; description?: string; icon?: string;
@@ -93,7 +96,7 @@ const ringOffset     = computed(() => isDark.value ? 'ring-offset-[#0B1437]' : '
                     <div>
                         <div v-if="sp.hero_badge"
                             class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6"
-                            style="background: rgba(232,160,32,0.15); color: #E8A020; border: 1px solid rgba(232,160,32,0.3);">
+                            style="background: rgba(230,57,70,0.15); color: #E63946; border: 1px solid rgba(230,57,70,0.3);">
                             <i class="bi bi-briefcase-fill"></i>
                             {{ sp.hero_badge }}
                         </div>
@@ -103,7 +106,7 @@ const ringOffset     = computed(() => isDark.value ? 'ring-offset-[#0B1437]' : '
                         </h1>
                         <p v-if="sp.hero_subtitle" class="text-xl text-white/70 leading-relaxed mb-8">{{ sp.hero_subtitle }}</p>
                         <div class="flex flex-wrap gap-4">
-                            <Link href="/contact" class="gt-btn-gold rounded-xl px-8 py-3.5">
+                            <Link v-if="contactEnabled" href="/contact" class="gt-btn-gold rounded-xl px-8 py-3.5">
                                 <i class="bi bi-telephone-fill"></i> Demander un devis
                             </Link>
                             <Link :href="route('portfolio')" class="gt-btn-outline rounded-xl px-8 py-3.5">
@@ -116,7 +119,7 @@ const ringOffset     = computed(() => isDark.value ? 'ring-offset-[#0B1437]' : '
                         <div v-for="item in sp.hero_stats" :key="item.l"
                             class="p-5 rounded-2xl border text-center"
                             style="background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1);">
-                            <i :class="['bi', item.icon, 'text-2xl mb-2 block']" style="color: #E8A020;"></i>
+                            <i :class="['bi', item.icon, 'text-2xl mb-2 block']" style="color: #E63946;"></i>
                             <div class="text-2xl font-black text-white">{{ item.n }}</div>
                             <div class="text-xs text-white/60">{{ item.l }}</div>
                         </div>
@@ -139,7 +142,7 @@ const ringOffset     = computed(() => isDark.value ? 'ring-offset-[#0B1437]' : '
                             <i :class="['bi', service.icon || 'bi-briefcase', 'text-2xl']" style="color: #2563EB;"></i>
                         </div>
                         <h3 class="text-lg font-bold mb-2" :style="`color: ${titleColor};`">{{ service.title }}</h3>
-                        <p v-if="service.subtitle" class="text-xs font-semibold mb-2" style="color: #E8A020;">{{ service.subtitle }}</p>
+                        <p v-if="service.subtitle" class="text-xs font-semibold mb-2" style="color: #E63946;">{{ service.subtitle }}</p>
                         <p v-if="service.description" class="text-sm leading-relaxed mb-4" :style="`color: ${descColor};`" v-html="service.description"></p>
                         <ul v-if="service.items?.length" class="space-y-1.5">
                             <li v-for="item in service.items" :key="item.id" class="flex items-center gap-2 text-xs" :style="`color: ${descColor};`">
@@ -195,10 +198,10 @@ const ringOffset     = computed(() => isDark.value ? 'ring-offset-[#0B1437]' : '
                 </div>
                 <div class="grid md:grid-cols-4 gap-6 relative">
                     <div class="hidden md:block absolute top-10 left-[12.5%] right-[12.5%] h-0.5"
-                        style="background: linear-gradient(90deg, #E8A020, #2563EB);"></div>
+                        style="background: linear-gradient(90deg, #E63946, #2563EB);"></div>
                     <div v-for="(step, i) in sp.process_steps" :key="step.step" class="relative text-center">
                         <div class="w-20 h-20 rounded-2xl mx-auto mb-4 flex flex-col items-center justify-center relative z-10 shadow-lg"
-                            :style="i % 2 === 0 ? 'background: #0B1437;' : 'background: #E8A020;'">
+                            :style="i % 2 === 0 ? 'background: #0B1437;' : 'background: #E63946;'">
                             <i :class="['bi', step.icon, 'text-xl text-white mb-1']"></i>
                             <span class="text-xs text-white/70">{{ step.step }}</span>
                         </div>
@@ -220,7 +223,7 @@ const ringOffset     = computed(() => isDark.value ? 'ring-offset-[#0B1437]' : '
                 </h2>
                 <p v-if="sp.cta_subtitle" class="text-white/70 mb-8 text-lg">{{ sp.cta_subtitle }}</p>
                 <div class="flex flex-wrap gap-4 justify-center">
-                    <Link href="/contact" class="gt-btn-gold px-8 py-4 rounded-xl text-base font-black">
+                    <Link v-if="contactEnabled" href="/contact" class="gt-btn-gold px-8 py-4 rounded-xl text-base font-black">
                         <i class="bi bi-send-fill"></i> Demander un devis
                     </Link>
                 </div>

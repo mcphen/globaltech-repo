@@ -56,6 +56,35 @@ class Setting extends Model
     }
 
     /**
+     * Default presence countries shown in the front footer
+     */
+    public const DEFAULT_PRESENCE_COUNTRIES = [
+        ['flag' => '🇨🇮', 'name' => "Côte d'Ivoire"],
+        ['flag' => '🇸🇳', 'name' => 'Sénégal'],
+        ['flag' => '🇲🇱', 'name' => 'Mali'],
+        ['flag' => '🇨🇲', 'name' => 'Cameroun'],
+        ['flag' => '🇧🇫', 'name' => 'Burkina'],
+    ];
+
+    /**
+     * Site-wide front settings (pages visibility, theme, presence)
+     *
+     * @return array
+     */
+    public static function siteSettings(): array
+    {
+        $countries = json_decode((string) self::get('site_presence_countries', ''), true);
+
+        return [
+            'contact_enabled' => self::get('site_contact_enabled', '1') === '1',
+            'blog_enabled' => self::get('site_blog_enabled', '1') === '1',
+            // 'user' = visitor chooses, 'dark' / 'light' = forced
+            'theme_mode' => self::get('site_theme_mode', 'user'),
+            'presence_countries' => is_array($countries) ? $countries : self::DEFAULT_PRESENCE_COUNTRIES,
+        ];
+    }
+
+    /**
      * Get all settings as key-value pairs
      *
      * @return array

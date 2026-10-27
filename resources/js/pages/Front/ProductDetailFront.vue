@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
+import { useSiteSettings } from '@/composables/useSiteSettings';
 import { ref, computed, onMounted } from 'vue';
+
+const { contactEnabled } = useSiteSettings();
 
 // Define Product interface
 interface Product {
@@ -269,7 +272,7 @@ onMounted(() => {
                         Contactez-nous pour obtenir des conseils personnalisés sur nos produits et services.
                     </p>
                     <div class="flex flex-col sm:flex-row justify-center gap-4">
-                        <Link
+                        <Link v-if="contactEnabled"
                             :href="route('contact')"
                             class="px-8 py-3 bg-white text-primary border border-primary rounded-full hover:bg-gray-50 transition-colors font-medium"
                         >

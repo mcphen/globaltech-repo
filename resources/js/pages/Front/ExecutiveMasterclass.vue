@@ -74,21 +74,21 @@ const session = props.session ?? null;
 
         <!-- ══ BANNIÈRE PRINCIPALE ══ -->
         <section class="relative overflow-hidden" style="background: linear-gradient(135deg, #060C22 0%, #0B1437 50%, #0D1D3E 100%); min-height: 88vh;">
-            <div class="absolute inset-0 opacity-5" style="background-image: repeating-linear-gradient(45deg, #E8A020 0, #E8A020 1px, transparent 0, transparent 50%); background-size: 40px 40px;"></div>
-            <div class="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full opacity-10" style="background: radial-gradient(circle, #E8A020 0%, transparent 70%);"></div>
+            <div class="absolute inset-0 opacity-5" style="background-image: repeating-linear-gradient(45deg, #E63946 0, #E63946 1px, transparent 0, transparent 50%); background-size: 40px 40px;"></div>
+            <div class="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full opacity-10" style="background: radial-gradient(circle, #E63946 0%, transparent 70%);"></div>
             <div class="absolute -bottom-20 -left-20 w-[350px] h-[350px] rounded-full opacity-8" style="background: radial-gradient(circle, #2563EB 0%, transparent 70%);"></div>
 
             <div class="relative max-w-7xl mx-auto px-6 lg:px-8 flex flex-col justify-center" style="min-height: 88vh; padding-top: 80px; padding-bottom: 80px;">
                 <div class="max-w-3xl">
                     <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-8 border"
-                        style="background: rgba(232,160,32,0.12); border-color: rgba(232,160,32,0.3); color: #E8A020;">
+                        style="background: rgba(230,57,70,0.12); border-color: rgba(230,57,70,0.3); color: #E63946;">
                         <i class="bi bi-stars"></i>
                         {{ page.hero_badge }}
                     </div>
 
                     <h1 class="text-4xl md:text-6xl font-black text-white leading-tight mb-6">
                         {{ page.hero_title }}<br/>
-                        <span style="color: #E8A020;" v-if="page.hero_subtitle">{{ page.hero_subtitle }}</span>
+                        <span style="color: #E63946;" v-if="page.hero_subtitle">{{ page.hero_subtitle }}</span>
                     </h1>
 
                     <p v-if="page.hero_description" class="text-lg md:text-xl leading-relaxed mb-10" style="color: rgba(255,255,255,0.75); max-width: 600px;">
@@ -98,7 +98,7 @@ const session = props.session ?? null;
                     <!-- Stats -->
                     <div v-if="stats.length" class="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
                         <div v-for="stat in stats" :key="stat.label" class="text-center">
-                            <div class="text-3xl font-black mb-1" style="color: #E8A020;">{{ stat.valeur }}</div>
+                            <div class="text-3xl font-black mb-1" style="color: #E63946;">{{ stat.valeur }}</div>
                             <div class="text-xs font-medium uppercase tracking-wider" style="color: rgba(255,255,255,0.5);">{{ stat.label }}</div>
                         </div>
                     </div>
@@ -106,7 +106,7 @@ const session = props.session ?? null;
                     <div class="flex flex-wrap gap-4">
                         <a href="#domaines"
                             class="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-white text-sm transition-all duration-300 hover:shadow-xl hover:scale-105"
-                            style="background: linear-gradient(135deg, #E8A020, #C68400); box-shadow: 0 8px 32px rgba(232,160,32,0.35);">
+                            style="background: linear-gradient(135deg, #E63946, #C1121F); box-shadow: 0 8px 32px rgba(230,57,70,0.35);">
                             <i class="bi bi-compass"></i>
                             Découvrir les programmes
                         </a>
@@ -132,7 +132,7 @@ const session = props.session ?? null;
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
                 <div class="grid lg:grid-cols-2 gap-16 items-center">
                     <div>
-                        <span class="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-6" style="background: rgba(232,160,32,0.12); color: #C68400;">Le Programme</span>
+                        <span class="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-6" style="background: rgba(230,57,70,0.12); color: #C1121F;">Le Programme</span>
                         <h2 class="text-4xl font-black mb-6" style="color: #0B1437;">{{ page.section_titre }}</h2>
                         <p v-if="page.section_description" class="text-gray-600 text-lg leading-relaxed mb-6">
                             {{ page.section_description }}
@@ -144,7 +144,7 @@ const session = props.session ?? null;
                                 'Réseau alumni de +1 200 cadres à travers 18 pays africains',
                                 'Accès à la plateforme e-learning pendant 12 mois post-formation',
                             ]" :key="point" class="flex items-start gap-3">
-                                <i class="bi bi-check-circle-fill text-lg mt-0.5 flex-shrink-0" style="color: #E8A020;"></i>
+                                <i class="bi bi-check-circle-fill text-lg mt-0.5 flex-shrink-0" style="color: #E63946;"></i>
                                 <span class="text-gray-700 font-medium">{{ point }}</span>
                             </div>
                         </div>
@@ -154,8 +154,8 @@ const session = props.session ?? null;
                         <div class="rounded-3xl overflow-hidden shadow-2xl" style="background: linear-gradient(145deg, #0B1437, #1E3A8A);">
                             <div class="p-10">
                                 <div class="text-center mb-8">
-                                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-4" style="background: rgba(232,160,32,0.2);">
-                                        <i class="bi bi-trophy-fill text-3xl" style="color: #E8A020;"></i>
+                                    <div class="inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-4" style="background: rgba(230,57,70,0.2);">
+                                        <i class="bi bi-trophy-fill text-3xl" style="color: #E63946;"></i>
                                     </div>
                                     <h3 class="text-2xl font-black text-white mb-2">Notre Philosophie</h3>
                                     <p class="text-sm" style="color: rgba(255,255,255,0.6);">Learn. Lead. Transform Africa.</p>
@@ -174,7 +174,7 @@ const session = props.session ?? null;
                                 </div>
                             </div>
                         </div>
-                        <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-2xl rotate-12" style="background: linear-gradient(135deg, #E8A020, #C68400); opacity: 0.3; z-index: -1;"></div>
+                        <div class="absolute -bottom-6 -right-6 w-24 h-24 rounded-2xl rotate-12" style="background: linear-gradient(135deg, #E63946, #C1121F); opacity: 0.3; z-index: -1;"></div>
                     </div>
                 </div>
             </div>
@@ -184,7 +184,7 @@ const session = props.session ?? null;
         <section v-if="publicCibles.length" class="py-24 bg-white">
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
                 <div class="text-center mb-16">
-                    <span class="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-6" style="background: rgba(232,160,32,0.1); color: #C68400;">À qui s'adresse ce programme ?</span>
+                    <span class="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-6" style="background: rgba(230,57,70,0.1); color: #C1121F;">À qui s'adresse ce programme ?</span>
                     <h2 class="text-4xl font-black mb-4" style="color: #0B1437;">Public Cible</h2>
                     <p class="text-gray-500 text-lg max-w-2xl mx-auto">Des programmes conçus pour les profils à fort potentiel qui souhaitent accélérer leur impact organisationnel.</p>
                 </div>
@@ -207,7 +207,7 @@ const session = props.session ?? null;
         <section v-if="domaines.length" id="domaines" class="py-24" style="background: #F0F4FF;">
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
                 <div class="text-center mb-16">
-                    <span class="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-6" style="background: rgba(232,160,32,0.12); color: #C68400;">Catalogue 2025</span>
+                    <span class="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-6" style="background: rgba(230,57,70,0.12); color: #C1121F;">Catalogue 2025</span>
                     <h2 class="text-4xl font-black mb-4" style="color: #0B1437;">Domaines de Masterclass</h2>
                     <p class="text-gray-500 text-lg max-w-2xl mx-auto">{{ domaines.length }} domaines d'expertise couvrant les enjeux stratégiques des entreprises africaines contemporaines.</p>
                 </div>
@@ -244,7 +244,7 @@ const session = props.session ?? null;
         <section v-if="formats.length" class="py-24 bg-white">
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
                 <div class="text-center mb-16">
-                    <span class="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-6" style="background: rgba(232,160,32,0.1); color: #C68400;">Flexibilité & Accessibilité</span>
+                    <span class="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-6" style="background: rgba(230,57,70,0.1); color: #C1121F;">Flexibilité & Accessibilité</span>
                     <h2 class="text-4xl font-black mb-4" style="color: #0B1437;">Format des Formations</h2>
                     <p class="text-gray-500 text-lg max-w-2xl mx-auto">Apprenez selon vos contraintes professionnelles. Nous adaptons nos formats à vos disponibilités.</p>
                 </div>
@@ -270,7 +270,7 @@ const session = props.session ?? null;
         <section v-if="partenaires.length" class="py-24" style="background: #F8FAFC;">
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
                 <div class="text-center mb-16">
-                    <span class="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-6" style="background: rgba(232,160,32,0.1); color: #C68400;">Écosystème de Partenaires</span>
+                    <span class="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-6" style="background: rgba(230,57,70,0.1); color: #C1121F;">Écosystème de Partenaires</span>
                     <h2 class="text-4xl font-black mb-4" style="color: #0B1437;">Partenaires Stratégiques</h2>
                     <p class="text-gray-500 text-lg max-w-2xl mx-auto">Nos partenariats garantissent la reconnaissance internationale et l'ancrage africain de nos certifications.</p>
                 </div>
@@ -283,7 +283,7 @@ const session = props.session ?? null;
                             </div>
                             <div>
                                 <h3 class="text-base font-bold mb-1" style="color: #0B1437;">{{ partenaire.nom }}</h3>
-                                <span class="text-xs font-medium px-2 py-0.5 rounded-full mb-2 inline-block" style="background: #FEF7E8; color: #C68400;">{{ partenaire.pays }}</span>
+                                <span class="text-xs font-medium px-2 py-0.5 rounded-full mb-2 inline-block" style="background: #FDECEE; color: #C1121F;">{{ partenaire.pays }}</span>
                                 <p class="text-sm text-gray-500 leading-relaxed">{{ partenaire.description }}</p>
                             </div>
                         </div>
@@ -296,7 +296,7 @@ const session = props.session ?? null;
         <section v-if="certifications.length" class="py-24" style="background: linear-gradient(135deg, #060C22 0%, #0B1437 100%);">
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
                 <div class="text-center mb-16">
-                    <span class="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-6 border" style="background: rgba(232,160,32,0.12); border-color: rgba(232,160,32,0.3); color: #E8A020;">Valeur Reconnue</span>
+                    <span class="text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-full inline-block mb-6 border" style="background: rgba(230,57,70,0.12); border-color: rgba(230,57,70,0.3); color: #E63946;">Valeur Reconnue</span>
                     <h2 class="text-4xl font-black mb-4 text-white">Certifications &<br/>Reconnaissance</h2>
                     <p class="text-lg max-w-2xl mx-auto" style="color: rgba(255,255,255,0.65);">À l'issue de votre parcours, obtenez des certifications qui valident votre expertise.</p>
                 </div>
@@ -322,7 +322,7 @@ const session = props.session ?? null;
         <!-- ══ CALL TO ACTION ══ -->
         <section v-if="session" id="contact-cta" class="py-24 bg-white">
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
-                <div class="rounded-3xl overflow-hidden relative" style="background: linear-gradient(135deg, #E8A020 0%, #C68400 40%, #A05A00 100%);">
+                <div class="rounded-3xl overflow-hidden relative" style="background: linear-gradient(135deg, #E63946 0%, #C1121F 40%, #A05A00 100%);">
                     <div class="absolute top-0 right-0 w-64 h-64 rounded-full opacity-15" style="background: white; transform: translate(30%, -30%);"></div>
                     <div class="absolute bottom-0 left-0 w-48 h-48 rounded-full opacity-10" style="background: white; transform: translate(-30%, 30%);"></div>
 

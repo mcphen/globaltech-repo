@@ -19,7 +19,7 @@ const form = useForm({
     titre:       props.certification?.titre       ?? '',
     description: props.certification?.description ?? '',
     badge_icon:  props.certification?.badge_icon  ?? 'bi-patch-check-fill',
-    couleur:     props.certification?.couleur     ?? '#E8A020',
+    couleur:     props.certification?.couleur     ?? '#E63946',
     sort_order:  props.certification?.sort_order  ?? 0,
     is_active:   props.certification?.is_active   ?? true,
 });

@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\FormationCategory;
+use App\Models\Setting;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -70,6 +71,15 @@ class HandleInertiaRequests extends Middleware
                 fn () => FormationCategory::orderBy('sort_order')
                     ->get(['id', 'name', 'slug', 'icon', 'color', 'is_featured']),
                 collect([])
+            ),
+            'siteSettings' => fn () => rescue(
+                fn () => Setting::siteSettings(),
+                [
+                    'contact_enabled' => true,
+                    'blog_enabled' => true,
+                    'theme_mode' => 'user',
+                    'presence_countries' => Setting::DEFAULT_PRESENCE_COUNTRIES,
+                ]
             ),
             'cart' => [
                 'items' => array_values($cart),

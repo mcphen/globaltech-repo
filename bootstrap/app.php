@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Middleware\EnsurePageEnabled;
 use App\Http\Middleware\HandleAppearance;
 use App\Http\Middleware\HandleInertiaRequests;
 use App\Http\Middleware\TrackVisitor;
@@ -16,6 +17,10 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->encryptCookies(except: ['appearance', 'sidebar_state']);
+
+        $middleware->alias([
+            'page.enabled' => EnsurePageEnabled::class,
+        ]);
 
         $middleware->web(append: [
             HandleAppearance::class,

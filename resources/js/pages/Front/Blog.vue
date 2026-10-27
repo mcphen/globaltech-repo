@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
+import { useSiteSettings } from '@/composables/useSiteSettings';
 import { useDarkMode } from '@/composables/useDarkMode';
 import { ref, computed, watch } from 'vue';
+
+const { contactEnabled } = useSiteSettings();
 
 interface Actualite {
     id: number; title: string; description?: string;
@@ -77,7 +80,7 @@ const paginationInactive = computed(() => isDark.value ? 'color: #94A3B8;' : 'co
             <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
                 <div class="max-w-2xl">
                     <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-5"
-                        style="background: rgba(232, 160, 32, 0.15); color: #E8A020; border: 1px solid rgba(232, 160, 32, 0.3);">
+                        style="background: rgba(230, 57, 70, 0.15); color: #E63946; border: 1px solid rgba(230, 57, 70, 0.3);">
                         <i class="bi bi-newspaper"></i>
                         Actualités & Insights
                     </div>
@@ -146,7 +149,7 @@ const paginationInactive = computed(() => isDark.value ? 'color: #94A3B8;' : 'co
                             </p>
                             <div class="flex items-center justify-between">
                                 <span class="text-xs" style="color: #94A3B8;">{{ formatDate(actualites.data[0].published_at ?? actualites.data[0].created_at) }}</span>
-                                <span class="text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all" style="color: #E8A020;">
+                                <span class="text-sm font-bold flex items-center gap-1 group-hover:gap-2 transition-all" style="color: #E63946;">
                                     Lire l'article <i class="bi bi-arrow-right"></i>
                                 </span>
                             </div>
@@ -174,7 +177,7 @@ const paginationInactive = computed(() => isDark.value ? 'color: #94A3B8;' : 'co
                             <p v-if="post.description" class="text-sm line-clamp-2 mb-4" :style="`color: ${descColor};`">
                                 {{ excerpt(post.description) }}
                             </p>
-                            <span class="text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all mt-auto" style="color: #E8A020;">
+                            <span class="text-xs font-bold flex items-center gap-1 group-hover:gap-2 transition-all mt-auto" style="color: #E63946;">
                                 Lire <i class="bi bi-arrow-right"></i>
                             </span>
                         </div>
@@ -203,9 +206,9 @@ const paginationInactive = computed(() => isDark.value ? 'color: #94A3B8;' : 'co
         </section>
 
         <!-- Newsletter CTA -->
-        <section class="py-16" :style="`background: ${ctaBg}; border-top: 1px solid ${ctaBorder};`">
+        <section v-if="contactEnabled" class="py-16" :style="`background: ${ctaBg}; border-top: 1px solid ${ctaBorder};`">
             <div class="max-w-2xl mx-auto px-6 text-center">
-                <i class="bi bi-bell-fill text-3xl mb-4 block" style="color: #E8A020;"></i>
+                <i class="bi bi-bell-fill text-3xl mb-4 block" style="color: #E63946;"></i>
                 <h3 class="text-2xl font-black mb-3" :style="`color: ${titleColor};`">Ne manquez aucune actualité</h3>
                 <p class="mb-6" :style="`color: ${descColor};`">Recevez nos derniers articles, annonces de formations et insights directement dans votre boîte mail.</p>
                 <Link href="/contact" class="gt-btn-gold px-8 py-3.5 rounded-xl font-black">

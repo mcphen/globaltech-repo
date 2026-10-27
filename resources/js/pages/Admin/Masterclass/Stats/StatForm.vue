@@ -56,7 +56,7 @@ function submit() {
                 </div>
                 <!-- Aperçu -->
                 <div class="p-4 rounded-xl border border-dashed border-gray-300 bg-gray-50 text-center">
-                    <div class="text-3xl font-black" style="color: #E8A020;">{{ form.valeur || '—' }}</div>
+                    <div class="text-3xl font-black" style="color: #E63946;">{{ form.valeur || '—' }}</div>
                     <div class="text-xs uppercase tracking-wider text-gray-500 mt-1">{{ form.label || 'Label' }}</div>
                 </div>
                 <div class="flex items-center justify-end gap-4 pt-4">

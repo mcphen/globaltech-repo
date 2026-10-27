@@ -3,8 +3,11 @@ import { Head, Link, usePage } from '@inertiajs/vue3';
 import { ref, onMounted, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
+import { useSiteSettings } from '@/composables/useSiteSettings';
 import { useDarkMode } from '@/composables/useDarkMode';
 import axios from 'axios';
+
+const { contactEnabled, blogEnabled } = useSiteSettings();
 
 const { isDark } = useDarkMode();
 const sectionBgAlt   = computed(() => isDark.value ? '#111F38' : '#F8FAFC');
@@ -116,7 +119,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                 <div class="absolute w-96 h-96 rounded-full blur-3xl opacity-20 animate-float-slow"
                     style="background: radial-gradient(circle, #2563EB, transparent); top: -10%; right: 10%;"></div>
                 <div class="absolute w-64 h-64 rounded-full blur-3xl opacity-15 animate-float-medium"
-                    style="background: radial-gradient(circle, #E8A020, transparent); bottom: 20%; left: 5%;"></div>
+                    style="background: radial-gradient(circle, #E63946, transparent); bottom: 20%; left: 5%;"></div>
                 <div class="absolute w-48 h-48 rounded-full blur-3xl opacity-10 animate-float-slow"
                     style="background: radial-gradient(circle, #7C3AED, transparent); top: 50%; right: 30%; animation-delay: -2s;"></div>
             </div>
@@ -128,8 +131,8 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                     <div>
                         <div v-if="hp.hero_badge" class="flex items-center gap-3 mb-6">
                             <div class="flex items-center gap-2 px-3 py-1.5 rounded-full border text-xs font-bold tracking-widest uppercase"
-                                style="background: rgba(232,160,32,0.1); border-color: rgba(232,160,32,0.3); color: #F5BC4A;">
-                                <span class="w-2 h-2 rounded-full animate-pulse" style="background: #E8A020;"></span>
+                                style="background: rgba(230,57,70,0.1); border-color: rgba(230,57,70,0.3); color: #FF6B75;">
+                                <span class="w-2 h-2 rounded-full animate-pulse" style="background: #E63946;"></span>
                                 {{ hp.hero_badge }}
                             </div>
                         </div>
@@ -149,7 +152,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                             <Link :href="route('formations')" class="gt-btn-gold text-base px-7 py-3.5 rounded-xl">
                                 <i class="bi bi-mortarboard-fill"></i> Voir les formations
                             </Link>
-                            <Link href="/contact" class="gt-btn-outline text-base px-7 py-3.5 rounded-xl">
+                            <Link v-if="contactEnabled" href="/contact" class="gt-btn-outline text-base px-7 py-3.5 rounded-xl">
                                 <i class="bi bi-building"></i> Solution entreprise
                             </Link>
                         </div>
@@ -157,7 +160,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                         <div v-if="hp.hero_trust_badges?.length" class="flex flex-wrap items-center gap-4">
                             <div v-for="badge in hp.hero_trust_badges" :key="badge"
                                 class="flex items-center gap-2 text-xs font-semibold text-white/60">
-                                <i class="bi bi-patch-check-fill text-yellow-400"></i>
+                                <i class="bi bi-patch-check-fill text-[#FF6B75]"></i>
                                 {{ badge }}
                             </div>
                         </div>
@@ -176,9 +179,9 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                         </div>
 
                         <div v-if="hp.hero_mini_stats?.length" class="col-span-2 p-5 rounded-2xl border flex items-center justify-between"
-                            style="background: rgba(232,160,32,0.08); border-color: rgba(232,160,32,0.2);">
+                            style="background: rgba(230,57,70,0.08); border-color: rgba(230,57,70,0.2);">
                             <div v-for="s in hp.hero_mini_stats" :key="s.l" class="text-center">
-                                <div class="text-2xl font-black" style="color: #E8A020;">{{ s.v }}</div>
+                                <div class="text-2xl font-black" style="color: #E63946;">{{ s.v }}</div>
                                 <div class="text-xs text-white/60">{{ s.l }}</div>
                             </div>
                         </div>
@@ -204,7 +207,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                             <i :class="['bi', stat.icon, 'text-xl']" style="color: #2563EB;"></i>
                         </div>
                         <div class="text-4xl font-black mb-1" :style="`color: ${textHeading}; font-family: 'Plus Jakarta Sans', sans-serif;`">
-                            {{ stat.current.toLocaleString() }}<span style="color: #E8A020;">{{ stat.suffix }}</span>
+                            {{ stat.current.toLocaleString() }}<span style="color: #E63946;">{{ stat.suffix }}</span>
                         </div>
                         <p class="text-sm font-medium" :style="`color: ${textBody};`">{{ stat.label }}</p>
                     </div>
@@ -290,7 +293,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
 
                         <div class="p-5 flex flex-col flex-1">
                             <h3 class="text-base font-bold mb-2 line-clamp-2 transition-colors duration-200"
-                                :class="isDark ? 'text-slate-100 group-hover:text-yellow-400' : 'text-[#0B1437] group-hover:text-[#E8A020]'"
+                                :class="isDark ? 'text-slate-100 group-hover:text-[#FF6B75]' : 'text-[#0B1437] group-hover:text-[#E63946]'"
                                 style="font-family: 'Plus Jakarta Sans', sans-serif;">{{ f.title }}</h3>
                             <p v-if="f.description" class="text-xs leading-relaxed mb-4 line-clamp-2 flex-1" :style="`color: ${textBody};`">{{ f.description }}</p>
                             <div class="flex items-center justify-between mt-auto pt-3" :style="`border-top: 1px solid ${isDark ? 'rgba(255,255,255,0.07)' : '#F1F5F9'};`">
@@ -302,7 +305,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                                         <i class="bi bi-calendar3 text-[10px]"></i>{{ formatDate(f.date || f.start_date || '') }}
                                     </span>
                                 </div>
-                                <span class="text-xs font-bold flex items-center gap-1" :style="`color: ${f.category?.color || '#E8A020'};`">
+                                <span class="text-xs font-bold flex items-center gap-1" :style="`color: ${f.category?.color || '#E63946'};`">
                                     En savoir plus <i class="bi bi-arrow-right text-[10px]"></i>
                                 </span>
                             </div>
@@ -317,7 +320,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
             class="py-24 relative overflow-hidden" style="background: linear-gradient(135deg, #0B1437 0%, #0E2060 50%, #091830 100%);">
             <div class="absolute inset-0 gt-grid-pattern opacity-30"></div>
             <div class="absolute right-0 top-0 w-1/2 h-full pointer-events-none hidden lg:flex items-center justify-center">
-                <div class="w-96 h-96 rounded-full opacity-10" style="background: radial-gradient(circle, #E8A020, transparent);"></div>
+                <div class="w-96 h-96 rounded-full opacity-10" style="background: radial-gradient(circle, #E63946, transparent);"></div>
             </div>
 
             <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
@@ -325,7 +328,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                     <div>
                         <div v-if="hp.b2b_badge"
                             class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6"
-                            style="background: rgba(232,160,32,0.15); color: #E8A020; border: 1px solid rgba(232,160,32,0.3);">
+                            style="background: rgba(230,57,70,0.15); color: #E63946; border: 1px solid rgba(230,57,70,0.3);">
                             <i class="bi bi-building"></i> {{ hp.b2b_badge }}
                         </div>
 
@@ -338,15 +341,15 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
 
                         <ul v-if="hp.b2b_list_items?.length" class="space-y-4 mb-10">
                             <li v-for="item in hp.b2b_list_items" :key="item" class="flex items-center gap-3 text-white/80 text-sm">
-                                <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style="background: rgba(232,160,32,0.2);">
-                                    <i class="bi bi-check text-xs" style="color: #E8A020;"></i>
+                                <div class="w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0" style="background: rgba(230,57,70,0.2);">
+                                    <i class="bi bi-check text-xs" style="color: #E63946;"></i>
                                 </div>
                                 {{ item }}
                             </li>
                         </ul>
 
                         <div class="flex flex-wrap gap-4">
-                            <Link href="/contact" class="gt-btn-gold rounded-xl px-8 py-3.5">
+                            <Link v-if="contactEnabled" href="/contact" class="gt-btn-gold rounded-xl px-8 py-3.5">
                                 <i class="bi bi-telephone-fill"></i> Demander un devis
                             </Link>
                             <Link href="/about" class="gt-btn-outline rounded-xl px-8 py-3.5">En savoir plus</Link>
@@ -357,8 +360,8 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                         <div v-for="item in hp.b2b_benefits" :key="item.title"
                             class="p-5 rounded-2xl border backdrop-blur-sm"
                             style="background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.1);">
-                            <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style="background: rgba(232,160,32,0.15);">
-                                <i :class="['bi', item.icon, 'text-lg']" style="color: #E8A020;"></i>
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style="background: rgba(230,57,70,0.15);">
+                                <i :class="['bi', item.icon, 'text-lg']" style="color: #E63946;"></i>
                             </div>
                             <h4 class="text-sm font-bold text-white mb-1">{{ item.title }}</h4>
                             <p class="text-xs text-white/60">{{ item.desc }}</p>
@@ -431,7 +434,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                 <div class="grid md:grid-cols-3 gap-6">
                     <div v-for="t in testimonials" :key="t.id" class="gt-card p-8">
                         <div class="flex mb-4 gap-0.5">
-                            <i v-for="n in 5" :key="n" class="bi bi-star-fill text-sm" style="color: #E8A020;"></i>
+                            <i v-for="n in 5" :key="n" class="bi bi-star-fill text-sm" style="color: #E63946;"></i>
                         </div>
                         <p class="text-sm leading-relaxed mb-6 italic" :style="`color: ${textBody};`">"{{ t.content }}"</p>
                         <div class="flex items-center gap-3">
@@ -465,7 +468,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
         </section>
 
         <!-- ══ NEWS ══════════════════════════════════════════════════════════ -->
-        <section v-if="latestPosts.length" class="py-24" :style="`background: ${sectionBgAlt};`">
+        <section v-if="blogEnabled && latestPosts.length" class="py-24" :style="`background: ${sectionBgAlt};`">
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
                 <div class="flex flex-col lg:flex-row lg:items-end lg:justify-between mb-12 gap-4">
                     <div>
@@ -497,12 +500,12 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
         <section v-if="hp.cta_title || hp.cta_badge"
             class="relative py-24 overflow-hidden" style="background: linear-gradient(135deg, #0B1437, #0E2060);">
             <div class="absolute inset-0 gt-grid-pattern opacity-20"></div>
-            <div class="absolute -top-20 -right-20 w-80 h-80 rounded-full blur-3xl opacity-10" style="background: #E8A020;"></div>
+            <div class="absolute -top-20 -right-20 w-80 h-80 rounded-full blur-3xl opacity-10" style="background: #E63946;"></div>
 
             <div class="max-w-4xl mx-auto px-6 lg:px-8 text-center relative z-10">
                 <div v-if="hp.cta_badge"
                     class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-6"
-                    style="background: rgba(232,160,32,0.15); color: #E8A020; border: 1px solid rgba(232,160,32,0.3);">
+                    style="background: rgba(230,57,70,0.15); color: #E63946; border: 1px solid rgba(230,57,70,0.3);">
                     <i class="bi bi-rocket-takeoff-fill"></i> {{ hp.cta_badge }}
                 </div>
 

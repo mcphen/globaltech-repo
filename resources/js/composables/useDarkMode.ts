@@ -5,10 +5,13 @@ type Theme = 'system' | 'light' | 'dark';
 // Singleton — shared across all component instances
 const theme = ref<Theme>('system');
 const isDark = ref(false);
+// Theme imposed by the admin (site settings); overrides the visitor's choice
+const forced = ref<'dark' | 'light' | null>(null);
 
 function resolve() {
-    if (theme.value === 'dark') isDark.value = true;
-    else if (theme.value === 'light') isDark.value = false;
+    const effective = forced.value ?? theme.value;
+    if (effective === 'dark') isDark.value = true;
+    else if (effective === 'light') isDark.value = false;
     else isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches;
     document.documentElement.classList.toggle('dark', isDark.value);
 }
@@ -26,6 +29,14 @@ watch(theme, () => {
     resolve();
 });
 
+watch(forced, () => {
+    if (typeof window !== 'undefined') resolve();
+});
+
+export function setForcedTheme(mode: 'dark' | 'light' | null) {
+    forced.value = mode;
+}
+
 export function useDarkMode() {
     const cycle = () => {
         const order: Theme[] = ['system', 'light', 'dark'];
@@ -35,5 +46,7 @@ export function useDarkMode() {
     const icon = computed(() => ({ system: 'bi-display', light: 'bi-sun-fill', dark: 'bi-moon-stars-fill' }[theme.value]));
     const label = computed(() => ({ system: 'Système', light: 'Clair', dark: 'Sombre' }[theme.value]));
 
-    return { theme, isDark, cycle, icon, label };
+    const isForced = computed(() => forced.value !== null);
+
+    return { theme, isDark, isForced, cycle, icon, label };
 }

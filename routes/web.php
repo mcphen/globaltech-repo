@@ -38,8 +38,8 @@ Route::get('/executive-masterclass', [HomeController::class,'executiveMasterclas
 Route::get('/team-members/listes', [TeamMemberController::class,'getListeDatas'])->name('api.team-members.listes');
 Route::get('/partners/listes', [PartnerController::class,'getListeDatas'])->name('api.team-members.listes');
 Route::get('/testimonials/listes', [TestimonialController::class,'getListeDatas'])->name('api.team-members.listes');
-Route::get('/blog', [HomeController::class, 'blog'])->name('blog');
-Route::get('/{id}/blog', [HomeController::class, 'blogShow'])->name('blog.show');
+Route::get('/blog', [HomeController::class, 'blog'])->middleware('page.enabled:blog')->name('blog');
+Route::get('/{id}/blog', [HomeController::class, 'blogShow'])->middleware('page.enabled:blog')->name('blog.show');
 
 // Public formations routes
 Route::get('/api/formations/featured', [FormationController::class, 'apiFeatured'])->name('api.formations.featured');
@@ -50,8 +50,8 @@ Route::get('/formations/{formation}/participation-status', [FormationController:
 Route::post('/formations/{formation}/participate', [FormationController::class, 'participate'])->name('formations.participate');
 
 // Contact routes
-Route::get('/contact', [ContactController::class, 'index'])->name('contact');
-Route::post('/contact', [ContactController::class, 'store'])->name('contact.store');
+Route::get('/contact', [ContactController::class, 'index'])->middleware('page.enabled:contact')->name('contact');
+Route::post('/contact', [ContactController::class, 'store'])->middleware('page.enabled:contact')->name('contact.store');
 
 // Public route subscribe
 Route::post('/subscribe', [SubscribeController::class, 'store'])->name('subscribe.store');
@@ -276,6 +276,10 @@ Route::middleware(['auth'])->group(function () {
         // Contact settings
         Route::get('contact-settings', [SettingController::class, 'contactSettings'])->name('admin.contact-settings');
         Route::post('contact-settings', [SettingController::class, 'updateContactSettings'])->name('admin.contact-settings.update');
+
+        // Site settings (pages visibility, theme, presence)
+        Route::get('site-settings', [SettingController::class, 'siteSettings'])->name('admin.site-settings');
+        Route::post('site-settings', [SettingController::class, 'updateSiteSettings'])->name('admin.site-settings.update');
 
         // Mail (SMTP) settings
         Route::get('mail-settings', [SettingController::class, 'mailSettings'])->name('admin.mail-settings');

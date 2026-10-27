@@ -1,10 +1,13 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
+import { useSiteSettings } from '@/composables/useSiteSettings';
 import { useDarkMode } from '@/composables/useDarkMode';
 import { computed, ref, onMounted } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
+
+const { contactEnabled } = useSiteSettings();
 
 interface Formation {
     id: number; title: string; slug: string; description: string;
@@ -96,7 +99,7 @@ async function submitParticipation() {
             alreadySelected.value = true;
             if (resp.data.status) currentStatus.value = resp.data.status;
         }
-        await Swal.fire({ icon: 'success', title: 'Inscription enregistrée !', text: 'Notre équipe vous contactera sous 48h pour confirmer votre participation.', confirmButtonText: 'Parfait !', confirmButtonColor: '#E8A020' });
+        await Swal.fire({ icon: 'success', title: 'Inscription enregistrée !', text: 'Notre équipe vous contactera sous 48h pour confirmer votre participation.', confirmButtonText: 'Parfait !', confirmButtonColor: '#E63946' });
         showForm.value = false;
         participateForm.attentes = '';
     } catch (error: any) {
@@ -141,7 +144,7 @@ async function submitB2B() {
             title: 'Demande entreprise enregistrée !',
             html: `Notre équipe contactera <strong>${f.contact_first_name} ${f.contact_last_name}</strong> sous 48h pour finaliser l'inscription des participants.`,
             confirmButtonText: 'Parfait !',
-            confirmButtonColor: '#E8A020'
+            confirmButtonColor: '#E63946'
         });
         showForm.value = false;
     } catch (error: any) {
@@ -200,7 +203,7 @@ const sidebarBg      = computed(() => isDark.value ? '#131F36' : '#FFFFFF');
 const sidebarBorder  = computed(() => isDark.value ? 'rgba(255,255,255,0.07)' : '#E5E7EB');
 const sidebarBodyBg  = computed(() => isDark.value ? '#131F36' : '#FFFFFF');
 const sidebarDivider = computed(() => isDark.value ? 'rgba(255,255,255,0.07)' : '#F1F5F9');
-const iconBgGold     = computed(() => isDark.value ? 'rgba(232,160,32,0.15)'  : '#FEF7E8');
+const iconBgGold     = computed(() => isDark.value ? 'rgba(230,57,70,0.15)'  : '#FDECEE');
 const iconBgBlue     = computed(() => isDark.value ? 'rgba(37,99,235,0.15)'   : '#EFF6FF');
 const iconBgRed      = computed(() => isDark.value ? 'rgba(239,68,68,0.15)'   : '#EFF6FF');
 const shareBtnStyle  = computed(() => isDark.value
@@ -214,11 +217,11 @@ const attachBorder   = computed(() => isDark.value ? 'rgba(255,255,255,0.07)' : 
 const attachIconBg   = computed(() => isDark.value ? 'rgba(239,68,68,0.15)' : '#EFF6FF');
 
 // Enrollment form
-const formBg         = computed(() => isDark.value ? '#1A2844' : '#FFFBEB');
-const formBorder     = computed(() => isDark.value ? 'rgba(232,160,32,0.25)' : '#FDE68A');
-const formHeaderBorder = computed(() => isDark.value ? 'rgba(232,160,32,0.2)' : '#FDE68A');
+const formBg         = computed(() => isDark.value ? '#1A2844' : '#FFF5F5');
+const formBorder     = computed(() => isDark.value ? 'rgba(230,57,70,0.25)' : '#FBCFD3');
+const formHeaderBorder = computed(() => isDark.value ? 'rgba(230,57,70,0.2)' : '#FBCFD3');
 const formLabelColor = computed(() => isDark.value ? '#CBD5E1' : '#0B1437');
-const formTitleColor = computed(() => isDark.value ? '#FCD34D' : '#92400E');
+const formTitleColor = computed(() => isDark.value ? '#FF8A93' : '#9B1C24');
 const inputBase      = computed(() => isDark.value
     ? 'background: #0F1E38; border-color: rgba(255,255,255,0.1); color: #F1F5F9;'
     : 'background: white; border-color: #E5E7EB; color: #0B1437;');
@@ -243,7 +246,7 @@ const inputBase      = computed(() => isDark.value
                 </nav>
                 <div class="max-w-3xl">
                     <div class="flex items-center gap-2 mb-4">
-                        <span class="px-3 py-1 rounded-full text-xs font-bold text-white" style="background: #E8A020;">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold text-white" style="background: #E63946;">
                             <i class="bi bi-patch-check-fill mr-1"></i>Formation certifiante
                         </span>
                         <span v-if="formation.price" class="px-3 py-1 rounded-full text-xs font-bold text-white" style="background: rgba(255,255,255,0.15);">
@@ -255,11 +258,11 @@ const inputBase      = computed(() => isDark.value
                     </h1>
                     <div class="flex flex-wrap gap-4 text-sm text-white/70">
                         <span v-if="formation.duration_hours" class="flex items-center gap-1.5">
-                            <i class="bi bi-clock" style="color: #E8A020;"></i>
+                            <i class="bi bi-clock" style="color: #E63946;"></i>
                             {{ formation.duration_hours }}h de formation
                         </span>
                         <span v-if="formation.date || formation.start_date" class="flex items-center gap-1.5">
-                            <i class="bi bi-calendar3" style="color: #E8A020;"></i>
+                            <i class="bi bi-calendar3" style="color: #E63946;"></i>
                             <template v-if="formation.date_mode === 'single'">{{ formatDate(formation.date) }}</template>
                             <template v-else>{{ formatDate(formation.start_date) }} → {{ formatDate(formation.end_date) }}</template>
                         </span>
@@ -334,14 +337,14 @@ const inputBase      = computed(() => isDark.value
                                         {{ new Intl.NumberFormat('fr-FR').format(formation.price) }}
                                         <span class="text-base font-normal opacity-70">{{ formation.currency || 'XOF' }}</span>
                                     </div>
-                                    <div v-else class="text-lg font-bold text-yellow-400">Sur devis</div>
+                                    <div v-else class="text-lg font-bold text-[#FF6B75]">Sur devis</div>
                                 </div>
 
                                 <div class="p-6 space-y-4" :style="`background: ${sidebarBodyBg};`">
                                     <!-- Dates -->
                                     <div class="flex items-start gap-3">
                                         <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5" :style="`background: ${iconBgGold};`">
-                                            <i class="bi bi-calendar3 text-sm" style="color: #E8A020;"></i>
+                                            <i class="bi bi-calendar3 text-sm" style="color: #E63946;"></i>
                                         </div>
                                         <div>
                                             <p class="text-xs font-semibold uppercase tracking-wide mb-0.5" :style="`color: ${metaLabelColor};`">Date(s)</p>
@@ -385,7 +388,7 @@ const inputBase      = computed(() => isDark.value
                                         <template v-else>
                                             <button @click="showForm = !showForm"
                                                 class="w-full py-3.5 rounded-xl text-sm font-black text-white transition-all duration-200 hover:shadow-lg"
-                                                style="background: linear-gradient(135deg, #E8A020, #C68400);">
+                                                style="background: linear-gradient(135deg, #E63946, #C1121F);">
                                                 <i class="bi bi-mortarboard-fill mr-1.5"></i>
                                                 {{ showForm ? 'Annuler' : 'S\'inscrire à cette formation' }}
                                             </button>
@@ -398,7 +401,7 @@ const inputBase      = computed(() => isDark.value
                                             <i class="bi bi-share"></i> Partager
                                         </button>
 
-                                        <Link :href="route('contact')"
+                                        <Link v-if="contactEnabled" :href="route('contact')"
                                             class="w-full py-3 rounded-xl text-sm font-semibold border-2 flex items-center justify-center gap-2 transition-all hover:shadow-sm"
                                             :style="contactBtnStyle">
                                             <i class="bi bi-telephone"></i> Nous contacter
@@ -424,7 +427,7 @@ const inputBase      = computed(() => isDark.value
                                                 @click="enrollmentMode = 'b2c'"
                                                 class="py-2 rounded-lg text-xs font-bold transition-all"
                                                 :style="enrollmentMode === 'b2c'
-                                                    ? 'background: #E8A020; color: white; box-shadow: 0 1px 4px rgba(232,160,32,0.4);'
+                                                    ? 'background: #E63946; color: white; box-shadow: 0 1px 4px rgba(230,57,70,0.4);'
                                                     : `background: transparent; color: ${isDark ? '#94A3B8' : '#637084'};`">
                                                 <i class="bi bi-person-fill mr-1"></i>Particulier
                                             </button>
@@ -454,14 +457,14 @@ const inputBase      = computed(() => isDark.value
                                             <div>
                                                 <label class="block text-xs font-semibold mb-1.5" :style="`color: ${formLabelColor};`">Prénom *</label>
                                                 <input v-model="participateForm.first_name" type="text" required :disabled="disableIdentityFields"
-                                                    class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-60 transition-all"
+                                                    class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946] disabled:opacity-60 transition-all"
                                                     :style="participateForm.errors.first_name ? 'border-color: #EF4444;' : inputBase" />
                                                 <p v-if="participateForm.errors.first_name" class="text-xs text-red-400 mt-1">{{ participateForm.errors.first_name }}</p>
                                             </div>
                                             <div>
                                                 <label class="block text-xs font-semibold mb-1.5" :style="`color: ${formLabelColor};`">Nom *</label>
                                                 <input v-model="participateForm.last_name" type="text" required :disabled="disableIdentityFields"
-                                                    class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-60 transition-all"
+                                                    class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946] disabled:opacity-60 transition-all"
                                                     :style="participateForm.errors.last_name ? 'border-color: #EF4444;' : inputBase" />
                                                 <p v-if="participateForm.errors.last_name" class="text-xs text-red-400 mt-1">{{ participateForm.errors.last_name }}</p>
                                             </div>
@@ -469,25 +472,25 @@ const inputBase      = computed(() => isDark.value
                                         <div>
                                             <label class="block text-xs font-semibold mb-1.5" :style="`color: ${formLabelColor};`">Email *</label>
                                             <input v-model="participateForm.email" type="email" required :disabled="disableIdentityFields"
-                                                class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-60 transition-all"
+                                                class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946] disabled:opacity-60 transition-all"
                                                 :style="participateForm.errors.email ? 'border-color: #EF4444;' : inputBase" />
                                             <p v-if="participateForm.errors.email" class="text-xs text-red-400 mt-1">{{ participateForm.errors.email }}</p>
                                         </div>
                                         <div>
                                             <label class="block text-xs font-semibold mb-1.5" :style="`color: ${formLabelColor};`">Téléphone</label>
                                             <input v-model="participateForm.phone" type="tel" :disabled="disableIdentityFields"
-                                                class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-60 transition-all"
+                                                class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946] disabled:opacity-60 transition-all"
                                                 :style="inputBase" />
                                         </div>
                                         <div>
                                             <label class="block text-xs font-semibold mb-1.5" :style="`color: ${formLabelColor};`">Vos attentes</label>
                                             <textarea v-model="participateForm.attentes" rows="3" placeholder="Ce que vous souhaitez apprendre..."
-                                                class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none transition-all"
+                                                class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946] resize-none transition-all"
                                                 :style="inputBase"></textarea>
                                         </div>
                                         <button type="submit" :disabled="isSubmitting"
                                             class="w-full py-3 rounded-xl text-sm font-black text-white transition-all disabled:opacity-60"
-                                            style="background: #E8A020;">
+                                            style="background: #E63946;">
                                             {{ isSubmitting ? 'Envoi en cours...' : 'Confirmer mon inscription' }}
                                         </button>
                                     </form>
@@ -497,21 +500,21 @@ const inputBase      = computed(() => isDark.value
 
                                         <!-- Infos entreprise -->
                                         <div>
-                                            <p class="text-xs font-black uppercase tracking-widest mb-2" :style="`color: ${isDark ? '#E8A020' : '#0B1437'};`">
+                                            <p class="text-xs font-black uppercase tracking-widest mb-2" :style="`color: ${isDark ? '#E63946' : '#0B1437'};`">
                                                 <i class="bi bi-building mr-1"></i>Informations entreprise
                                             </p>
                                             <div class="space-y-3">
                                                 <div>
                                                     <label class="block text-xs font-semibold mb-1.5" :style="`color: ${formLabelColor};`">Nom de l'entreprise *</label>
                                                     <input v-model="b2bForm.company_name" type="text" placeholder="Ex: Acme Côte d'Ivoire"
-                                                        class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                                        class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946] transition-all"
                                                         :style="b2bErrors.company_name ? 'border-color: #EF4444;' : inputBase" />
                                                     <p v-if="b2bErrors.company_name" class="text-xs text-red-400 mt-1">{{ b2bErrors.company_name }}</p>
                                                 </div>
                                                 <div>
                                                     <label class="block text-xs font-semibold mb-1.5" :style="`color: ${formLabelColor};`">Secteur d'activité</label>
                                                     <input v-model="b2bForm.company_sector" type="text" placeholder="Ex: Télécoms, Banque, BTP..."
-                                                        class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                                        class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946] transition-all"
                                                         :style="inputBase" />
                                                 </div>
                                             </div>
@@ -519,7 +522,7 @@ const inputBase      = computed(() => isDark.value
 
                                         <!-- Contact responsable -->
                                         <div>
-                                            <p class="text-xs font-black uppercase tracking-widest mb-2" :style="`color: ${isDark ? '#E8A020' : '#0B1437'};`">
+                                            <p class="text-xs font-black uppercase tracking-widest mb-2" :style="`color: ${isDark ? '#E63946' : '#0B1437'};`">
                                                 <i class="bi bi-person-badge mr-1"></i>Responsable / Contact RH
                                             </p>
                                             <div class="space-y-3">
@@ -527,14 +530,14 @@ const inputBase      = computed(() => isDark.value
                                                     <div>
                                                         <label class="block text-xs font-semibold mb-1.5" :style="`color: ${formLabelColor};`">Prénom *</label>
                                                         <input v-model="b2bForm.contact_first_name" type="text"
-                                                            class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                                            class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946] transition-all"
                                                             :style="b2bErrors.contact_first_name ? 'border-color: #EF4444;' : inputBase" />
                                                         <p v-if="b2bErrors.contact_first_name" class="text-xs text-red-400 mt-1">{{ b2bErrors.contact_first_name }}</p>
                                                     </div>
                                                     <div>
                                                         <label class="block text-xs font-semibold mb-1.5" :style="`color: ${formLabelColor};`">Nom *</label>
                                                         <input v-model="b2bForm.contact_last_name" type="text"
-                                                            class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                                            class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946] transition-all"
                                                             :style="b2bErrors.contact_last_name ? 'border-color: #EF4444;' : inputBase" />
                                                         <p v-if="b2bErrors.contact_last_name" class="text-xs text-red-400 mt-1">{{ b2bErrors.contact_last_name }}</p>
                                                     </div>
@@ -542,20 +545,20 @@ const inputBase      = computed(() => isDark.value
                                                 <div>
                                                     <label class="block text-xs font-semibold mb-1.5" :style="`color: ${formLabelColor};`">Fonction / Poste</label>
                                                     <input v-model="b2bForm.contact_function" type="text" placeholder="Ex: DRH, Responsable Formation"
-                                                        class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                                        class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946] transition-all"
                                                         :style="inputBase" />
                                                 </div>
                                                 <div>
                                                     <label class="block text-xs font-semibold mb-1.5" :style="`color: ${formLabelColor};`">Email professionnel *</label>
                                                     <input v-model="b2bForm.contact_email" type="email"
-                                                        class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                                        class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946] transition-all"
                                                         :style="b2bErrors.contact_email ? 'border-color: #EF4444;' : inputBase" />
                                                     <p v-if="b2bErrors.contact_email" class="text-xs text-red-400 mt-1">{{ b2bErrors.contact_email }}</p>
                                                 </div>
                                                 <div>
                                                     <label class="block text-xs font-semibold mb-1.5" :style="`color: ${formLabelColor};`">Téléphone</label>
                                                     <input v-model="b2bForm.contact_phone" type="tel"
-                                                        class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                                        class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946] transition-all"
                                                         :style="inputBase" />
                                                 </div>
                                             </div>
@@ -564,7 +567,7 @@ const inputBase      = computed(() => isDark.value
                                         <!-- Liste des participants -->
                                         <div>
                                             <div class="flex items-center justify-between mb-2">
-                                                <p class="text-xs font-black uppercase tracking-widest" :style="`color: ${isDark ? '#E8A020' : '#0B1437'};`">
+                                                <p class="text-xs font-black uppercase tracking-widest" :style="`color: ${isDark ? '#E63946' : '#0B1437'};`">
                                                     <i class="bi bi-people-fill mr-1"></i>Participants ({{ b2bForm.participants.length }})
                                                 </p>
                                                 <button type="button" @click="addParticipant"
@@ -588,14 +591,14 @@ const inputBase      = computed(() => isDark.value
                                                     </div>
                                                     <div class="grid grid-cols-2 gap-2 mb-2">
                                                         <input v-model="p.first_name" type="text" placeholder="Prénom"
-                                                            class="w-full px-2.5 py-1.5 rounded-lg border text-xs focus:outline-none focus:ring-1 focus:ring-yellow-400 transition-all"
+                                                            class="w-full px-2.5 py-1.5 rounded-lg border text-xs focus:outline-none focus:ring-1 focus:ring-[#E63946] transition-all"
                                                             :style="inputBase" />
                                                         <input v-model="p.last_name" type="text" placeholder="Nom"
-                                                            class="w-full px-2.5 py-1.5 rounded-lg border text-xs focus:outline-none focus:ring-1 focus:ring-yellow-400 transition-all"
+                                                            class="w-full px-2.5 py-1.5 rounded-lg border text-xs focus:outline-none focus:ring-1 focus:ring-[#E63946] transition-all"
                                                             :style="inputBase" />
                                                     </div>
                                                     <input v-model="p.email" type="email" placeholder="Email professionnel"
-                                                        class="w-full px-2.5 py-1.5 rounded-lg border text-xs focus:outline-none focus:ring-1 focus:ring-yellow-400 transition-all"
+                                                        class="w-full px-2.5 py-1.5 rounded-lg border text-xs focus:outline-none focus:ring-1 focus:ring-[#E63946] transition-all"
                                                         :style="inputBase" />
                                                 </div>
                                             </div>
@@ -608,7 +611,7 @@ const inputBase      = computed(() => isDark.value
                                         <div>
                                             <label class="block text-xs font-semibold mb-1.5" :style="`color: ${formLabelColor};`">Objectifs / Attentes</label>
                                             <textarea v-model="b2bForm.attentes" rows="3" placeholder="Objectifs de montée en compétence pour vos équipes..."
-                                                class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none transition-all"
+                                                class="w-full px-3 py-2 rounded-lg border text-sm focus:outline-none focus:ring-2 focus:ring-[#E63946] resize-none transition-all"
                                                 :style="inputBase"></textarea>
                                         </div>
 
@@ -633,7 +636,7 @@ const inputBase      = computed(() => isDark.value
                 <h3 class="text-2xl font-black mb-3" :style="`color: ${titleColor};`">Vous hésitez encore ?</h3>
                 <p class="mb-6" :style="`color: ${descColor};`">Nos conseillers pédagogiques sont disponibles pour vous aider à choisir la formation adaptée à votre profil.</p>
                 <div class="flex flex-wrap gap-4 justify-center">
-                    <Link :href="route('contact')" class="gt-btn-gold px-8 py-3.5 rounded-xl">
+                    <Link v-if="contactEnabled" :href="route('contact')" class="gt-btn-gold px-8 py-3.5 rounded-xl">
                         <i class="bi bi-telephone-fill"></i> Parler à un conseiller
                     </Link>
                     <Link :href="route('formations')" class="gt-btn-outline-navy px-8 py-3.5 rounded-xl">

@@ -92,6 +92,7 @@ const operationalItems: NavItem[] = [
 // ── 7. ADMINISTRATION ────────────────────────────────────────────────────────
 const adminItems: NavItem[] = [
     { title: 'Utilisateurs',          href: route('admin.users.index'),        icon: Users },
+    { title: 'Paramètres du site',    href: route('admin.site-settings'),      icon: Settings },
     { title: 'Config Contact & Réseaux', href: route('admin.contact-settings'), icon: Settings },
     { title: 'Config SMTP',           href: route('admin.mail-settings'),      icon: Settings },
 ];

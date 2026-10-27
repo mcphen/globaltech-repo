@@ -46,7 +46,7 @@ class MasterclassSeeder extends Seeder
         MasterclassDomaine::truncate();
         $domaines = [
             [
-                'icon' => 'bi-bar-chart-line', 'color' => '#E8A020',
+                'icon' => 'bi-bar-chart-line', 'color' => '#E63946',
                 'titre' => 'Management Stratégique',
                 'description' => "Leadership transformationnel, gouvernance d'entreprise, planification stratégique et gestion du changement pour dirigeants.",
                 'niveau' => 'C-Level', 'duree' => '5 jours',
@@ -141,7 +141,7 @@ class MasterclassSeeder extends Seeder
         // Certifications
         MasterclassCertification::truncate();
         $certifications = [
-            ['titre' => 'Certificat GlobalTECH Executive', 'description' => "Certificat professionnel reconnu par le réseau d'entreprises partenaires GlobalTECH en Afrique de l'Ouest et Centrale.", 'badge_icon' => 'bi-patch-check-fill', 'couleur' => '#E8A020', 'sort_order' => 1],
+            ['titre' => 'Certificat GlobalTECH Executive', 'description' => "Certificat professionnel reconnu par le réseau d'entreprises partenaires GlobalTECH en Afrique de l'Ouest et Centrale.", 'badge_icon' => 'bi-patch-check-fill', 'couleur' => '#E63946', 'sort_order' => 1],
             ['titre' => 'PMP® — Project Management Professional', 'description' => "La certification la plus reconnue au monde en gestion de projet, délivrée par le Project Management Institute (PMI, USA).", 'badge_icon' => 'bi-award-fill', 'couleur' => '#2563EB', 'sort_order' => 2],
             ['titre' => 'Attestation Universitaire UFHB', 'description' => "Attestation de formation continue en partenariat avec l'Université Félix Houphouët-Boigny d'Abidjan.", 'badge_icon' => 'bi-mortarboard-fill', 'couleur' => '#10B981', 'sort_order' => 3],
             ['titre' => 'Badge Digital Vérifiable', 'description' => "Badge numérique partageable sur LinkedIn, vérifiable par les employeurs via notre plateforme sécurisée.", 'badge_icon' => 'bi-shield-fill-check', 'couleur' => '#8B5CF6', 'sort_order' => 4],

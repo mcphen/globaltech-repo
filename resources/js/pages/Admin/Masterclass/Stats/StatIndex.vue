@@ -44,7 +44,7 @@ function doDelete() {
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div v-for="s in props.stats" :key="s.id"
                     class="relative p-5 rounded-2xl border-2 border-gray-100 hover:border-blue-100 transition-all group">
-                    <div class="text-3xl font-black mb-1" style="color: #E8A020;">{{ s.valeur }}</div>
+                    <div class="text-3xl font-black mb-1" style="color: #E63946;">{{ s.valeur }}</div>
                     <div class="text-sm text-gray-500 uppercase tracking-wider">{{ s.label }}</div>
                     <div class="mt-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Link :href="route('admin.masterclass.stats.edit', s.id)"

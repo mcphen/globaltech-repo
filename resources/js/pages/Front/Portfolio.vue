@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
+import { useSiteSettings } from '@/composables/useSiteSettings';
 import { useDarkMode } from '@/composables/useDarkMode';
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
+
+const { contactEnabled } = useSiteSettings();
 
 interface Photo { id: number; album_id: number; image_path: string; image_url?: string; caption?: string; is_banner?: boolean; }
 interface Album { id: number; title: string; description?: string; created_at: string; photos: Photo[]; cover?: Photo; }
@@ -112,7 +115,7 @@ const albumEmptyBg   = computed(() => isDark.value ? '#1E2D50' : '#F1F5F9');
             <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
                 <div class="max-w-3xl">
                     <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6"
-                        style="background: rgba(232, 160, 32, 0.15); color: #E8A020; border: 1px solid rgba(232, 160, 32, 0.3);">
+                        style="background: rgba(230, 57, 70, 0.15); color: #E63946; border: 1px solid rgba(230, 57, 70, 0.3);">
                         <i class="bi bi-folder2-open-fill"></i>
                         Portfolio & Réalisations
                     </div>
@@ -240,7 +243,7 @@ const albumEmptyBg   = computed(() => isDark.value ? '#1E2D50' : '#F1F5F9');
                     Contactez-nous pour discuter de votre projet et recevoir une proposition adaptée à vos besoins.
                 </p>
                 <div class="flex flex-wrap gap-4 justify-center">
-                    <Link href="/contact" class="gt-btn-gold px-8 py-4 rounded-xl font-black">
+                    <Link v-if="contactEnabled" href="/contact" class="gt-btn-gold px-8 py-4 rounded-xl font-black">
                         <i class="bi bi-envelope-fill"></i> Nous contacter
                     </Link>
                     <Link href="/services" class="gt-btn-outline px-8 py-4 rounded-xl">

@@ -151,6 +151,44 @@ class SettingController extends Controller
     }
 
     /**
+     * Display site settings form (pages visibility, theme, presence).
+     */
+    public function siteSettings()
+    {
+        return Inertia::render('Admin/Settings/Site', [
+            'site' => Setting::siteSettings(),
+        ]);
+    }
+
+    /**
+     * Update site settings.
+     */
+    public function updateSiteSettings(Request $request)
+    {
+        $data = $request->validate([
+            'contact_enabled' => 'required|boolean',
+            'blog_enabled' => 'required|boolean',
+            'theme_mode' => 'required|in:user,dark,light',
+            'presence_countries' => 'present|array',
+            'presence_countries.*.flag' => 'nullable|string|max:20',
+            'presence_countries.*.name' => 'required|string|max:100',
+        ]);
+
+        Setting::set('site_contact_enabled', $data['contact_enabled'] ? '1' : '0');
+        Setting::set('site_blog_enabled', $data['blog_enabled'] ? '1' : '0');
+        Setting::set('site_theme_mode', $data['theme_mode']);
+        Setting::set('site_presence_countries', json_encode(
+            array_values(array_map(fn ($c) => [
+                'flag' => $c['flag'] ?? '',
+                'name' => $c['name'],
+            ], $data['presence_countries'])),
+            JSON_UNESCAPED_UNICODE
+        ));
+
+        return redirect()->back()->with('success', 'Paramètres du site mis à jour.');
+    }
+
+    /**
      * Display SMTP (mail) settings form.
      */
     public function mailSettings()

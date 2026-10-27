@@ -36,7 +36,7 @@ const metaDescription = computed(() => (props.actualite.description || '').repla
                     {{ actualite.title }}
                 </h1>
                 <p class="text-white/60 text-sm">
-                    <i class="bi bi-calendar3 mr-1.5" style="color: #E8A020;"></i>
+                    <i class="bi bi-calendar3 mr-1.5" style="color: #E63946;"></i>
                     Publié le {{ formatDate(actualite.published_at ?? actualite.created_at) }}
                 </p>
             </div>
@@ -59,7 +59,7 @@ const metaDescription = computed(() => (props.actualite.description || '').repla
                     prose-img:rounded-2xl prose-img:shadow-lg
                     prose-blockquote:border-l-4 prose-blockquote:pl-6
                     prose-strong:text-gray-900"
-                    style="--tw-prose-quote-borders: #E8A020;"
+                    style="--tw-prose-quote-borders: #E63946;"
                     v-html="actualite.description">
                 </div>
 

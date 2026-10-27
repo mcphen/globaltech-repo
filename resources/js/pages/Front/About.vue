@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
+import { useSiteSettings } from '@/composables/useSiteSettings';
 import { useDarkMode } from '@/composables/useDarkMode';
 import axios from 'axios';
 import { ref, computed, onMounted } from 'vue';
+
+const { contactEnabled } = useSiteSettings();
 
 interface AboutData {
     content?: string;
@@ -57,8 +60,8 @@ const cardBg          = computed(() => isDark.value ? '#131F36' : '#FFFFFF');
 const cardBorder      = computed(() => isDark.value ? 'rgba(255,255,255,0.07)' : 'rgba(203,213,225,0.6)');
 const dotBorder       = computed(() => isDark.value ? '#0B1437' : '#FFFFFF');
 const timelineEvent   = computed(() => isDark.value ? '#CBD5E1' : '#0B1437');
-const officeHeadBg    = computed(() => isDark.value ? 'rgba(232,160,32,0.15)' : '#FEF7E8');
-const officeHeadColor = computed(() => isDark.value ? '#E8A020' : '#C68400');
+const officeHeadBg    = computed(() => isDark.value ? 'rgba(230,57,70,0.15)' : '#FDECEE');
+const officeHeadColor = computed(() => isDark.value ? '#E63946' : '#C1121F');
 const officeBlueBg    = computed(() => isDark.value ? 'rgba(37,99,235,0.15)' : '#EFF6FF');
 const officeBlueColor = computed(() => isDark.value ? '#60A5FA' : '#2563EB');
 const teamAvatarBg    = computed(() => isDark.value ? 'linear-gradient(135deg,#1E2D50,#152050)' : 'linear-gradient(135deg,#EFF6FF,#DBEAFE)');
@@ -82,7 +85,7 @@ onMounted(async () => {
             <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center relative z-10">
                 <div v-if="about?.hero_badge"
                     class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-6"
-                    style="background: rgba(232, 160, 32, 0.15); color: #E8A020; border: 1px solid rgba(232, 160, 32, 0.3);">
+                    style="background: rgba(230, 57, 70, 0.15); color: #E63946; border: 1px solid rgba(230, 57, 70, 0.3);">
                     <i class="bi bi-globe-africa"></i>
                     {{ about.hero_badge }}
                 </div>
@@ -109,7 +112,7 @@ onMounted(async () => {
 
                         <div v-if="about?.stats?.length" class="grid grid-cols-3 gap-6 mt-10">
                             <div v-for="s in about.stats" :key="s.label" class="text-center">
-                                <div class="text-3xl font-black mb-1" style="color: #E8A020;">{{ s.value }}</div>
+                                <div class="text-3xl font-black mb-1" style="color: #E63946;">{{ s.value }}</div>
                                 <div class="text-sm" :style="`color: ${descColor};`">{{ s.label }}</div>
                             </div>
                         </div>
@@ -143,16 +146,16 @@ onMounted(async () => {
                 </div>
 
                 <div class="relative">
-                    <div class="absolute left-6 lg:left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2" style="background: linear-gradient(to bottom, #E8A020, #2563EB);"></div>
+                    <div class="absolute left-6 lg:left-1/2 top-0 bottom-0 w-0.5 -translate-x-1/2" style="background: linear-gradient(to bottom, #E63946, #2563EB);"></div>
                     <div class="space-y-8">
                         <div v-for="(m, i) in about.milestones" :key="m.year"
                             class="relative flex items-start gap-6"
                             :class="i % 2 === 0 ? 'lg:flex-row' : 'lg:flex-row-reverse'">
                             <div class="absolute left-6 lg:left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border-4 z-10 mt-1"
-                                :style="`background: #E8A020; border-color: ${dotBorder};`"></div>
+                                :style="`background: #E63946; border-color: ${dotBorder};`"></div>
                             <div class="ml-14 lg:ml-0 lg:w-1/2" :class="i % 2 === 0 ? 'lg:pr-12' : 'lg:pl-12'">
                                 <div class="gt-card p-6">
-                                    <div class="text-2xl font-black mb-2" style="color: #E8A020;">{{ m.year }}</div>
+                                    <div class="text-2xl font-black mb-2" style="color: #E63946;">{{ m.year }}</div>
                                     <p class="text-sm font-medium" :style="`color: ${timelineEvent};`">{{ m.event }}</p>
                                 </div>
                             </div>
@@ -207,7 +210,7 @@ onMounted(async () => {
                             </div>
                         </div>
                         <h3 class="font-bold mb-1" :style="`color: ${titleColor};`">{{ member.firstname }} {{ member.lastname }}</h3>
-                        <p class="text-xs font-semibold mb-3" style="color: #E8A020;">{{ member.position }}</p>
+                        <p class="text-xs font-semibold mb-3" style="color: #E63946;">{{ member.position }}</p>
                         <p v-if="member.bio" class="text-xs leading-relaxed" :style="`color: ${descColor};`">{{ member.bio }}</p>
                     </div>
                 </div>
@@ -218,14 +221,14 @@ onMounted(async () => {
         <section v-if="about?.cta_title || about?.cta_subtitle"
             class="py-20 relative overflow-hidden"
             style="background: linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(135deg,#060C22 0%,#0B1437 50%,#091830 100%); background-size:60px 60px,60px 60px,100% 100%;">
-            <div class="absolute inset-0 opacity-10" style="background: radial-gradient(circle at 80% 50%, #E8A020, transparent 60%);"></div>
+            <div class="absolute inset-0 opacity-10" style="background: radial-gradient(circle at 80% 50%, #E63946, transparent 60%);"></div>
             <div class="max-w-3xl mx-auto px-6 lg:px-8 text-center relative z-10">
                 <h2 v-if="about?.cta_title" class="text-3xl lg:text-4xl font-black text-white mb-4" style="font-family: 'Plus Jakarta Sans', sans-serif;">
                     {{ about.cta_title }}
                 </h2>
                 <p v-if="about?.cta_subtitle" class="text-white/70 mb-8">{{ about.cta_subtitle }}</p>
                 <div class="flex flex-wrap gap-4 justify-center">
-                    <Link href="/contact" class="gt-btn-gold px-8 py-3.5 rounded-xl">
+                    <Link v-if="contactEnabled" href="/contact" class="gt-btn-gold px-8 py-3.5 rounded-xl">
                         <i class="bi bi-envelope-fill"></i> Nous contacter
                     </Link>
                     <Link :href="route('formations')" class="gt-btn-outline px-8 py-3.5 rounded-xl">

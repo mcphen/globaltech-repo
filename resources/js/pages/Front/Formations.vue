@@ -1,8 +1,11 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
+import { useSiteSettings } from '@/composables/useSiteSettings';
 import { ref, computed, watch } from 'vue';
 import { useDarkMode } from '@/composables/useDarkMode';
+
+const { contactEnabled } = useSiteSettings();
 
 interface Formation {
     id: number; title: string; slug: string; description?: string | null;
@@ -93,7 +96,7 @@ const thumbIcon      = computed(() => isDark.value ? '#2D4A7A' : '#BFDBFE');
             <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
                 <div class="max-w-3xl">
                     <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-5"
-                        style="background: rgba(232, 160, 32, 0.15); color: #E8A020; border: 1px solid rgba(232, 160, 32, 0.3);">
+                        style="background: rgba(230, 57, 70, 0.15); color: #E63946; border: 1px solid rgba(230, 57, 70, 0.3);">
                         <i class="bi bi-mortarboard-fill"></i>
                         Centre accrédité PMI — Pearson VUE
                     </div>
@@ -132,7 +135,7 @@ const thumbIcon      = computed(() => isDark.value ? '#2D4A7A' : '#BFDBFE');
                         <input v-model="searchQuery" type="text" placeholder="Rechercher une formation..."
                             class="pl-9 pr-4 py-2.5 rounded-xl border text-sm w-72 focus:outline-none focus:ring-2 transition-all"
                             :style="searchStyle"
-                            style="--tw-ring-color: #E8A020;" />
+                            style="--tw-ring-color: #E63946;" />
                     </div>
                 </div>
             </div>
@@ -149,7 +152,7 @@ const thumbIcon      = computed(() => isDark.value ? '#2D4A7A' : '#BFDBFE');
                         formation{{ formations.total !== 1 ? 's' : '' }} disponible{{ formations.total !== 1 ? 's' : '' }}
                     </p>
                     <div class="flex items-center gap-2 text-xs" :style="`color: ${countColor};`">
-                        <i class="bi bi-patch-check-fill" style="color: #E8A020;"></i>
+                        <i class="bi bi-patch-check-fill" style="color: #E63946;"></i>
                         Toutes certifiantes
                     </div>
                 </div>
@@ -172,14 +175,14 @@ const thumbIcon      = computed(() => isDark.value ? '#2D4A7A' : '#BFDBFE');
                             <!-- Certification badge -->
                             <div class="absolute top-3 right-3 px-2.5 py-1 rounded-full text-xs font-bold text-white"
                                 style="background: rgba(11, 20, 55, 0.75); backdrop-filter: blur(8px);">
-                                <i class="bi bi-patch-check-fill mr-1" style="color: #E8A020;"></i>Certifiante
+                                <i class="bi bi-patch-check-fill mr-1" style="color: #E63946;"></i>Certifiante
                             </div>
                         </div>
 
                         <div class="p-6 flex flex-col flex-1">
                             <h3 class="text-base font-bold mb-3 line-clamp-2 leading-snug transition-colors"
                                 :style="`color: ${titleColor}; font-family: 'Plus Jakarta Sans', sans-serif;`"
-                                :class="isDark ? 'group-hover:text-yellow-400' : 'group-hover:text-blue-600'">
+                                :class="isDark ? 'group-hover:text-[#FF6B75]' : 'group-hover:text-blue-600'">
                                 {{ f.title }}
                             </h3>
 
@@ -193,7 +196,7 @@ const thumbIcon      = computed(() => isDark.value ? '#2D4A7A' : '#BFDBFE');
                                 <!-- Dates -->
                                 <div v-if="f.date || f.start_date" class="flex items-center gap-2 text-xs"
                                     :style="`color: ${metaColor};`">
-                                    <i class="bi bi-calendar3" style="color: #E8A020;"></i>
+                                    <i class="bi bi-calendar3" style="color: #E63946;"></i>
                                     <span v-if="f.date_mode === 'single'">{{ formatDate(f.date) }}</span>
                                     <span v-else>{{ formatDate(f.start_date) }} → {{ formatDate(f.end_date) }}</span>
                                 </div>
@@ -201,7 +204,7 @@ const thumbIcon      = computed(() => isDark.value ? '#2D4A7A' : '#BFDBFE');
                                 <!-- Duration -->
                                 <div v-if="f.duration_hours" class="flex items-center gap-2 text-xs"
                                     :style="`color: ${metaColor};`">
-                                    <i class="bi bi-clock" style="color: #E8A020;"></i>
+                                    <i class="bi bi-clock" style="color: #E63946;"></i>
                                     {{ f.duration_hours }} heures de formation
                                 </div>
 
@@ -258,14 +261,14 @@ const thumbIcon      = computed(() => isDark.value ? '#2D4A7A' : '#BFDBFE');
                     style="background: linear-gradient(135deg, #0B1437, #152050);">
                     <div class="absolute inset-0 gt-grid-pattern opacity-20"></div>
                     <div class="relative z-10">
-                        <i class="bi bi-building text-3xl mb-4 block" style="color: #E8A020;"></i>
+                        <i class="bi bi-building text-3xl mb-4 block" style="color: #E63946;"></i>
                         <h3 class="text-2xl font-black mb-3" style="font-family: 'Plus Jakarta Sans', sans-serif;">
                             Formation pour votre entreprise ?
                         </h3>
                         <p class="text-white/70 mb-6 max-w-xl mx-auto text-sm">
                             Nous concevons des programmes sur mesure pour former vos équipes. Contactez nos experts pour un devis personnalisé.
                         </p>
-                        <Link href="/contact" class="gt-btn-gold px-8 py-3.5 rounded-xl">
+                        <Link v-if="contactEnabled" href="/contact" class="gt-btn-gold px-8 py-3.5 rounded-xl">
                             <i class="bi bi-telephone-fill"></i>
                             Demander un devis entreprise
                         </Link>

@@ -28,7 +28,7 @@ const breadcrumbs: BreadcrumbItemType[] = [
 
 const form = useForm({
     icon:        props.domaine?.icon        ?? 'bi-star',
-    color:       props.domaine?.color       ?? '#E8A020',
+    color:       props.domaine?.color       ?? '#E63946',
     titre:       props.domaine?.titre       ?? '',
     description: props.domaine?.description ?? '',
     niveau:      props.domaine?.niveau      ?? '',
