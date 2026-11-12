@@ -29,6 +29,10 @@ interface FormationCategoryProp {
 
 const page = usePage();
 const contactSettings = computed<ContactSettings>(() => page.props.contactSettings as ContactSettings);
+// Villes des bureaux (Admin > À Propos), identiques à la page Contact
+const officeCities = computed(() =>
+    ((page.props.offices as Array<{ city?: string }>) ?? []).map(o => o.city).filter(Boolean).join(' · ')
+);
 const cart = computed<any>(() => (page.props as any).cart ?? { items: [], count: 0, subtotal: 0, total: 0 });
 const auth = computed<any>(() => (page.props as any).auth);
 const dbCategories = computed<FormationCategoryProp[]>(() => (page.props as any).formationCategories ?? []);
@@ -129,7 +133,7 @@ const navLinkClass = computed(() =>
         : 'text-gray-700 hover:text-gray-900 hover:bg-gray-50'
 );
 const navActiveClass = computed(() =>
-    isDark.value ? 'text-yellow-400 bg-yellow-400/10' : 'text-yellow-600 bg-yellow-50'
+    isDark.value ? 'text-red-400 bg-red-400/10' : 'text-red-600 bg-red-50'
 );
 const dropdownBg = computed(() => isDark.value ? '#131F36' : '#FFFFFF');
 const dropdownBorder = computed(() => isDark.value ? 'rgba(255,255,255,0.08)' : '#F1F5F9');
@@ -168,30 +172,30 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
             <div class="max-w-7xl mx-auto px-6 lg:px-8 flex items-center justify-between h-10">
                 <div class="flex items-center gap-6 text-white/70 text-xs">
                     <span v-if="contactSettings?.contact_email" class="flex items-center gap-1.5">
-                        <i class="bi bi-envelope text-yellow-400"></i>
+                        <i class="bi bi-envelope text-red-400"></i>
                         {{ contactSettings.contact_email }}
                     </span>
                     <span v-if="contactSettings?.contact_phone" class="flex items-center gap-1.5">
-                        <i class="bi bi-telephone text-yellow-400"></i>
+                        <i class="bi bi-telephone text-red-400"></i>
                         {{ contactSettings.contact_phone }}
                     </span>
                     <span class="flex items-center gap-1.5">
-                        <i class="bi bi-geo-alt text-yellow-400"></i>
+                        <i class="bi bi-geo-alt text-red-400"></i>
                         Abidjan, Côte d'Ivoire — Présence panafricaine
                     </span>
                 </div>
                 <div class="flex items-center gap-4">
                     <div class="flex items-center gap-3">
-                        <a v-if="contactSettings?.social_linkedin" :href="contactSettings.social_linkedin" target="_blank" class="text-white/50 hover:text-yellow-400 transition-colors">
+                        <a v-if="contactSettings?.social_linkedin" :href="contactSettings.social_linkedin" target="_blank" class="text-white/50 hover:text-red-400 transition-colors">
                             <i class="bi bi-linkedin"></i>
                         </a>
-                        <a v-if="contactSettings?.social_facebook" :href="contactSettings.social_facebook" target="_blank" class="text-white/50 hover:text-yellow-400 transition-colors">
+                        <a v-if="contactSettings?.social_facebook" :href="contactSettings.social_facebook" target="_blank" class="text-white/50 hover:text-red-400 transition-colors">
                             <i class="bi bi-facebook"></i>
                         </a>
-                        <a v-if="contactSettings?.social_twitter" :href="contactSettings.social_twitter" target="_blank" class="text-white/50 hover:text-yellow-400 transition-colors">
+                        <a v-if="contactSettings?.social_twitter" :href="contactSettings.social_twitter" target="_blank" class="text-white/50 hover:text-red-400 transition-colors">
                             <i class="bi bi-twitter-x"></i>
                         </a>
-                        <a v-if="contactSettings?.social_youtube" :href="contactSettings.social_youtube" target="_blank" class="text-white/50 hover:text-yellow-400 transition-colors">
+                        <a v-if="contactSettings?.social_youtube" :href="contactSettings.social_youtube" target="_blank" class="text-white/50 hover:text-red-400 transition-colors">
                             <i class="bi bi-youtube"></i>
                         </a>
                     </div>
@@ -300,7 +304,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                         <!-- Dark mode toggle -->
                         <button v-if="!isForced" @click="cycle"
                             class="relative p-2 rounded-lg transition-all group"
-                            :class="isDark ? 'text-slate-300 hover:text-yellow-400 hover:bg-white/8' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'"
+                            :class="isDark ? 'text-slate-300 hover:text-red-400 hover:bg-white/8' : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'"
                             :title="`Thème : ${label}`">
                             <i :class="['bi', icon, 'text-base']"></i>
                             <!-- Tooltip -->
@@ -413,7 +417,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                     <div class="lg:hidden flex items-center gap-1">
                         <button v-if="!isForced" @click="cycle"
                             class="p-2 rounded-lg transition-all"
-                            :class="isDark ? 'text-slate-300 hover:text-yellow-400' : 'text-gray-500 hover:text-gray-900'"
+                            :class="isDark ? 'text-slate-300 hover:text-red-400' : 'text-gray-500 hover:text-gray-900'"
                             :title="`Thème : ${label}`">
                             <i :class="['bi', icon, 'text-base']"></i>
                         </button>
@@ -620,7 +624,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                         <div v-if="contactEnabled" class="mt-6">
                             <p class="text-xs font-semibold text-white mb-2">Restez informé</p>
                             <Link :href="route('contact')"
-                                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all duration-200 hover:shadow-lg hover:shadow-yellow-900/20"
+                                class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white transition-all duration-200 hover:shadow-lg hover:shadow-red-900/20"
                                 style="background: linear-gradient(135deg, #E63946, #C1121F);">
                                 <i class="bi bi-bell"></i>
                                 Nous contacter
@@ -637,7 +641,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                         &copy; {{ new Date().getFullYear() }} GlobalTECH EDUCATION Africa. Tous droits réservés.
                     </p>
                     <div class="flex items-center gap-4">
-                        <span class="text-xs" style="color: #475569;">Abidjan · Dakar · Bamako · Douala</span>
+                        <span v-if="officeCities" class="text-xs" style="color: #475569;">{{ officeCities }}</span>
                         <div class="flex items-center gap-1 text-xs" style="color: #475569;">
                             <i class="bi bi-shield-check" style="color: #E63946;"></i>
                             Certifications Officielles

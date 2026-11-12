@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\About;
 use App\Models\FormationCategory;
 use App\Models\Setting;
 use Illuminate\Foundation\Inspiring;
@@ -80,6 +81,14 @@ class HandleInertiaRequests extends Middleware
                     'theme_mode' => 'user',
                     'presence_countries' => Setting::DEFAULT_PRESENCE_COUNTRIES,
                 ]
+            ),
+            // Bureaux (gérés dans Admin > À Propos) — utilisés par la page Contact et le footer
+            'offices' => fn () => rescue(
+                fn () => array_values(array_filter(
+                    About::first()?->offices ?: About::DEFAULT_OFFICES,
+                    fn ($o) => !empty($o['city'])
+                )),
+                About::DEFAULT_OFFICES
             ),
             'cart' => [
                 'items' => array_values($cart),

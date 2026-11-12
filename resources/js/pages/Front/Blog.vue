@@ -67,7 +67,7 @@ const cardThumbBg    = computed(() => isDark.value
     : 'linear-gradient(135deg, #F8FAFC, #EFF6FF)');
 const featuredBadgeBg = computed(() => isDark.value ? 'rgba(37,99,235,0.2)' : '#EFF6FF');
 const featuredBadgeColor = computed(() => isDark.value ? '#60A5FA' : '#2563EB');
-const hoverTitle     = computed(() => isDark.value ? 'group-hover:text-yellow-400' : 'group-hover:text-blue-600');
+const hoverTitle     = computed(() => isDark.value ? 'group-hover:text-red-400' : 'group-hover:text-blue-600');
 const paginationInactive = computed(() => isDark.value ? 'color: #94A3B8;' : 'color: #374151;');
 </script>
 
@@ -101,11 +101,11 @@ const paginationInactive = computed(() => isDark.value ? 'color: #94A3B8;' : 'co
                 <div class="relative">
                     <i class="bi bi-search absolute left-3.5 top-1/2 -translate-y-1/2 text-sm" style="color: #94A3B8;"></i>
                     <input v-model="searchQuery" type="text" placeholder="Rechercher un article..."
-                        class="pl-9 pr-4 py-2.5 rounded-xl border text-sm w-72 focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                        class="pl-9 pr-4 py-2.5 rounded-xl border text-sm w-72 focus:outline-none focus:ring-2 focus:ring-red-400 transition-all"
                         :style="inputStyle" />
                 </div>
                 <select v-model="sortBy"
-                    class="px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    class="px-4 py-2.5 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-red-400"
                     :style="selectStyle">
                     <option value="newest">Plus récents</option>
                     <option value="oldest">Plus anciens</option>

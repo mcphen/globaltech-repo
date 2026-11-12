@@ -3,6 +3,7 @@ import { Head, Link, usePage } from '@inertiajs/vue3';
 import { ref, onMounted, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
+import HeroSlider from '@/components/front/HeroSlider.vue';
 import { useSiteSettings } from '@/composables/useSiteSettings';
 import { useDarkMode } from '@/composables/useDarkMode';
 import axios from 'axios';
@@ -19,9 +20,11 @@ const textHeading    = computed(() => isDark.value ? '#F1F5F9' : '#0B1437');
 const page = usePage<{
     contactSettings: any;
     homePage: any;
+    heroSlides?: any[];
 }>();
 const contactSettings = computed(() => page.props.contactSettings);
 const hp = computed(() => page.props.homePage || {});
+const heroSlides = computed(() => page.props.heroSlides ?? []);
 
 // ── Interfaces ─────────────────────────────────────────────────────────────
 interface FormationCategory { name: string; slug: string; icon?: string; color?: string; background?: string; }
@@ -33,7 +36,7 @@ interface Formation {
     category?: FormationCategory | null;
 }
 interface Testimonial { id: number; name: string; position?: string; company?: string; content: string; rating?: number; image_url?: string; }
-interface Partner { id: number; name: string; logo_url?: string; website?: string; }
+interface Partner { id: number; name: string; logo_path?: string | null; website_url?: string | null; }
 interface Actualite { id: number; title: string; excerpt?: string; image_url?: string; created_at: string; slug?: string; }
 interface Project { id: number; title: string; description?: string | null; image_url?: string | null; }
 interface Pillar { icon?: string; category: string; title: string; color: string; bg: string; description: string; certifications: string[]; href: string; featured: boolean; }
@@ -111,8 +114,11 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
     <Head title="GlobalTECH EDUCATION Africa — Formations Certifiantes en Afrique" />
     <LayoutFront>
 
+        <!-- ══ BANNIÈRE (slides CMS) — remplace le hero par défaut si présente ══ -->
+        <HeroSlider v-if="heroSlides.length" :slides="heroSlides" />
+
         <!-- ══ HERO ══════════════════════════════════════════════════════════ -->
-        <section v-if="hp.hero_title_1 || hp.hero_badge"
+        <section v-else-if="hp.hero_title_1 || hp.hero_badge"
             class="relative min-h-screen flex items-center overflow-hidden"
             style="background: linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(135deg,#060C22 0%,#0B1437 42%,#0E2060 72%,#091830 100%); background-size:60px 60px,60px 60px,100% 100%;">
             <div class="absolute inset-0 overflow-hidden pointer-events-none">
@@ -157,13 +163,6 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
                             </Link>
                         </div>
 
-                        <div v-if="hp.hero_trust_badges?.length" class="flex flex-wrap items-center gap-4">
-                            <div v-for="badge in hp.hero_trust_badges" :key="badge"
-                                class="flex items-center gap-2 text-xs font-semibold text-white/60">
-                                <i class="bi bi-patch-check-fill text-[#FF6B75]"></i>
-                                {{ badge }}
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Right: Pillar cards + mini-stats -->
@@ -458,11 +457,20 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
                 <p class="text-center text-xs font-bold uppercase tracking-widest mb-10" style="color: #94A3B8;">Partenaires officiels</p>
                 <div class="flex flex-wrap items-center justify-center gap-8">
-                    <div v-for="partner in partners" :key="partner.id"
-                        class="px-5 py-3 rounded-2xl text-sm font-bold transition-all duration-200 cursor-default"
-                        :style="`border: 1px solid ${isDark ? 'rgba(255,255,255,0.12)' : '#E5E7EB'}; color: ${isDark ? '#94A3B8' : '#6B7280'};`">
-                        {{ partner.name }}
-                    </div>
+                    <component :is="partner.website_url ? 'a' : 'div'"
+                        v-for="partner in partners" :key="partner.id"
+                        :href="partner.website_url || undefined"
+                        :target="partner.website_url ? '_blank' : undefined"
+                        :rel="partner.website_url ? 'noopener noreferrer' : undefined"
+                        :title="partner.website_url ? `${partner.name} — visiter le site` : partner.name"
+                        class="group flex items-center justify-center h-20 w-40 px-5 py-3 rounded-2xl transition-all duration-200"
+                        :class="partner.website_url ? 'hover:-translate-y-0.5 hover:shadow-lg' : 'cursor-default'"
+                        :style="`border: 1px solid ${isDark ? 'rgba(255,255,255,0.12)' : '#E5E7EB'}; background: ${isDark ? 'rgba(255,255,255,0.95)' : '#FFFFFF'};`">
+                        <img v-if="partner.logo_path" :src="`/storage/${partner.logo_path}`" :alt="partner.name"
+                            loading="lazy"
+                            class="max-h-12 max-w-full object-contain grayscale opacity-70 transition-all duration-200 group-hover:grayscale-0 group-hover:opacity-100" />
+                        <span v-else class="text-sm font-bold" style="color: #6B7280;">{{ partner.name }}</span>
+                    </component>
                 </div>
             </div>
         </section>

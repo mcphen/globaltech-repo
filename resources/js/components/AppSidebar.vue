@@ -28,6 +28,7 @@ import {
     Settings,
     ChevronDown,
     ChevronUp,
+    GalleryHorizontal,
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
@@ -50,6 +51,7 @@ const mainNavItems: NavItem[] = [
 // ── 2. PAGES DU SITE (toujours visible) ────────────────────────────────────
 const pagesItems: NavItem[] = [
     { title: 'Page d\'accueil', href: route('admin.home-page.edit'),    icon: Monitor },
+    { title: 'Bannière d\'accueil', href: route('admin.hero-slides.index'), icon: GalleryHorizontal },
     { title: 'Page À propos',   href: route('admin.about.index'),        icon: Info },
     { title: 'Page Consulting', href: route('admin.service-page.edit'), icon: Briefcase },
 ];

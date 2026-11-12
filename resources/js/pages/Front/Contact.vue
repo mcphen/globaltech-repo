@@ -47,12 +47,9 @@ const inquiryTypes = [
     { value: 'partnership', label: 'Partenariat' },
 ];
 
-const offices = [
-    { country: 'Côte d\'Ivoire', city: 'Abidjan', flag: '🇨🇮', role: 'Siège',          address: 'Plateau, Abidjan',  email: 'abidjan@globaltech-edu.com' },
-    { country: 'Sénégal',        city: 'Dakar',   flag: '🇸🇳', role: 'Bureau régional', address: 'Plateau, Dakar',    email: 'dakar@globaltech-edu.com' },
-    { country: 'Mali',           city: 'Bamako',  flag: '🇲🇱', role: 'Bureau régional', address: 'ACI 2000',          email: 'bamako@globaltech-edu.com' },
-    { country: 'Cameroun',       city: 'Douala',  flag: '🇨🇲', role: 'Bureau régional', address: 'Bonanjo',           email: 'douala@globaltech-edu.com' },
-];
+type Office = { country: string; city: string; flag?: string; role?: string; address?: string; email?: string };
+// Bureaux gérés dans Admin > À Propos (partagés via Inertia)
+const offices = computed<Office[]>(() => (page.props.offices as Office[]) ?? []);
 
 // Dark-mode styles
 const sectionBg      = computed(() => isDark.value ? '#0B1437' : '#F8FAFC');
@@ -172,7 +169,7 @@ const pillInactive   = computed(() => isDark.value
                         <div>
                             <h3 class="text-sm font-black uppercase tracking-widest mb-4" :style="`color: ${sectionHeadColor};`">Nos Bureaux</h3>
                             <div class="space-y-3">
-                                <div v-for="office in offices" :key="office.country" class="gt-card p-4 flex items-start gap-3">
+                                <div v-for="office in offices" :key="office.city" class="gt-card p-4 flex items-start gap-3">
                                     <span class="text-2xl flex-shrink-0">{{ office.flag }}</span>
                                     <div class="min-w-0">
                                         <div class="flex items-center gap-2 mb-0.5">
@@ -182,8 +179,8 @@ const pillInactive   = computed(() => isDark.value
                                                 {{ office.role }}
                                             </span>
                                         </div>
-                                        <p class="text-xs" :style="`color: ${descColor};`">{{ office.address }}</p>
-                                        <a :href="`mailto:${office.email}`"
+                                        <p v-if="office.address" class="text-xs" :style="`color: ${descColor};`">{{ office.address }}</p>
+                                        <a v-if="office.email" :href="`mailto:${office.email}`"
                                             class="text-xs hover:text-blue-400 transition-colors"
                                             style="color: #94A3B8;">
                                             {{ office.email }}
@@ -233,7 +230,7 @@ const pillInactive   = computed(() => isDark.value
                                     <div>
                                         <label class="block text-xs font-bold uppercase tracking-wide mb-1.5" :style="`color: ${labelColor};`">Prénom *</label>
                                         <input v-model="form.first_name" type="text" required
-                                            class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                            class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-red-400 transition-all"
                                             :style="form.errors.first_name ? inputError : inputBase"
                                             placeholder="Votre prénom" />
                                         <p v-if="form.errors.first_name" class="text-xs text-red-400 mt-1">{{ form.errors.first_name }}</p>
@@ -241,7 +238,7 @@ const pillInactive   = computed(() => isDark.value
                                     <div>
                                         <label class="block text-xs font-bold uppercase tracking-wide mb-1.5" :style="`color: ${labelColor};`">Nom *</label>
                                         <input v-model="form.last_name" type="text" required
-                                            class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                            class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-red-400 transition-all"
                                             :style="form.errors.last_name ? inputError : inputBase"
                                             placeholder="Votre nom" />
                                         <p v-if="form.errors.last_name" class="text-xs text-red-400 mt-1">{{ form.errors.last_name }}</p>
@@ -253,7 +250,7 @@ const pillInactive   = computed(() => isDark.value
                                     <div>
                                         <label class="block text-xs font-bold uppercase tracking-wide mb-1.5" :style="`color: ${labelColor};`">Email *</label>
                                         <input v-model="form.email" type="email" required
-                                            class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                            class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-red-400 transition-all"
                                             :style="form.errors.email ? inputError : inputBase"
                                             placeholder="votre@email.com" />
                                         <p v-if="form.errors.email" class="text-xs text-red-400 mt-1">{{ form.errors.email }}</p>
@@ -261,7 +258,7 @@ const pillInactive   = computed(() => isDark.value
                                     <div>
                                         <label class="block text-xs font-bold uppercase tracking-wide mb-1.5" :style="`color: ${labelColor};`">Téléphone</label>
                                         <input v-model="form.phone" type="tel"
-                                            class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                            class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-red-400 transition-all"
                                             :style="inputBase"
                                             placeholder="+225 XX XX XX XX" />
                                     </div>
@@ -274,7 +271,7 @@ const pillInactive   = computed(() => isDark.value
                                         <span class="normal-case font-normal ml-1" style="color: #94A3B8;">(optionnel)</span>
                                     </label>
                                     <input v-model="form.company" type="text"
-                                        class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                        class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-red-400 transition-all"
                                         :style="inputBase"
                                         placeholder="Nom de votre entreprise" />
                                 </div>
@@ -283,7 +280,7 @@ const pillInactive   = computed(() => isDark.value
                                 <div>
                                     <label class="block text-xs font-bold uppercase tracking-wide mb-1.5" :style="`color: ${labelColor};`">Objet *</label>
                                     <input v-model="form.subject" type="text" required
-                                        class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all"
+                                        class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-red-400 transition-all"
                                         :style="form.errors.subject ? inputError : inputBase"
                                         placeholder="Ex : Demande de devis formation PMP®" />
                                     <p v-if="form.errors.subject" class="text-xs text-red-400 mt-1">{{ form.errors.subject }}</p>
@@ -293,7 +290,7 @@ const pillInactive   = computed(() => isDark.value
                                 <div>
                                     <label class="block text-xs font-bold uppercase tracking-wide mb-1.5" :style="`color: ${labelColor};`">Message *</label>
                                     <textarea v-model="form.description" required rows="5"
-                                        class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-yellow-400 transition-all resize-none"
+                                        class="w-full px-4 py-3 rounded-xl border text-sm focus:outline-none focus:ring-2 focus:ring-red-400 transition-all resize-none"
                                         :style="form.errors.description ? inputError : inputBase"
                                         placeholder="Décrivez votre besoin en détail..."></textarea>
                                     <p v-if="form.errors.description" class="text-xs text-red-400 mt-1">{{ form.errors.description }}</p>

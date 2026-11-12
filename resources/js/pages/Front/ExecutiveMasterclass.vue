@@ -346,7 +346,7 @@ const session = props.session ?? null;
                                     Candidater maintenant
                                 </a>
                                 <a :href="`tel:${contactSettings?.contact_phone || ''}`"
-                                    class="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-sm border-2 border-white text-white transition-all duration-300 hover:bg-white hover:text-yellow-700">
+                                    class="inline-flex items-center gap-2 px-8 py-4 rounded-xl font-bold text-sm border-2 border-white text-white transition-all duration-300 hover:bg-white hover:text-red-700">
                                     <i class="bi bi-telephone-fill"></i>
                                     Appeler un conseiller
                                 </a>

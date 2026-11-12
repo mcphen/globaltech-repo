@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\About;
+use App\Models\HeroSlide;
 use App\Models\HomePage;
 use App\Models\ServicePage;
 use App\Models\Actualite;
@@ -34,6 +35,8 @@ class HomeController extends Controller
             'bannerPhotos'    => $bannerPhotos,
             'contactSettings' => $this->getContactSettings(),
             'homePage'        => HomePage::first(),
+            'heroSlides'      => HeroSlide::where('active', true)
+                ->orderBy('sort_order')->orderBy('id')->get(),
         ]);
     }
 

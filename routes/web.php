@@ -237,6 +237,20 @@ Route::middleware(['auth'])->group(function () {
 
         Route::get('albums/{album}',[AlbumController::class,'show'])->name('admin.albums.show');
 
+        // Hero slides (bannière d'accueil)
+        Route::post('hero-slides/reorder', [\App\Http\Controllers\HeroSlideController::class, 'reorder'])->name('admin.hero-slides.reorder');
+        Route::patch('hero-slides/{heroSlide}/toggle', [\App\Http\Controllers\HeroSlideController::class, 'toggle'])->name('admin.hero-slides.toggle');
+        Route::resource('hero-slides', \App\Http\Controllers\HeroSlideController::class)
+            ->except(['show'])
+            ->names([
+                'index'   => 'admin.hero-slides.index',
+                'create'  => 'admin.hero-slides.create',
+                'store'   => 'admin.hero-slides.store',
+                'edit'    => 'admin.hero-slides.edit',
+                'update'  => 'admin.hero-slides.update',
+                'destroy' => 'admin.hero-slides.destroy',
+            ]);
+
         // Banner management routes
         Route::get('banner', [BannerController::class, 'index'])->name('admin.banner.index');
         Route::post('banner/update', [BannerController::class, 'update'])->name('admin.banner.update');

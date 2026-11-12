@@ -73,8 +73,6 @@ const form = reactive({
 });
 
 // ── Array helpers ──────────────────────────────────────────────────────────
-function addBadge()       { form.hero_trust_badges.push(''); }
-function removeBadge(i: number) { form.hero_trust_badges.splice(i, 1); }
 
 function addMiniStat()    { form.hero_mini_stats.push({ v: '', l: '' }); }
 function removeMiniStat(i: number) { form.hero_mini_stats.splice(i, 1); }
@@ -203,20 +201,6 @@ const tabs = [
                     <div>
                         <label class="gt-label">Sous-titre</label>
                         <textarea v-model="form.hero_subtitle" rows="3" class="gt-input" placeholder="GLOBALTECH EDUCATION Africa est le leader..."></textarea>
-                    </div>
-
-                    <!-- Trust badges -->
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <label class="gt-label mb-0">Badges de certification (ligne du bas)</label>
-                            <button type="button" @click="addBadge" class="gt-btn-sm">+ Ajouter</button>
-                        </div>
-                        <div class="flex flex-wrap gap-2">
-                            <div v-for="(b, i) in form.hero_trust_badges" :key="i" class="flex items-center gap-1">
-                                <input v-model="form.hero_trust_badges[i]" type="text" class="gt-input w-32" placeholder="CISCO" />
-                                <button type="button" @click="removeBadge(i)" class="gt-btn-danger">×</button>
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Mini stats (carte dorée en bas à droite) -->

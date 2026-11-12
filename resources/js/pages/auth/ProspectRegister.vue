@@ -113,7 +113,7 @@ const submit = () => {
                 </p>
             </div>
 
-            <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-yellow-400/50 to-transparent"></div>
+            <div class="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-red-400/50 to-transparent"></div>
         </div>
 
         <!-- Formulaire -->
