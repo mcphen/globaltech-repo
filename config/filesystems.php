@@ -33,7 +33,8 @@ return [
         'local' => [
             'driver' => 'local',
             'root' => storage_path('app/private'),
-            'serve' => true,
+            // false : libère l'URL /storage/{path} pour la route "storage.fallback" (LWS, pas de symlink)
+            'serve' => false,
             'throw' => false,
             'report' => false,
         ],

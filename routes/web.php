@@ -18,6 +18,8 @@ use App\Http\Controllers\FormationController;
 use App\Http\Controllers\SubscribeController;
 use App\Http\Controllers\Admin\LeadController;
 use App\Http\Controllers\TeamMemberController;
+use Illuminate\Support\Facades\Storage;
+
 use App\Http\Controllers\Admin\OrderController;
 use App\Http\Controllers\AppointmentController;
 use App\Http\Controllers\ProfilFrontController;
@@ -26,6 +28,21 @@ use App\Http\Controllers\ProductOrderController;
 use App\Http\Controllers\LeadFormationController;
 use App\Http\Controllers\Admin\ScheduleController;
 use App\Http\Controllers\VisitorTrackerController;
+
+/*
+| Sert /storage/... depuis storage/app/public quand le lien symbolique
+| (php artisan storage:link) est impossible, ex. hébergement mutualisé LWS.
+| Si public/storage existe réellement, Apache sert le fichier avant Laravel.
+*/
+Route::get('/storage/{path}', function (string $path) {
+    abort_if(str_contains($path, '..'), 404);
+    $disk = Storage::disk('public');
+    abort_unless($disk->exists($path), 404);
+
+    return response()->file($disk->path($path), [
+        'Cache-Control' => 'public, max-age=2592000',
+    ]);
+})->where('path', '.*')->name('storage.fallback');
 
 
 Route::get('/', [HomeController::class,'index'])->name('home');
