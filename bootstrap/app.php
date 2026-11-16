@@ -20,6 +20,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'page.enabled' => EnsurePageEnabled::class,
+            'staff' => \App\Http\Middleware\EnsureStaff::class,
         ]);
 
         $middleware->web(append: [

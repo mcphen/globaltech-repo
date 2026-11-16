@@ -22,9 +22,11 @@ interface Formation {
   duration_per_day_hours?: number | null;
   price?: number | null;
   currency?: string | null;
+  category_id?: number | null;
+  is_featured?: boolean;
 }
 
-const props = defineProps<{ formation: Formation }>();
+const props = defineProps<{ formation: Formation; categories: { id: number; name: string }[] }>();
 
 const breadcrumbs: BreadcrumbItem[] = [
   { title: 'Dashboard', href: '/dashboard' },
@@ -34,6 +36,8 @@ const breadcrumbs: BreadcrumbItem[] = [
 
 const form = useForm({
   title: props.formation.title || '',
+  category_id: (props.formation.category_id ?? null) as number | null,
+  is_featured: !!props.formation.is_featured,
   description: props.formation.description || '',
   image: null as File | null,
   attachment: null as File | null,
@@ -198,6 +202,25 @@ function submit() {
           <label class="block text-sm font-medium mb-1">Titre de la formation</label>
           <input v-model="form.title" type="text" class="w-full px-3 py-2 border rounded" />
           <p v-if="form.errors.title" class="text-red-600 text-sm mt-1">{{ form.errors.title }}</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-sm font-medium mb-1">Catégorie</label>
+            <select v-model="form.category_id" class="w-full px-3 py-2 border rounded">
+              <option :value="null">— Aucune catégorie —</option>
+              <option v-for="c in props.categories" :key="c.id" :value="c.id">{{ c.name }}</option>
+            </select>
+            <p class="text-xs text-gray-500 mt-1">Sert au filtre de la page Formations et au menu « Formations » du site.</p>
+            <p v-if="form.errors.category_id" class="text-red-600 text-sm mt-1">{{ form.errors.category_id }}</p>
+          </div>
+          <label class="flex items-start gap-3 p-3 border rounded cursor-pointer self-end">
+            <input v-model="form.is_featured" type="checkbox" class="mt-1 h-4 w-4" />
+            <span>
+              <span class="block text-sm font-medium">Mettre en avant sur l'accueil</span>
+              <span class="block text-xs text-gray-500">Les formations mises en avant passent en premier dans « Formations à la une » (6 au maximum).</span>
+            </span>
+          </label>
         </div>
 
         <div>

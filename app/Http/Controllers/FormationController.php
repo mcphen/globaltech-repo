@@ -24,9 +24,17 @@ class FormationController extends Controller
         ]);
     }
 
+    /** Catégories proposées dans le formulaire (id, nom), dans l'ordre d'affichage. */
+    private function categoryOptions()
+    {
+        return \App\Models\FormationCategory::orderBy('sort_order')->orderBy('name')->get(['id', 'name']);
+    }
+
     public function create()
     {
-        return Inertia::render('Admin/Formations/Create');
+        return Inertia::render('Admin/Formations/Create', [
+            'categories' => $this->categoryOptions(),
+        ]);
     }
 
     public function store(Request $request)
@@ -46,6 +54,8 @@ class FormationController extends Controller
             'duration_per_day_hours' => 'nullable|integer|min:1|required_if:date_mode,range',
             'price' => 'nullable|numeric|min:0',
             'currency' => 'nullable|string|max:10',
+            'category_id' => 'nullable|integer|exists:formation_categories,id',
+            'is_featured' => 'nullable|boolean',
         ]);
 
         if ($request->hasFile('image')) {
@@ -70,6 +80,8 @@ class FormationController extends Controller
             'duration_per_day_hours' => $data['date_mode'] === 'range' ? ($data['duration_per_day_hours'] ?? null) : null,
             'price' => $data['price'] ?? null,
             'currency' => $data['currency'] ?? null,
+            'category_id' => $data['category_id'] ?? null,
+            'is_featured' => $request->boolean('is_featured'),
         ]);
 
         return redirect()->route('admin.formations.index')
@@ -80,6 +92,7 @@ class FormationController extends Controller
     {
         return Inertia::render('Admin/Formations/Edit', [
             'formation' => $formation,
+            'categories' => $this->categoryOptions(),
         ]);
     }
 
@@ -100,6 +113,8 @@ class FormationController extends Controller
             'duration_per_day_hours' => 'nullable|integer|min:1|required_if:date_mode,range',
             'price' => 'nullable|numeric|min:0',
             'currency' => 'nullable|string|max:10',
+            'category_id' => 'nullable|integer|exists:formation_categories,id',
+            'is_featured' => 'nullable|boolean',
         ]);
 
         // Handle files
@@ -137,6 +152,8 @@ class FormationController extends Controller
             'date_mode' => $data['date_mode'],
             'price' => $data['price'] ?? null,
             'currency' => $data['currency'] ?? null,
+            'category_id' => $data['category_id'] ?? null,
+            'is_featured' => $request->boolean('is_featured'),
         ];
         if (isset($data['image_path'])) {
             $payload['image_path'] = $data['image_path'];

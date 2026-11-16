@@ -1,6 +1,5 @@
-```vue
 <script setup lang="ts">
-import { Head, Link, useForm } from '@inertiajs/vue3';
+import { Head, Link, router, useForm } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItemType } from '@/types';
 import { ref, computed } from 'vue';
@@ -30,6 +29,8 @@ interface Pagination {
 // Props
 interface Props {
     partners: Pagination;
+    /** Taille max d'un logo en Mo (limite réelle du serveur, 4 Mo au plus) */
+    maxLogoMb?: number;
     flash?: { success?: string };
 }
 
@@ -84,9 +85,25 @@ function cancelDelete() {
 
 function deletePartner() {
     if (partnerToDelete.value) {
-        window.location.href = route('admin.partners.destroy', partnerToDelete.value.id);
+        router.delete(route('admin.partners.destroy', partnerToDelete.value.id), { preserveScroll: true });
     }
     showDeleteModal.value = false;
+}
+
+// Logo : contrôle du poids avant l'envoi
+const MAX_LOGO_MB = props.maxLogoMb ?? 4;
+const LOGO_ACCEPT = '.jpg,.jpeg,.png,.gif,.webp,.svg';
+function pickLogo(form: typeof addForm | typeof editForm, event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0] ?? null;
+    form.clearErrors('logo');
+    if (file && file.size > MAX_LOGO_MB * 1024 * 1024) {
+        form.setError('logo', `Fichier trop lourd : ce logo pèse ${(file.size / 1024 / 1024).toFixed(1)} Mo, le maximum est ${MAX_LOGO_MB} Mo. Compressez-le (par exemple sur tinypng.com) puis réessayez.`);
+        input.value = '';
+        form.logo = null;
+        return;
+    }
+    form.logo = file;
 }
 
 // Ouvrir la modal d'édition
@@ -106,6 +123,9 @@ function submitAddForm() {
             addForm.reset();
             showAddModal.value = false;
         },
+        onError: (errors) => {
+            if (!Object.keys(errors).length) addForm.setError('logo', "L'envoi a échoué. Réessayez avec un fichier plus léger.");
+        },
     });
 }
 
@@ -113,6 +133,7 @@ function submitAddForm() {
 function submitEditForm() {
     editForm.post(route('admin.partners.update', currentPartner.value?.id), {
         preserveScroll: true,
+        forceFormData: true,
         onSuccess: () => {
             editForm.reset();
             showEditModal.value = false;
@@ -469,9 +490,9 @@ function formatDate(dateString: string): string {
 
                 <div class="mb-6">
                     <label for="logo" class="block text-gray-700 text-sm font-bold mb-2">Logo</label>
-                    <input type="file" id="logo" @input="addForm.logo = $event.target.files[0]" class="block w-full text-sm text-gray-700 border border-gray-300 rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" accept="image/*" required>
+                    <input type="file" id="logo" @change="pickLogo(addForm, $event)" class="block w-full text-sm text-gray-700 border border-gray-300 rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" :accept="LOGO_ACCEPT" required>
                     <div v-if="addForm.errors.logo" class="text-red-500 text-xs mt-1">{{ addForm.errors.logo }}</div>
-                    <p class="text-xs text-gray-500 mt-1">Formats acceptés: JPG, PNG, GIF. Taille max: 2Mo</p>
+                    <p class="text-xs text-gray-500 mt-1">Formats acceptés : JPG, PNG, GIF, WebP, SVG. Taille max : {{ MAX_LOGO_MB }} Mo. Idéal : PNG ou SVG à fond transparent.</p>
                 </div>
 
                 <div class="flex justify-end gap-2">
@@ -518,9 +539,9 @@ function formatDate(dateString: string): string {
                     </div>
 
                     <label for="edit_logo" class="block text-gray-700 text-sm font-bold mb-2">Nouveau logo (optionnel)</label>
-                    <input type="file" id="edit_logo" @input="editForm.logo = $event.target.files[0]" class="block w-full text-sm text-gray-700 border border-gray-300 rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" accept="image/*">
+                    <input type="file" id="edit_logo" @change="pickLogo(editForm, $event)" class="block w-full text-sm text-gray-700 border border-gray-300 rounded py-2 px-3 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" :accept="LOGO_ACCEPT">
                     <div v-if="editForm.errors.logo" class="text-red-500 text-xs mt-1">{{ editForm.errors.logo }}</div>
-                    <p class="text-xs text-gray-500 mt-1">Laissez vide pour conserver le logo actuel. Formats acceptés: JPG, PNG, GIF. Taille max: 2Mo</p>
+                    <p class="text-xs text-gray-500 mt-1">Laissez vide pour conserver le logo actuel. Formats acceptés : JPG, PNG, GIF, WebP, SVG. Taille max : {{ MAX_LOGO_MB }} Mo.</p>
                 </div>
 
                 <div class="flex justify-end gap-2">

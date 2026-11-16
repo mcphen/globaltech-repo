@@ -29,6 +29,11 @@ import {
     ChevronDown,
     ChevronUp,
     GalleryHorizontal,
+    UserSearch,
+    CalendarCheck,
+    CalendarClock,
+    AtSign,
+    Images,
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
@@ -70,6 +75,7 @@ const contentItems: NavItem[] = [
     { title: 'Pourquoi nous', href: route('admin.why-us.index'),       icon: ThumbsUp },
     { title: 'Équipe',        href: route('admin.team-members.index'), icon: Users },
     { title: 'Albums photos', href: route('admin.albums.index'),       icon: Image },
+    { title: 'Bannière photos', href: route('admin.banner.index'),     icon: Images },
 ];
 
 // ── 5. EXECUTIVE MASTERCLASS ────────────────────────────────────────────────
@@ -86,6 +92,10 @@ const masterclassItems: NavItem[] = [
 // ── 6. OPÉRATIONNEL ─────────────────────────────────────────────────────────
 const operationalItems: NavItem[] = [
     { title: 'Contacts',  href: route('admin.contacts.index'), icon: Mail },
+    { title: 'Prospects',     href: route('admin.leads.index'),        icon: UserSearch },
+    { title: 'Rendez-vous',   href: route('admin.appointments.index'), icon: CalendarCheck },
+    { title: 'Créneaux',      href: route('admin.schedules.index'),    icon: CalendarClock },
+    { title: 'Newsletter',    href: route('admin.subscribes.index'),   icon: AtSign },
     { title: 'Services',  href: route('admin.services.index'), icon: Briefcase },
     { title: 'Produits',  href: route('admin.products.index'), icon: ShoppingCart },
     { title: 'Commandes', href: route('admin.orders.index'),   icon: ShoppingCart },

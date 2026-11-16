@@ -134,13 +134,14 @@ Route::middleware(['auth'])->group(function () {
 
 
 Route::get('dashboard', [VisitorTrackerController::class, 'dashboard'])
-    ->middleware(['auth', 'verified'])
+    ->middleware(['auth', 'verified', 'staff'])
     ->name('dashboard');
 
 Route::middleware(['auth'])->group(function () {
 
 
-    Route::prefix('admin')->group(function () {
+    // Administration : réservée au personnel (les prospects en sont exclus)
+    Route::prefix('admin')->middleware('staff')->group(function () {
 
 
         Route::resource('services', ServiceController::class)
@@ -355,8 +356,8 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('contacts/{contact}', [ContactController::class, 'destroy'])->name('admin.contacts.destroy');
 
         // Admin routes for subscribes
-        Route::get('/admin/subscribes', [SubscribeController::class, 'index'])->name('admin.subscribes.index');
-        Route::delete('/admin/subscribes/{subscribe}', [SubscribeController::class, 'destroy'])->name('admin.subscribes.destroy');
+        Route::get('subscribes', [SubscribeController::class, 'index'])->name('admin.subscribes.index');
+        Route::delete('subscribes/{subscribe}', [SubscribeController::class, 'destroy'])->name('admin.subscribes.destroy');
 
 
         // Leads management routes
@@ -388,18 +389,17 @@ Route::middleware(['auth'])->group(function () {
 
 
             // Route Home Page
-        Route::get('/admin/home-page', [\App\Http\Controllers\HomePageController::class, 'edit'])->name('admin.home-page.edit');
-        Route::post('/admin/home-page', [\App\Http\Controllers\HomePageController::class, 'update'])->name('admin.home-page.update');
+        Route::get('home-page', [\App\Http\Controllers\HomePageController::class, 'edit'])->name('admin.home-page.edit');
+        Route::post('home-page', [\App\Http\Controllers\HomePageController::class, 'update'])->name('admin.home-page.update');
 
             // Route Service Page
-        Route::get('/admin/service-page', [\App\Http\Controllers\ServicePageController::class, 'edit'])->name('admin.service-page.edit');
-        Route::post('/admin/service-page', [\App\Http\Controllers\ServicePageController::class, 'update'])->name('admin.service-page.update');
+        Route::get('service-page', [\App\Http\Controllers\ServicePageController::class, 'edit'])->name('admin.service-page.edit');
+        Route::post('service-page', [\App\Http\Controllers\ServicePageController::class, 'update'])->name('admin.service-page.update');
 
             //Route About
-        Route::get('/admin/about', [AboutController::class, 'edit'])->name('admin.about.edit');
-        Route::get('/admin/about/edit', [AboutController::class, 'edit'])->name('admin.about.edit');
-        Route::post('/admin/about', [AboutController::class, 'update'])->name('admin.about.update');
-        Route::get('/admin/about/index', [AboutController::class, 'indexAdminAbout'])->name('admin.about.index');
+        Route::get('about', [AboutController::class, 'indexAdminAbout'])->name('admin.about.index');
+        Route::get('about/edit', [AboutController::class, 'edit'])->name('admin.about.edit');
+        Route::post('about', [AboutController::class, 'update'])->name('admin.about.update');
 
 
 
