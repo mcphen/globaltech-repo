@@ -4,12 +4,14 @@ import AppLayout from '@/layouts/AppLayout.vue';
 
 type Country = { flag: string; name: string };
 type ThemeMode = 'user' | 'dark' | 'light';
+type NavItem = { key: string; label: string; visible: boolean };
 
 type SiteSettingsForm = {
     contact_enabled: boolean;
     blog_enabled: boolean;
     theme_mode: ThemeMode;
     presence_countries: Country[];
+    nav_menu: NavItem[];
 };
 
 const props = defineProps<{
@@ -18,6 +20,7 @@ const props = defineProps<{
         blog_enabled: boolean;
         theme_mode: ThemeMode;
         presence_countries: Country[];
+        nav_menu: NavItem[];
     };
 }>();
 
@@ -26,7 +29,29 @@ const form = useForm<SiteSettingsForm>({
     blog_enabled: props.site.blog_enabled,
     theme_mode: props.site.theme_mode,
     presence_countries: props.site.presence_countries.map((c) => ({ flag: c.flag ?? '', name: c.name })),
+    nav_menu: props.site.nav_menu.map((m) => ({ ...m })),
 });
+
+// Adresse et libellé d'origine de chaque entrée (les liens ne sont pas modifiables)
+const navInfo: Record<string, { path: string; original: string }> = {
+    home: { path: '/', original: 'Accueil' },
+    about: { path: '/about', original: 'À Propos' },
+    formations: { path: '/formations (avec sous-menu des catégories)', original: 'Formations' },
+    consulting: { path: '/services', original: 'Consulting' },
+    masterclass: { path: '/executive-masterclass', original: 'Executive Masterclass' },
+    blog: { path: '/blog', original: 'Actualités' },
+    contact: { path: '/contact', original: 'Contact' },
+};
+
+const moveNav = (i: number, dir: -1 | 1) => {
+    const j = i + dir;
+    if (j < 0 || j >= form.nav_menu.length) return;
+    const list = form.nav_menu;
+    [list[i], list[j]] = [list[j], list[i]];
+};
+const resetNav = () => {
+    form.nav_menu = Object.entries(navInfo).map(([key, v]) => ({ key, label: v.original, visible: true }));
+};
 
 const themeOptions: { value: ThemeMode; label: string; desc: string }[] = [
     { value: 'dark', label: 'Sombre uniquement', desc: 'Le site est toujours affiché en mode sombre.' },
@@ -81,6 +106,43 @@ const submit = () => {
                                     </span>
                                     <input v-model="form.blog_enabled" type="checkbox" class="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary" />
                                 </label>
+                            </div>
+
+                            <!-- Menu -->
+                            <div class="mb-8">
+                                <h2 class="text-lg font-medium mb-4 text-gray-700 border-b pb-2">Menu principal</h2>
+                                <p class="text-sm text-gray-500 mb-4">
+                                    Renommez, réordonnez (↑ ↓) ou masquez les entrées du menu du site. Les mêmes libellés sont utilisés dans le menu mobile et le pied de page.
+                                    Actualités et Contact restent masqués si la page est désactivée ci-dessus.
+                                </p>
+
+                                <div v-for="(item, i) in form.nav_menu" :key="item.key"
+                                    class="flex items-center gap-2 mb-2 p-2 rounded-md border"
+                                    :class="item.visible ? 'border-gray-200' : 'border-dashed border-gray-300 bg-gray-50 opacity-70'">
+                                    <span class="w-6 text-center text-sm text-gray-400">{{ i + 1 }}</span>
+                                    <div class="flex-1">
+                                        <input v-model="item.label" type="text" maxlength="40" required
+                                            :placeholder="navInfo[item.key]?.original"
+                                            class="w-full border-gray-300 rounded-md shadow-sm focus:border-primary focus:ring focus:ring-primary focus:ring-opacity-50" />
+                                        <span class="block text-xs text-gray-400 mt-1">{{ navInfo[item.key]?.path }}</span>
+                                        <span v-if="(form.errors as Record<string, string>)[`nav_menu.${i}.label`]" class="block text-xs text-red-600">
+                                            {{ (form.errors as Record<string, string>)[`nav_menu.${i}.label`] }}
+                                        </span>
+                                    </div>
+                                    <label class="flex items-center gap-1 text-xs text-gray-600 cursor-pointer px-2" title="Afficher dans le menu">
+                                        <input v-model="item.visible" type="checkbox" class="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary" />
+                                        Visible
+                                    </label>
+                                    <button type="button" @click="moveNav(i, -1)" :disabled="i === 0"
+                                        class="px-2 py-2 text-gray-500 hover:text-gray-800 disabled:opacity-30" title="Monter">↑</button>
+                                    <button type="button" @click="moveNav(i, 1)" :disabled="i === form.nav_menu.length - 1"
+                                        class="px-2 py-2 text-gray-500 hover:text-gray-800 disabled:opacity-30" title="Descendre">↓</button>
+                                </div>
+
+                                <button type="button" @click="resetNav"
+                                    class="mt-2 px-3 py-2 text-sm border border-gray-300 rounded-md hover:bg-gray-50">
+                                    Rétablir le menu d'origine
+                                </button>
                             </div>
 
                             <!-- Theme -->

@@ -67,6 +67,53 @@ class Setting extends Model
     ];
 
     /**
+     * Default main menu (front header). Keys are fixed (each maps to a route
+     * in LayoutFront.vue); only label, order and visibility are editable.
+     */
+    public const DEFAULT_NAV_MENU = [
+        ['key' => 'home',        'label' => 'Accueil',               'visible' => true],
+        ['key' => 'about',       'label' => 'À Propos',              'visible' => true],
+        ['key' => 'formations',  'label' => 'Formations',            'visible' => true],
+        ['key' => 'consulting',  'label' => 'Consulting',            'visible' => true],
+        ['key' => 'masterclass', 'label' => 'Executive Masterclass', 'visible' => true],
+        ['key' => 'blog',        'label' => 'Actualités',            'visible' => true],
+        ['key' => 'contact',     'label' => 'Contact',               'visible' => true],
+    ];
+
+    /**
+     * Stored menu merged with defaults: unknown keys dropped, missing keys
+     * appended, empty labels replaced by the default label.
+     */
+    public static function navMenu(): array
+    {
+        $stored = json_decode((string) self::get('site_nav_menu', ''), true);
+        $defaults = collect(self::DEFAULT_NAV_MENU)->keyBy('key');
+
+        if (! is_array($stored)) {
+            return self::DEFAULT_NAV_MENU;
+        }
+
+        $menu = [];
+        foreach ($stored as $item) {
+            $key = $item['key'] ?? null;
+            if (! $defaults->has($key) || isset($menu[$key])) {
+                continue;
+            }
+            $label = trim((string) ($item['label'] ?? ''));
+            $menu[$key] = [
+                'key' => $key,
+                'label' => $label !== '' ? $label : $defaults[$key]['label'],
+                'visible' => (bool) ($item['visible'] ?? true),
+            ];
+        }
+        foreach ($defaults as $key => $item) {
+            $menu[$key] ??= $item;
+        }
+
+        return array_values($menu);
+    }
+
+    /**
      * Site-wide front settings (pages visibility, theme, presence)
      *
      * @return array
@@ -81,6 +128,7 @@ class Setting extends Model
             // 'user' = visitor chooses, 'dark' / 'light' = forced
             'theme_mode' => self::get('site_theme_mode', 'user'),
             'presence_countries' => is_array($countries) ? $countries : self::DEFAULT_PRESENCE_COUNTRIES,
+            'nav_menu' => self::navMenu(),
         ];
     }
 

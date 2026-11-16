@@ -2,7 +2,7 @@
 import { Head, Link, router, usePage } from '@inertiajs/vue3';
 import { ref, onMounted, onUnmounted, computed, watch } from 'vue';
 import { useDarkMode, setForcedTheme } from '@/composables/useDarkMode';
-import { useSiteSettings } from '@/composables/useSiteSettings';
+import { useSiteSettings, type NavKey, type NavMenuItem } from '@/composables/useSiteSettings';
 
 interface ContactSettings {
     contact_phone: string;
@@ -46,14 +46,36 @@ watch(() => site.value.theme_mode, (mode) => {
     setForcedTheme(mode === 'dark' || mode === 'light' ? mode : null);
 }, { immediate: true });
 
-const footerLinks = computed(() => [
-    { label: 'Accueil', href: '/' },
-    { label: 'À Propos', href: '/about' },
-    { label: 'Consulting', href: '/services' },
-    { label: 'Executive Masterclass', href: '/executive-masterclass' },
-    ...(blogEnabled.value ? [{ label: 'Actualités', href: '/blog' }] : []),
-    ...(contactEnabled.value ? [{ label: 'Contact', href: '/contact' }] : []),
-]);
+// ── Menu principal (Admin > Paramètres du site > Menu principal) ──────────
+// Les liens sont fixes ; seuls le libellé, l'ordre et la visibilité sont réglables.
+const NAV_ROUTES: Record<NavKey, { href: string; icon: string; isActive: (url: string) => boolean }> = {
+    home:        { href: '/',                      icon: 'bi-house',       isActive: u => u === '/' },
+    about:       { href: '/about',                 icon: 'bi-info-circle', isActive: u => u.startsWith('/about') },
+    formations:  { href: '/formations',            icon: 'bi-mortarboard', isActive: u => u.startsWith('/formations') },
+    consulting:  { href: '/services',              icon: 'bi-briefcase',   isActive: u => u.startsWith('/services') },
+    masterclass: { href: '/executive-masterclass', icon: 'bi-award',       isActive: u => u.startsWith('/executive-masterclass') },
+    blog:        { href: '/blog',                  icon: 'bi-newspaper',   isActive: u => u.startsWith('/blog') },
+    contact:     { href: '/contact',               icon: 'bi-envelope',    isActive: u => u.startsWith('/contact') },
+};
+const DEFAULT_NAV: NavMenuItem[] = [
+    { key: 'home', label: 'Accueil', visible: true },
+    { key: 'about', label: 'À Propos', visible: true },
+    { key: 'formations', label: 'Formations', visible: true },
+    { key: 'consulting', label: 'Consulting', visible: true },
+    { key: 'masterclass', label: 'Executive Masterclass', visible: true },
+    { key: 'blog', label: 'Actualités', visible: true },
+    { key: 'contact', label: 'Contact', visible: true },
+];
+const navItems = computed(() => {
+    const menu = site.value.nav_menu?.length ? site.value.nav_menu : DEFAULT_NAV;
+    return menu
+        .filter(m => m.visible && NAV_ROUTES[m.key])
+        .filter(m => (m.key !== 'blog' || blogEnabled.value) && (m.key !== 'contact' || contactEnabled.value))
+        .map(m => ({ ...m, ...NAV_ROUTES[m.key] }));
+});
+
+// Pied de page : même ordre et mêmes libellés, sans « Formations » (listé à part)
+const footerLinks = computed(() => navItems.value.filter(m => m.key !== 'formations'));
 
 const isLoading = ref(false);
 const isScrolled = ref(false);
@@ -226,30 +248,19 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
 
                     <!-- Desktop Nav -->
                     <nav class="hidden lg:flex items-center gap-1">
-                        <Link :href="route('home')"
-                            class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200"
-                            :class="page.url === '/' ? navActiveClass : navLinkClass">
-                            Accueil
-                        </Link>
+                        <template v-for="item in navItems" :key="item.key">
+                            <!-- Formations : avec sous-menu des catégories -->
+                            <div v-if="item.key === 'formations'" class="relative"
+                                @mouseenter="formationsDropdownOpen = true"
+                                @mouseleave="formationsDropdownOpen = false">
+                                <Link :href="item.href"
+                                    class="flex items-center gap-1 px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200"
+                                    :class="item.isActive(page.url) ? navActiveClass : navLinkClass">
+                                    {{ item.label }}
+                                    <i class="bi bi-chevron-down text-xs transition-transform duration-200" :class="formationsDropdownOpen ? 'rotate-180' : ''"></i>
+                                </Link>
 
-                        <Link href="/about"
-                            class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200"
-                            :class="page.url.startsWith('/about') ? navActiveClass : navLinkClass">
-                            À Propos
-                        </Link>
-
-                        <!-- Formations Dropdown -->
-                        <div class="relative"
-                            @mouseenter="formationsDropdownOpen = true"
-                            @mouseleave="formationsDropdownOpen = false">
-                            <Link :href="route('formations')"
-                                class="flex items-center gap-1 px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200"
-                                :class="page.url.startsWith('/formations') ? navActiveClass : navLinkClass">
-                                Formations
-                                <i class="bi bi-chevron-down text-xs transition-transform duration-200" :class="formationsDropdownOpen ? 'rotate-180' : ''"></i>
-                            </Link>
-
-                            <Transition name="dropdown">
+                                <Transition name="dropdown">
                                 <div v-show="formationsDropdownOpen"
                                     class="absolute top-full left-0 mt-1 w-72 rounded-2xl shadow-xl p-2 z-50"
                                     :style="`background: ${dropdownBg}; border: 1px solid ${dropdownBorder};`">
@@ -271,31 +282,14 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                                     </Link>
                                 </div>
                             </Transition>
-                        </div>
+                            </div>
 
-                        <Link href="/services"
-                            class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200"
-                            :class="page.url.startsWith('/services') ? navActiveClass : navLinkClass">
-                            Consulting
-                        </Link>
-
-                        <Link href="/executive-masterclass"
-                            class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200"
-                            :class="page.url.startsWith('/executive-masterclass') ? navActiveClass : navLinkClass">
-                            Executive Masterclass
-                        </Link>
-
-                        <Link v-if="blogEnabled" :href="route('blog')"
-                            class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200"
-                            :class="page.url.startsWith('/blog') ? navActiveClass : navLinkClass">
-                            Actualités
-                        </Link>
-
-                        <Link v-if="contactEnabled" :href="route('contact')"
-                            class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200"
-                            :class="page.url.startsWith('/contact') ? navActiveClass : navLinkClass">
-                            Contact
-                        </Link>
+                            <Link v-else :href="item.href"
+                                class="px-4 py-2 text-sm font-semibold rounded-lg transition-all duration-200"
+                                :class="item.isActive(page.url) ? navActiveClass : navLinkClass">
+                                {{ item.label }}
+                            </Link>
+                        </template>
                     </nav>
 
                     <!-- Right Actions -->
@@ -434,40 +428,10 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
             <Transition name="mobile-menu">
                 <div v-show="mobileMenuOpen" class="lg:hidden" :style="`background: ${mobileBg}; border-top: 1px solid ${headerBorder};`">
                     <div class="max-w-7xl mx-auto px-6 py-4 space-y-1">
-                        <Link :href="route('home')" @click="mobileMenuOpen = false"
+                        <Link v-for="item in navItems" :key="item.key" :href="item.href" @click="mobileMenuOpen = false"
                             class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors"
-                            :class="page.url === '/' ? navActiveClass : (isDark ? 'text-slate-300 hover:bg-white/6' : 'text-gray-700 hover:bg-gray-50')">
-                            <i class="bi bi-house w-5 text-center"></i> Accueil
-                        </Link>
-                        <Link href="/about" @click="mobileMenuOpen = false"
-                            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors"
-                            :class="isDark ? 'text-slate-300 hover:bg-white/6' : 'text-gray-700 hover:bg-gray-50'">
-                            <i class="bi bi-info-circle w-5 text-center"></i> À Propos
-                        </Link>
-                        <Link :href="route('formations')" @click="mobileMenuOpen = false"
-                            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors"
-                            :class="isDark ? 'text-slate-300 hover:bg-white/6' : 'text-gray-700 hover:bg-gray-50'">
-                            <i class="bi bi-mortarboard w-5 text-center"></i> Formations
-                        </Link>
-                        <Link href="/services" @click="mobileMenuOpen = false"
-                            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors"
-                            :class="isDark ? 'text-slate-300 hover:bg-white/6' : 'text-gray-700 hover:bg-gray-50'">
-                            <i class="bi bi-briefcase w-5 text-center"></i> Consulting
-                        </Link>
-                        <Link href="/executive-masterclass" @click="mobileMenuOpen = false"
-                            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors"
-                            :class="isDark ? 'text-slate-300 hover:bg-white/6' : 'text-gray-700 hover:bg-gray-50'">
-                            <i class="bi bi-award w-5 text-center"></i> Executive Masterclass
-                        </Link>
-                        <Link v-if="blogEnabled" :href="route('blog')" @click="mobileMenuOpen = false"
-                            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors"
-                            :class="isDark ? 'text-slate-300 hover:bg-white/6' : 'text-gray-700 hover:bg-gray-50'">
-                            <i class="bi bi-newspaper w-5 text-center"></i> Actualités
-                        </Link>
-                        <Link v-if="contactEnabled" :href="route('contact')" @click="mobileMenuOpen = false"
-                            class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors"
-                            :class="isDark ? 'text-slate-300 hover:bg-white/6' : 'text-gray-700 hover:bg-gray-50'">
-                            <i class="bi bi-envelope w-5 text-center"></i> Contact
+                            :class="item.isActive(page.url) ? navActiveClass : (isDark ? 'text-slate-300 hover:bg-white/6' : 'text-gray-700 hover:bg-gray-50')">
+                            <i :class="['bi', item.icon, 'w-5 text-center']"></i> {{ item.label }}
                         </Link>
 
                         <!-- Theme selector row -->

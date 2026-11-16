@@ -172,6 +172,12 @@ class SettingController extends Controller
             'presence_countries' => 'present|array',
             'presence_countries.*.flag' => 'nullable|string|max:20',
             'presence_countries.*.name' => 'required|string|max:100',
+            'nav_menu' => 'required|array',
+            'nav_menu.*.key' => 'required|string|in:' . implode(',', array_column(Setting::DEFAULT_NAV_MENU, 'key')),
+            'nav_menu.*.label' => 'required|string|max:40',
+            'nav_menu.*.visible' => 'required|boolean',
+        ], [
+            'nav_menu.*.label.required' => 'Chaque entrée du menu doit avoir un libellé.',
         ]);
 
         Setting::set('site_contact_enabled', $data['contact_enabled'] ? '1' : '0');
@@ -182,6 +188,14 @@ class SettingController extends Controller
                 'flag' => $c['flag'] ?? '',
                 'name' => $c['name'],
             ], $data['presence_countries'])),
+            JSON_UNESCAPED_UNICODE
+        ));
+        Setting::set('site_nav_menu', json_encode(
+            array_values(array_map(fn ($m) => [
+                'key' => $m['key'],
+                'label' => trim($m['label']),
+                'visible' => (bool) $m['visible'],
+            ], $data['nav_menu'])),
             JSON_UNESCAPED_UNICODE
         ));
 
