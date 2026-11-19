@@ -561,6 +561,53 @@ html:not(.dark) {
 .dark .text-gray-500 { color: #64748B !important; }
 .dark .text-gray-900 { color: #F1F5F9 !important; }
 
+/* ══════════════════════════════════════════
+   ADMIN — mode sombre
+   Les pages admin utilisent des couleurs Tailwind « claires » (gris foncé
+   sur blanc). On les adapte uniquement dans la zone de contenu admin.
+   ══════════════════════════════════════════ */
+.dark [data-slot="sidebar-inset"] { --adm-surface: #16233F; --adm-surface-2: #1C2B4B; --adm-line: rgba(255,255,255,0.09); }
+
+/* Textes */
+.dark [data-slot="sidebar-inset"] :is(.text-black, .text-gray-800, .text-gray-900, .text-slate-800, .text-slate-900) { color: #F1F5F9 !important; }
+.dark [data-slot="sidebar-inset"] :is(.text-gray-700, .text-slate-700) { color: #CBD5E1 !important; }
+.dark [data-slot="sidebar-inset"] :is(.text-gray-600, .text-slate-600) { color: #A5B1C4 !important; }
+.dark [data-slot="sidebar-inset"] :is(.text-gray-500, .text-slate-500) { color: #8D9AB0 !important; }
+.dark [data-slot="sidebar-inset"] :is(.text-gray-400, .text-gray-300) { color: #6B7A93 !important; }
+.dark [data-slot="sidebar-inset"] :is(h1, h2, h3, h4):not([class*="text-"]) { color: #F1F5F9; }
+
+/* Fonds gris clairs → surfaces sombres */
+.dark [data-slot="sidebar-inset"] :is(.bg-gray-50, .bg-slate-50) { background-color: var(--adm-surface) !important; }
+.dark [data-slot="sidebar-inset"] :is(.bg-gray-100, .bg-slate-100) { background-color: var(--adm-surface-2) !important; }
+.dark [data-slot="sidebar-inset"] .bg-gray-200 { background-color: #263657 !important; }
+.dark [data-slot="sidebar-inset"] :is(.hover\:bg-gray-50, .hover\:bg-gray-100):hover { background-color: var(--adm-surface-2) !important; }
+.dark [data-slot="sidebar-inset"] :is(.hover\:bg-gray-200, .hover\:bg-gray-300):hover { background-color: #2B3C60 !important; }
+
+/* Bordures */
+.dark [data-slot="sidebar-inset"] :is(.border-gray-100, .border-gray-200, .border-gray-300, .divide-gray-200 > *, .divide-gray-100 > *) { border-color: var(--adm-line) !important; }
+
+/* Pastilles / alertes colorées : fond teinté transparent + texte clair */
+.dark [data-slot="sidebar-inset"] :is(.bg-green-50, .bg-green-100, .bg-emerald-50) { background-color: rgba(22,163,74,0.14) !important; }
+.dark [data-slot="sidebar-inset"] :is(.bg-red-50, .bg-red-100, .hover\:bg-red-50:hover) { background-color: rgba(230,57,70,0.14) !important; }
+.dark [data-slot="sidebar-inset"] .hover\:bg-red-100:hover { background-color: rgba(230,57,70,0.24) !important; }
+.dark [data-slot="sidebar-inset"] :is(.bg-blue-50, .bg-blue-100, .bg-indigo-50) { background-color: rgba(59,130,246,0.14) !important; }
+.dark [data-slot="sidebar-inset"] .hover\:bg-blue-100:hover { background-color: rgba(59,130,246,0.24) !important; }
+.dark [data-slot="sidebar-inset"] :is(.bg-yellow-50, .bg-yellow-100, .bg-amber-50, .bg-orange-50) { background-color: rgba(234,179,8,0.14) !important; }
+.dark [data-slot="sidebar-inset"] :is(.bg-purple-50, .bg-purple-100) { background-color: rgba(147,51,234,0.16) !important; }
+.dark [data-slot="sidebar-inset"] :is(.text-green-700, .text-green-800, .text-green-900) { color: #86EFAC !important; }
+.dark [data-slot="sidebar-inset"] :is(.text-red-700, .text-red-800, .text-red-900) { color: #FCA5A5 !important; }
+.dark [data-slot="sidebar-inset"] :is(.text-blue-700, .text-blue-800, .text-blue-900) { color: #93C5FD !important; }
+.dark [data-slot="sidebar-inset"] :is(.text-yellow-700, .text-yellow-800, .text-amber-700, .text-amber-800) { color: #FDE68A !important; }
+.dark [data-slot="sidebar-inset"] :is(.text-purple-700, .text-purple-800, .text-purple-900) { color: #D8B4FE !important; }
+.dark [data-slot="sidebar-inset"] :is(.border-green-200, .border-red-200, .border-blue-200, .border-purple-200, .border-yellow-200) { border-color: var(--adm-line) !important; }
+
+/* Champs de formulaire non couverts plus haut */
+.dark [data-slot="sidebar-inset"] :is(input[type="url"], input[type="password"], input[type="date"], input[type="datetime-local"], input[type="time"], input:not([type])) {
+  background-color: #1E2D4A !important;
+  color: #E2E8F0 !important;
+  border-color: rgba(255,255,255,0.12) !important;
+}
+
 /* Category tags dark mode */
 .dark .gt-cat-it     { background: rgba(37,99,235,0.15);  color: #93C5FD; border-color: rgba(37,99,235,0.3); }
 .dark .gt-cat-pmp    { background: rgba(22,163,74,0.15);  color: #86EFAC; border-color: rgba(22,163,74,0.3); }

@@ -130,6 +130,26 @@ const sections: MenuSection[] = [
         ],
     },
     {
+        label: 'Configuration',
+        groups: [
+            {
+                id: 'settings', title: 'Paramètres', icon: Settings, items: [
+                    { title: 'Paramètres du site', href: route('admin.site-settings'),    icon: SlidersHorizontal },
+                    { title: 'Logo & favicon',     href: route('admin.branding.index'),   icon: Palette },
+                    { title: 'Contact & réseaux',  href: route('admin.contact-settings'), icon: Share2 },
+                    { title: 'E-mails (SMTP)',     href: route('admin.mail-settings'),    icon: Send },
+                    { title: 'Utilisateurs',       href: route('admin.users.index'),      icon: Users },
+                ],
+            },
+        ],
+    },
+];
+
+// Section « Gestion » masquée à la demande du client (les pages restent
+// accessibles par leur adresse). Pour la réafficher, l'ajouter à `sections`.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const hiddenSections: MenuSection[] = [
+    {
         label: 'Gestion',
         groups: [
             {
@@ -149,20 +169,6 @@ const sections: MenuSection[] = [
             },
         ],
     },
-    {
-        label: 'Configuration',
-        groups: [
-            {
-                id: 'settings', title: 'Paramètres', icon: Settings, items: [
-                    { title: 'Paramètres du site', href: route('admin.site-settings'),    icon: SlidersHorizontal },
-                    { title: 'Logo & favicon',     href: route('admin.branding.index'),   icon: Palette },
-                    { title: 'Contact & réseaux',  href: route('admin.contact-settings'), icon: Share2 },
-                    { title: 'E-mails (SMTP)',     href: route('admin.mail-settings'),    icon: Send },
-                    { title: 'Utilisateurs',       href: route('admin.users.index'),      icon: Users },
-                ],
-            },
-        ],
-    },
 ];
 
 // ── Page active : l'entrée dont l'adresse correspond le mieux à la page ─────
@@ -177,6 +183,7 @@ const pathOf = (href: string) => {
 const currentPath = computed(() => (page.url.split(/[?#]/)[0].replace(/\/+$/, '') || '/'));
 
 const allLinks = [dashboard, ...sections.flatMap((s) => s.groups.flatMap((g) => g.items))];
+void hiddenSections;
 const activeHref = computed(() => {
     let best: string | null = null;
     let bestLen = -1;
@@ -245,7 +252,7 @@ const toggle = (g: MenuGroup) => {
             </SidebarMenu>
         </SidebarHeader>
 
-        <SidebarContent class="gap-0 pb-4">
+        <SidebarContent class="admin-nav-scroll gap-0 pb-4">
             <!-- Tableau de bord + lien vers le site -->
             <SidebarGroup class="pt-1 pb-0">
                 <SidebarMenu class="gap-0.5">
@@ -309,6 +316,24 @@ const toggle = (g: MenuGroup) => {
 </template>
 
 <style>
+/* Barre de défilement discrète du menu */
+.admin-nav-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(228 30% 26%) transparent;
+}
+.admin-nav-scroll::-webkit-scrollbar { width: 6px; }
+.admin-nav-scroll::-webkit-scrollbar-track { background: transparent; }
+.admin-nav-scroll::-webkit-scrollbar-thumb { background: hsl(228 30% 26%); border-radius: 3px; }
+.admin-nav-scroll::-webkit-scrollbar-thumb:hover { background: hsl(228 30% 34%); }
+
+/* Libellés sur une seule ligne */
+.admin-nav-link span,
+.admin-nav-group span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 /* Libellés de section : SITE WEB, GESTION, CONFIGURATION */
 .admin-nav-section {
     font-size: 0.65rem;
