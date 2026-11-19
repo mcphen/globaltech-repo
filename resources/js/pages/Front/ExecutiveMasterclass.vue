@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
+import { usePageBanner } from '@/composables/useSiteSettings';
 import { Head } from '@inertiajs/vue3';
 
+
+// Image de fond de la bannière (Admin > Bannières des pages)
+const bannerStyle = usePageBanner('masterclass', 'background: linear-gradient(135deg, #060C22 0%, #0B1437 50%, #0D1D3E 100%);');
 interface PageData {
     hero_badge: string;
     hero_title: string;
@@ -73,7 +77,7 @@ const session = props.session ?? null;
     <LayoutFront>
 
         <!-- ══ BANNIÈRE PRINCIPALE ══ -->
-        <section class="relative overflow-hidden" style="background: linear-gradient(135deg, #060C22 0%, #0B1437 50%, #0D1D3E 100%); min-height: 88vh;">
+        <section class="relative overflow-hidden" :style="bannerStyle + ' min-height: 88vh;'">
             <div class="absolute inset-0 opacity-5" style="background-image: repeating-linear-gradient(45deg, #E63946 0, #E63946 1px, transparent 0, transparent 50%); background-size: 40px 40px;"></div>
             <div class="absolute -top-32 -right-32 w-[500px] h-[500px] rounded-full opacity-10" style="background: radial-gradient(circle, #E63946 0%, transparent 70%);"></div>
             <div class="absolute -bottom-20 -left-20 w-[350px] h-[350px] rounded-full opacity-8" style="background: radial-gradient(circle, #2563EB 0%, transparent 70%);"></div>

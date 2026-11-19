@@ -114,6 +114,36 @@ class Setting extends Model
     }
 
     /**
+     * Pages publiques dont la bannière (section du haut) peut recevoir une
+     * image. Clé => libellé affiché dans l'admin.
+     */
+    public const PAGE_BANNERS = [
+        'home'        => "Accueil (si aucun slide n'est actif)",
+        'about'       => 'À Propos',
+        'formations'  => 'Formations (liste et fiche formation)',
+        'consulting'  => 'Consulting',
+        'masterclass' => 'Executive Masterclass',
+        'portfolio'   => 'Projets',
+        'blog'        => 'Actualités (liste et article)',
+        'contact'     => 'Contact',
+    ];
+
+    /**
+     * Image de bannière de chaque page (chemin dans le disque public, ou null).
+     */
+    public static function pageBanners(): array
+    {
+        $stored = self::where('key', 'like', 'page_banner_%')->pluck('value', 'key');
+        $banners = [];
+        foreach (array_keys(self::PAGE_BANNERS) as $key) {
+            $value = $stored['page_banner_'.$key] ?? null;
+            $banners[$key] = $value !== '' ? $value : null;
+        }
+
+        return $banners;
+    }
+
+    /**
      * Site-wide front settings (pages visibility, theme, presence)
      *
      * @return array
@@ -129,6 +159,7 @@ class Setting extends Model
             'theme_mode' => self::get('site_theme_mode', 'user'),
             'presence_countries' => is_array($countries) ? $countries : self::DEFAULT_PRESENCE_COUNTRIES,
             'nav_menu' => self::navMenu(),
+            'page_banners' => self::pageBanners(),
         ];
     }
 

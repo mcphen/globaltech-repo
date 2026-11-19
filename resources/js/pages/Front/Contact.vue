@@ -1,10 +1,14 @@
 <script setup lang="ts">
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
+import { usePageBanner } from '@/composables/useSiteSettings';
 import { useDarkMode } from '@/composables/useDarkMode';
 import { useToast } from 'vue-toast-notification';
 import { computed } from 'vue';
 
+
+// Image de fond de la bannière (Admin > Bannières des pages)
+const bannerStyle = usePageBanner('contact');
 const page = usePage();
 const $toast = useToast();
 const { isDark } = useDarkMode();
@@ -84,7 +88,7 @@ const pillInactive   = computed(() => isDark.value
     <LayoutFront>
 
         <!-- Hero -->
-        <section class="py-24 relative overflow-hidden" style="background: linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(135deg,#060C22 0%,#0B1437 42%,#0E2060 72%,#091830 100%); background-size:60px 60px,60px 60px,100% 100%;">
+        <section class="py-24 relative overflow-hidden" :style="bannerStyle">
             <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
                 <div class="max-w-2xl">
                     <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-5"

@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
-import { useSiteSettings } from '@/composables/useSiteSettings';
+import { useSiteSettings, usePageBanner } from '@/composables/useSiteSettings';
 import { useDarkMode } from '@/composables/useDarkMode';
 import axios from 'axios';
 import { ref, computed, onMounted } from 'vue';
 
+
+// Image de fond de la bannière (Admin > Bannières des pages)
+const bannerStyle = usePageBanner('about');
 const { contactEnabled } = useSiteSettings();
 
 interface AboutData {
@@ -81,7 +84,7 @@ onMounted(async () => {
         <!-- Hero -->
         <section v-if="about?.hero_title || about?.hero_badge || about?.hero_subtitle"
             class="py-28 relative overflow-hidden"
-            style="background: linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(135deg,#060C22 0%,#0B1437 42%,#0E2060 72%,#091830 100%); background-size:60px 60px,60px 60px,100% 100%;">
+            :style="bannerStyle">
             <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center relative z-10">
                 <div v-if="about?.hero_badge"
                     class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest mb-6"

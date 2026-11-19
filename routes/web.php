@@ -269,6 +269,11 @@ Route::middleware(['auth'])->group(function () {
                 'destroy' => 'admin.hero-slides.destroy',
             ]);
 
+        // Image de bannière des pages publiques
+        Route::get('page-banners', [\App\Http\Controllers\PageBannerController::class, 'index'])->name('admin.page-banners.index');
+        Route::post('page-banners/{page}', [\App\Http\Controllers\PageBannerController::class, 'update'])->name('admin.page-banners.update');
+        Route::delete('page-banners/{page}', [\App\Http\Controllers\PageBannerController::class, 'destroy'])->name('admin.page-banners.destroy');
+
         // Banner management routes
         Route::get('banner', [BannerController::class, 'index'])->name('admin.banner.index');
         Route::post('banner/update', [BannerController::class, 'update'])->name('admin.banner.update');

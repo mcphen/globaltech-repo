@@ -1,12 +1,15 @@
 <script setup lang="ts">
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
-import { useSiteSettings } from '@/composables/useSiteSettings';
+import { useSiteSettings, usePageBanner } from '@/composables/useSiteSettings';
 import { useDarkMode } from '@/composables/useDarkMode';
 import { computed, ref, onMounted } from 'vue';
 import axios from 'axios';
 import Swal from 'sweetalert2';
 
+
+// Image de fond de la bannière (Admin > Bannières des pages)
+const bannerStyle = usePageBanner('formations');
 const { contactEnabled } = useSiteSettings();
 
 interface Formation {
@@ -235,7 +238,7 @@ const inputBase      = computed(() => isDark.value
     <LayoutFront>
 
         <!-- Hero -->
-        <section class="py-20 relative overflow-hidden" style="background: linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(135deg,#060C22 0%,#0B1437 42%,#0E2060 72%,#091830 100%); background-size:60px 60px,60px 60px,100% 100%;">
+        <section class="py-20 relative overflow-hidden" :style="bannerStyle">
             <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
                 <nav class="flex items-center gap-2 text-sm text-white/60 mb-6">
                     <Link href="/" class="hover:text-white transition-colors">Accueil</Link>

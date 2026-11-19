@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
-import { useSiteSettings } from '@/composables/useSiteSettings';
+import { useSiteSettings, usePageBanner } from '@/composables/useSiteSettings';
 import { useDarkMode } from '@/composables/useDarkMode';
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 
+
+// Image de fond de la bannière (Admin > Bannières des pages)
+const bannerStyle = usePageBanner('portfolio');
 const { contactEnabled } = useSiteSettings();
 
 interface Photo { id: number; album_id: number; image_path: string; image_url?: string; caption?: string; is_banner?: boolean; }
@@ -111,7 +114,7 @@ const albumEmptyBg   = computed(() => isDark.value ? '#1E2D50' : '#F1F5F9');
     <LayoutFront>
 
         <!-- Hero -->
-        <section class="py-28 relative overflow-hidden" style="background: linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(135deg,#060C22 0%,#0B1437 42%,#0E2060 72%,#091830 100%); background-size:60px 60px,60px 60px,100% 100%;">
+        <section class="py-28 relative overflow-hidden" :style="bannerStyle">
             <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
                 <div class="max-w-3xl">
                     <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6"

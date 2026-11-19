@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
-import { useSiteSettings } from '@/composables/useSiteSettings';
+import { useSiteSettings, usePageBanner } from '@/composables/useSiteSettings';
 import { useDarkMode } from '@/composables/useDarkMode';
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
 
+
+// Image de fond de la bannière (Admin > Bannières des pages)
+const bannerStyle = usePageBanner('consulting');
 const { contactEnabled } = useSiteSettings();
 
 interface Service {
@@ -90,7 +93,7 @@ const ringOffset     = computed(() => isDark.value ? 'ring-offset-[#0B1437]' : '
         <!-- Hero -->
         <section v-if="sp.hero_title || sp.hero_badge"
             class="py-28 relative overflow-hidden"
-            style="background: linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(135deg,#060C22 0%,#0B1437 42%,#0E2060 72%,#091830 100%); background-size:60px 60px,60px 60px,100% 100%;">
+            :style="bannerStyle">
             <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
                 <div class="grid lg:grid-cols-2 gap-12 items-center">
                     <div>

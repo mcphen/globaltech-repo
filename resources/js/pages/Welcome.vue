@@ -4,10 +4,13 @@ import { ref, onMounted, computed } from 'vue';
 import { router } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
 import HeroSlider from '@/components/front/HeroSlider.vue';
-import { useSiteSettings } from '@/composables/useSiteSettings';
+import { useSiteSettings, usePageBanner } from '@/composables/useSiteSettings';
 import { useDarkMode } from '@/composables/useDarkMode';
 import axios from 'axios';
 
+
+// Image de fond de la bannière (Admin > Bannières des pages)
+const bannerStyle = usePageBanner('home');
 const { contactEnabled, blogEnabled } = useSiteSettings();
 
 const { isDark } = useDarkMode();
@@ -120,7 +123,7 @@ const formatDate = (d: string) => d ? new Date(d).toLocaleDateString('fr-FR', { 
         <!-- ══ HERO ══════════════════════════════════════════════════════════ -->
         <section v-else-if="hp.hero_title_1 || hp.hero_badge"
             class="relative min-h-screen flex items-center overflow-hidden"
-            style="background: linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(135deg,#060C22 0%,#0B1437 42%,#0E2060 72%,#091830 100%); background-size:60px 60px,60px 60px,100% 100%;">
+            :style="bannerStyle">
             <div class="absolute inset-0 overflow-hidden pointer-events-none">
                 <div class="absolute w-96 h-96 rounded-full blur-3xl opacity-20 animate-float-slow"
                     style="background: radial-gradient(circle, #2563EB, transparent); top: -10%; right: 10%;"></div>

@@ -1,8 +1,12 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
+import { usePageBanner } from '@/composables/useSiteSettings';
 import { computed } from 'vue';
 
+
+// Image de fond de la bannière (Admin > Bannières des pages)
+const bannerStyle = usePageBanner('blog');
 interface Actualite {
     id: number; title: string; description: string;
     image_path?: string; image_url?: string;
@@ -23,7 +27,7 @@ const metaDescription = computed(() => (props.actualite.description || '').repla
     <LayoutFront>
 
         <!-- Hero -->
-        <section class="py-20 relative overflow-hidden" style="background: linear-gradient(rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.025) 1px,transparent 1px),linear-gradient(135deg,#060C22 0%,#0B1437 42%,#0E2060 72%,#091830 100%); background-size:60px 60px,60px 60px,100% 100%;">
+        <section class="py-20 relative overflow-hidden" :style="bannerStyle">
             <div class="max-w-4xl mx-auto px-6 lg:px-8 relative z-10">
                 <nav class="flex items-center gap-2 text-sm text-white/60 mb-6">
                     <Link href="/" class="hover:text-white transition-colors">Accueil</Link>
