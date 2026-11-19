@@ -1,10 +1,19 @@
 <script setup lang="ts">
-import NavMain from '@/components/NavMain.vue';
 import NavUser from '@/components/NavUser.vue';
-import { Sidebar, SidebarContent, SidebarFooter, SidebarHeader, SidebarMenu, SidebarMenuButton, SidebarMenuItem } from '@/components/ui/sidebar';
-import { type NavItem } from '@/types';
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarGroup,
+    SidebarGroupLabel,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+    useSidebar,
+} from '@/components/ui/sidebar';
 import { Link, usePage } from '@inertiajs/vue3';
-import { computed, ref } from 'vue';
+import { computed, reactive, watch, type Component } from 'vue';
 import {
     LayoutGrid,
     Monitor,
@@ -17,6 +26,7 @@ import {
     ThumbsUp,
     Users,
     Image,
+    Images,
     Award,
     Globe,
     BadgeCheck,
@@ -25,104 +35,200 @@ import {
     Mail,
     Briefcase,
     ShoppingCart,
+    ShoppingBag,
+    Package,
     Settings,
-    ChevronDown,
-    ChevronUp,
+    ChevronRight,
     GalleryHorizontal,
     UserSearch,
     CalendarCheck,
     CalendarClock,
     AtSign,
-    Images,
+    PanelTop,
+    Palette,
+    Share2,
+    Send,
+    FileText,
+    Megaphone,
+    Contact,
+    SlidersHorizontal,
+    ExternalLink,
 } from 'lucide-vue-next';
 import AppLogo from './AppLogo.vue';
 
-const page = usePage();
+interface MenuLink {
+    title: string;
+    href: string;
+    icon: Component;
+}
 
-const isItemActive = (href: string): boolean => {
+interface MenuGroup {
+    id: string;
+    title: string;
+    icon: Component;
+    items: MenuLink[];
+}
+
+interface MenuSection {
+    label: string;
+    groups: MenuGroup[];
+}
+
+// ── Structure du menu ───────────────────────────────────────────────────────
+const dashboard: MenuLink = { title: 'Tableau de bord', href: route('dashboard'), icon: LayoutGrid };
+
+const sections: MenuSection[] = [
+    {
+        label: 'Site web',
+        groups: [
+            {
+                id: 'pages', title: 'Pages du site', icon: FileText, items: [
+                    { title: "Page d'accueil",       href: route('admin.home-page.edit'),     icon: Monitor },
+                    { title: "Slider d'accueil",     href: route('admin.hero-slides.index'),  icon: GalleryHorizontal },
+                    { title: 'Page À propos',        href: route('admin.about.index'),        icon: Info },
+                    { title: 'Bannières des pages',  href: route('admin.page-banners.index'), icon: PanelTop },
+                ],
+            },
+            {
+                id: 'formations', title: 'Formations', icon: GraduationCap, items: [
+                    { title: 'Toutes les formations', href: route('admin.formations.index'),           icon: GraduationCap },
+                    { title: 'Catégories',            href: route('admin.formation-categories.index'), icon: Layers },
+                ],
+            },
+            {
+                id: 'consulting', title: 'Consulting', icon: Briefcase, items: [
+                    { title: 'Page Consulting',   href: route('admin.service-page.edit'), icon: Monitor },
+                    { title: 'Services proposés', href: route('admin.services.index'),     icon: Briefcase },
+                ],
+            },
+            {
+                id: 'masterclass', title: 'Executive Masterclass', icon: Award, items: [
+                    { title: 'Bannière & CTA',    href: route('admin.masterclass.page.edit'),           icon: PanelTop },
+                    { title: 'Domaines',          href: route('admin.masterclass.domaines.index'),       icon: Globe },
+                    { title: 'Formats',           href: route('admin.masterclass.formats.index'),        icon: Layers },
+                    { title: 'Public cible',      href: route('admin.masterclass.public-cibles.index'),  icon: Target },
+                    { title: 'Certifications',    href: route('admin.masterclass.certifications.index'), icon: BadgeCheck },
+                    { title: 'Partenaires',       href: route('admin.masterclass.partenaires.index'),    icon: Handshake },
+                    { title: 'Statistiques clés', href: route('admin.masterclass.stats.index'),          icon: BarChart2 },
+                ],
+            },
+            {
+                id: 'content', title: 'Contenu', icon: Megaphone, items: [
+                    { title: 'Actualités',    href: route('admin.actualites.index'),   icon: Newspaper },
+                    { title: 'Témoignages',   href: route('admin.testimonials.index'), icon: MessageSquare },
+                    { title: 'Pourquoi nous', href: route('admin.why-us.index'),       icon: ThumbsUp },
+                    { title: 'Équipe',        href: route('admin.team-members.index'), icon: Users },
+                    { title: 'Partenaires',   href: route('admin.partners.index'),     icon: Handshake },
+                ],
+            },
+            {
+                id: 'media', title: 'Médias', icon: Images, items: [
+                    { title: 'Albums photos',   href: route('admin.albums.index'), icon: Image },
+                    { title: 'Bannière photos', href: route('admin.banner.index'), icon: Images },
+                ],
+            },
+        ],
+    },
+    {
+        label: 'Gestion',
+        groups: [
+            {
+                id: 'crm', title: 'Relation client', icon: Contact, items: [
+                    { title: 'Messages reçus', href: route('admin.contacts.index'),     icon: Mail },
+                    { title: 'Prospects',      href: route('admin.leads.index'),        icon: UserSearch },
+                    { title: 'Rendez-vous',    href: route('admin.appointments.index'), icon: CalendarCheck },
+                    { title: 'Créneaux',       href: route('admin.schedules.index'),    icon: CalendarClock },
+                    { title: 'Newsletter',     href: route('admin.subscribes.index'),   icon: AtSign },
+                ],
+            },
+            {
+                id: 'shop', title: 'Boutique', icon: ShoppingBag, items: [
+                    { title: 'Produits',  href: route('admin.products.index'), icon: Package },
+                    { title: 'Commandes', href: route('admin.orders.index'),   icon: ShoppingCart },
+                ],
+            },
+        ],
+    },
+    {
+        label: 'Configuration',
+        groups: [
+            {
+                id: 'settings', title: 'Paramètres', icon: Settings, items: [
+                    { title: 'Paramètres du site', href: route('admin.site-settings'),    icon: SlidersHorizontal },
+                    { title: 'Logo & favicon',     href: route('admin.branding.index'),   icon: Palette },
+                    { title: 'Contact & réseaux',  href: route('admin.contact-settings'), icon: Share2 },
+                    { title: 'E-mails (SMTP)',     href: route('admin.mail-settings'),    icon: Send },
+                    { title: 'Utilisateurs',       href: route('admin.users.index'),      icon: Users },
+                ],
+            },
+        ],
+    },
+];
+
+// ── Page active : l'entrée dont l'adresse correspond le mieux à la page ─────
+const page = usePage();
+const pathOf = (href: string) => {
     try {
-        const itemPath = new URL(href).pathname;
-        return page.url === itemPath || page.url.startsWith(itemPath + '/');
+        return new URL(href, 'http://localhost').pathname.replace(/\/+$/, '') || '/';
     } catch {
-        return page.url === href || page.url.startsWith(href + '/');
+        return href;
+    }
+};
+const currentPath = computed(() => (page.url.split(/[?#]/)[0].replace(/\/+$/, '') || '/'));
+
+const allLinks = [dashboard, ...sections.flatMap((s) => s.groups.flatMap((g) => g.items))];
+const activeHref = computed(() => {
+    let best: string | null = null;
+    let bestLen = -1;
+    for (const link of allLinks) {
+        const p = pathOf(link.href);
+        if ((currentPath.value === p || currentPath.value.startsWith(p + '/')) && p.length > bestLen) {
+            best = link.href;
+            bestLen = p.length;
+        }
+    }
+    return best;
+});
+const isActive = (item: MenuLink) => item.href === activeHref.value;
+const groupHasActive = (g: MenuGroup) => g.items.some(isActive);
+
+// ── Groupes ouverts (mémorisés dans le navigateur) ─────────────────────────
+const STORAGE_KEY = 'admin_sidebar_open_groups';
+const open = reactive<Record<string, boolean>>({});
+try {
+    if (typeof localStorage !== 'undefined') Object.assign(open, JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'));
+} catch {
+    /* stockage indisponible : tout fermé */
+}
+const persist = () => {
+    try {
+        if (typeof localStorage !== 'undefined') localStorage.setItem(STORAGE_KEY, JSON.stringify(open));
+    } catch {
+        /* ignore */
     }
 };
 
-// ── 1. PRINCIPAL ────────────────────────────────────────────────────────────
-const mainNavItems: NavItem[] = [
-    { title: 'Dashboard', href: '/dashboard', icon: LayoutGrid },
-];
+// Le groupe de la page courante est toujours ouvert
+watch(
+    activeHref,
+    () => {
+        for (const s of sections) for (const g of s.groups) if (groupHasActive(g)) open[g.id] = true;
+        persist();
+    },
+    { immediate: true },
+);
 
-// ── 2. PAGES DU SITE (toujours visible) ────────────────────────────────────
-const pagesItems: NavItem[] = [
-    { title: 'Page d\'accueil', href: route('admin.home-page.edit'),    icon: Monitor },
-    { title: 'Bannière d\'accueil', href: route('admin.hero-slides.index'), icon: GalleryHorizontal },
-    { title: 'Page À propos',   href: route('admin.about.index'),        icon: Info },
-    { title: 'Page Consulting', href: route('admin.service-page.edit'), icon: Briefcase },
-];
-
-// ── 3. FORMATIONS ───────────────────────────────────────────────────────────
-const formationItems: NavItem[] = [
-    { title: 'Formations',            href: route('admin.formations.index'),          icon: GraduationCap },
-    { title: 'Catégories',            href: route('admin.formation-categories.index'), icon: Layers },
-];
-
-// ── 4. CONTENU ÉDITORIAL ───────────────────────────────────────────────────
-const contentItems: NavItem[] = [
-    { title: 'Témoignages',   href: route('admin.testimonials.index'), icon: MessageSquare },
-    { title: 'Partenaires',   href: route('admin.partners.index'),     icon: Handshake },
-    { title: 'Actualités',    href: route('admin.actualites.index'),   icon: Newspaper },
-    { title: 'Pourquoi nous', href: route('admin.why-us.index'),       icon: ThumbsUp },
-    { title: 'Équipe',        href: route('admin.team-members.index'), icon: Users },
-    { title: 'Albums photos', href: route('admin.albums.index'),       icon: Image },
-    { title: 'Bannière photos', href: route('admin.banner.index'),     icon: Images },
-];
-
-// ── 5. EXECUTIVE MASTERCLASS ────────────────────────────────────────────────
-const masterclassItems: NavItem[] = [
-    { title: 'Bannière & CTA',    href: route('admin.masterclass.page.edit'),            icon: Layers },
-    { title: 'Domaines',          href: route('admin.masterclass.domaines.index'),        icon: Globe },
-    { title: 'Formats',           href: route('admin.masterclass.formats.index'),         icon: Layers },
-    { title: 'Partenaires MC',    href: route('admin.masterclass.partenaires.index'),     icon: Award },
-    { title: 'Certifications',    href: route('admin.masterclass.certifications.index'),  icon: BadgeCheck },
-    { title: 'Public cible',      href: route('admin.masterclass.public-cibles.index'),   icon: Target },
-    { title: 'Statistiques clés', href: route('admin.masterclass.stats.index'),           icon: BarChart2 },
-];
-
-// ── 6. OPÉRATIONNEL ─────────────────────────────────────────────────────────
-const operationalItems: NavItem[] = [
-    { title: 'Contacts',  href: route('admin.contacts.index'), icon: Mail },
-    { title: 'Prospects',     href: route('admin.leads.index'),        icon: UserSearch },
-    { title: 'Rendez-vous',   href: route('admin.appointments.index'), icon: CalendarCheck },
-    { title: 'Créneaux',      href: route('admin.schedules.index'),    icon: CalendarClock },
-    { title: 'Newsletter',    href: route('admin.subscribes.index'),   icon: AtSign },
-    { title: 'Services',  href: route('admin.services.index'), icon: Briefcase },
-    { title: 'Produits',  href: route('admin.products.index'), icon: ShoppingCart },
-    { title: 'Commandes', href: route('admin.orders.index'),   icon: ShoppingCart },
-];
-
-// ── 7. ADMINISTRATION ────────────────────────────────────────────────────────
-const adminItems: NavItem[] = [
-    { title: 'Utilisateurs',          href: route('admin.users.index'),        icon: Users },
-    { title: 'Paramètres du site',    href: route('admin.site-settings'),      icon: Settings },
-    { title: 'Logo & favicon',        href: route('admin.branding.index'),     icon: Image },
-    { title: 'Bannières des pages',   href: route('admin.page-banners.index'), icon: Image },
-    { title: 'Config Contact & Réseaux', href: route('admin.contact-settings'), icon: Settings },
-    { title: 'Config SMTP',           href: route('admin.mail-settings'),      icon: Settings },
-];
-
-// ── Collapsed state ──────────────────────────────────────────────────────────
-const _showFormations    = ref(false);
-const _showContent       = ref(false);
-const _showMasterclass   = ref(false);
-const _showOperational   = ref(false);
-const _showAdmin         = ref(false);
-
-const showFormations  = computed(() => _showFormations.value  || formationItems.some(i => isItemActive(i.href)));
-const showContent     = computed(() => _showContent.value     || contentItems.some(i => isItemActive(i.href)));
-const showMasterclass = computed(() => _showMasterclass.value || masterclassItems.some(i => isItemActive(i.href)));
-const showOperational = computed(() => _showOperational.value || operationalItems.some(i => isItemActive(i.href)));
-const showAdmin       = computed(() => _showAdmin.value       || adminItems.some(i => isItemActive(i.href)));
+const { state, setOpen, isMobile } = useSidebar();
+const toggle = (g: MenuGroup) => {
+    // Menu réduit en icônes : on le déplie pour montrer le sous-menu
+    if (state.value === 'collapsed' && !isMobile.value) {
+        setOpen(true);
+        open[g.id] = true;
+    } else {
+        open[g.id] = !open[g.id];
+    }
+    persist();
+};
 </script>
 
 <template>
@@ -139,119 +245,60 @@ const showAdmin       = computed(() => _showAdmin.value       || adminItems.some
             </SidebarMenu>
         </SidebarHeader>
 
-        <SidebarContent>
-
-            <!-- ① Dashboard -->
-            <NavMain :items="mainNavItems" group-title="Principal" />
-
-            <!-- ② Pages du site — toujours visible, pas de toggle -->
-            <NavMain :items="pagesItems" group-title="Pages du site" />
-
-            <!-- ③ Formations -->
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton @click="_showFormations = !showFormations">
-                        <GraduationCap class="mr-2 h-4 w-4" />
-                        <span>Formations</span>
-                        <component :is="showFormations ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-                <template v-if="showFormations">
-                    <SidebarMenuItem v-for="item in formationItems" :key="item.title">
-                        <SidebarMenuButton as-child :is-active="isItemActive(item.href)">
-                            <Link :href="item.href">
-                                <component :is="item.icon" class="mr-2 h-4 w-4" />
-                                <span>{{ item.title }}</span>
+        <SidebarContent class="gap-0 pb-4">
+            <!-- Tableau de bord + lien vers le site -->
+            <SidebarGroup class="pt-1 pb-0">
+                <SidebarMenu class="gap-0.5">
+                    <SidebarMenuItem>
+                        <SidebarMenuButton as-child :tooltip="dashboard.title" class="admin-nav-link" :data-current="isActive(dashboard)">
+                            <Link :href="dashboard.href">
+                                <component :is="dashboard.icon" />
+                                <span>{{ dashboard.title }}</span>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
-                </template>
-            </SidebarMenu>
-
-            <!-- ④ Contenu éditorial -->
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton @click="_showContent = !showContent">
-                        <Newspaper class="mr-2 h-4 w-4" />
-                        <span>Contenu</span>
-                        <component :is="showContent ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-                <template v-if="showContent">
-                    <SidebarMenuItem v-for="item in contentItems" :key="item.title">
-                        <SidebarMenuButton as-child :is-active="isItemActive(item.href)">
-                            <Link :href="item.href">
-                                <component :is="item.icon" class="mr-2 h-4 w-4" />
-                                <span>{{ item.title }}</span>
-                            </Link>
+                    <SidebarMenuItem>
+                        <SidebarMenuButton as-child tooltip="Voir le site" class="admin-nav-link">
+                            <a href="/" target="_blank" rel="noopener">
+                                <ExternalLink />
+                                <span>Voir le site</span>
+                            </a>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
-                </template>
-            </SidebarMenu>
+                </SidebarMenu>
+            </SidebarGroup>
 
-            <!-- ⑤ Executive Masterclass -->
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton @click="_showMasterclass = !showMasterclass">
-                        <Award class="mr-2 h-4 w-4" />
-                        <span>Executive Masterclass</span>
-                        <component :is="showMasterclass ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-                <template v-if="showMasterclass">
-                    <SidebarMenuItem v-for="item in masterclassItems" :key="item.title">
-                        <SidebarMenuButton as-child :is-active="isItemActive(item.href)">
-                            <Link :href="item.href">
-                                <component :is="item.icon" class="mr-2 h-4 w-4" />
-                                <span>{{ item.title }}</span>
-                            </Link>
+            <SidebarGroup v-for="section in sections" :key="section.label" class="pb-0">
+                <SidebarGroupLabel class="admin-nav-section">{{ section.label }}</SidebarGroupLabel>
+                <SidebarMenu class="gap-0.5">
+                    <SidebarMenuItem v-for="g in section.groups" :key="g.id">
+                        <!-- En-tête du groupe -->
+                        <SidebarMenuButton
+                            :tooltip="g.title"
+                            class="admin-nav-group"
+                            :data-has-current="groupHasActive(g)"
+                            :aria-expanded="!!open[g.id]"
+                            @click="toggle(g)"
+                        >
+                            <component :is="g.icon" />
+                            <span>{{ g.title }}</span>
+                            <ChevronRight class="admin-nav-chevron ml-auto" :class="{ 'rotate-90': open[g.id] }" />
                         </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </template>
-            </SidebarMenu>
 
-            <!-- ⑥ Opérationnel -->
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton @click="_showOperational = !showOperational">
-                        <Briefcase class="mr-2 h-4 w-4" />
-                        <span>Opérationnel</span>
-                        <component :is="showOperational ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-                <template v-if="showOperational">
-                    <SidebarMenuItem v-for="item in operationalItems" :key="item.title">
-                        <SidebarMenuButton as-child :is-active="isItemActive(item.href)">
-                            <Link :href="item.href">
-                                <component :is="item.icon" class="mr-2 h-4 w-4" />
-                                <span>{{ item.title }}</span>
-                            </Link>
-                        </SidebarMenuButton>
+                        <!-- Sous-menu -->
+                        <div class="admin-nav-sub" :class="{ 'is-open': open[g.id] }">
+                            <ul class="admin-nav-sub-inner">
+                                <li v-for="item in g.items" :key="item.href">
+                                    <Link :href="item.href" class="admin-nav-sublink" :data-current="isActive(item)"
+                                        :aria-current="isActive(item) ? 'page' : undefined">
+                                        <span>{{ item.title }}</span>
+                                    </Link>
+                                </li>
+                            </ul>
+                        </div>
                     </SidebarMenuItem>
-                </template>
-            </SidebarMenu>
-
-            <!-- ⑦ Administration -->
-            <SidebarMenu>
-                <SidebarMenuItem>
-                    <SidebarMenuButton @click="_showAdmin = !showAdmin">
-                        <Settings class="mr-2 h-4 w-4" />
-                        <span>Administration</span>
-                        <component :is="showAdmin ? ChevronUp : ChevronDown" class="ml-auto h-4 w-4 opacity-70" />
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-                <template v-if="showAdmin">
-                    <SidebarMenuItem v-for="item in adminItems" :key="item.title">
-                        <SidebarMenuButton as-child :is-active="isItemActive(item.href)">
-                            <Link :href="item.href">
-                                <component :is="item.icon" class="mr-2 h-4 w-4" />
-                                <span>{{ item.title }}</span>
-                            </Link>
-                        </SidebarMenuButton>
-                    </SidebarMenuItem>
-                </template>
-            </SidebarMenu>
-
+                </SidebarMenu>
+            </SidebarGroup>
         </SidebarContent>
 
         <SidebarFooter>
@@ -260,3 +307,120 @@ const showAdmin       = computed(() => _showAdmin.value       || adminItems.some
     </Sidebar>
     <slot />
 </template>
+
+<style>
+/* Libellés de section : SITE WEB, GESTION, CONFIGURATION */
+.admin-nav-section {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: hsl(220 15% 55%);
+    margin-top: 0.5rem;
+}
+
+/* Liens de 1er niveau et en-têtes de groupe */
+[data-sidebar] .admin-nav-link,
+[data-sidebar] .admin-nav-group {
+    color: hsl(220 15% 78%);
+    font-weight: 500;
+    transition: background-color 0.15s, color 0.15s;
+}
+[data-sidebar] .admin-nav-link:hover,
+[data-sidebar] .admin-nav-group:hover {
+    background: hsl(228 40% 18%);
+    color: #fff;
+}
+[data-sidebar] .admin-nav-link svg,
+[data-sidebar] .admin-nav-group svg {
+    color: hsl(220 15% 60%);
+}
+
+/* Page active (1er niveau) */
+[data-sidebar] .admin-nav-link[data-current='true'] {
+    background: #E63946;
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 4px 14px -4px rgba(230, 57, 70, 0.55);
+}
+[data-sidebar] .admin-nav-link[data-current='true'] svg {
+    color: #fff;
+}
+
+/* Groupe contenant la page active */
+[data-sidebar] .admin-nav-group[data-has-current='true'] {
+    color: #fff;
+    font-weight: 600;
+}
+[data-sidebar] .admin-nav-group[data-has-current='true'] svg {
+    color: #E63946;
+}
+[data-sidebar] .admin-nav-group[data-has-current='true'] .admin-nav-chevron {
+    color: hsl(220 15% 70%);
+}
+
+.admin-nav-chevron {
+    transition: transform 0.2s ease;
+}
+
+/* Sous-menu : ouverture animée */
+.admin-nav-sub {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 0.22s ease;
+}
+.admin-nav-sub.is-open {
+    grid-template-rows: 1fr;
+}
+.admin-nav-sub-inner {
+    overflow: hidden;
+    margin-left: 1.05rem;
+    padding-left: 0.6rem;
+    border-left: 1px solid hsl(228 30% 22%);
+}
+.admin-nav-sub.is-open .admin-nav-sub-inner {
+    padding-top: 0.15rem;
+    padding-bottom: 0.35rem;
+}
+/* Masqué quand le menu est réduit en icônes */
+[data-collapsible='icon'] .admin-nav-sub {
+    display: none;
+}
+
+.admin-nav-sublink {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-height: 1.9rem;
+    padding: 0.3rem 0.6rem;
+    border-radius: 0.375rem;
+    font-size: 0.8125rem;
+    color: hsl(220 15% 68%);
+    transition: background-color 0.15s, color 0.15s;
+}
+.admin-nav-sublink span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.admin-nav-sublink:hover {
+    background: hsl(228 40% 18%);
+    color: #fff;
+}
+/* Page active dans un sous-menu : fond rouge léger + barre rouge sur la ligne */
+.admin-nav-sublink[data-current='true'] {
+    background: rgba(230, 57, 70, 0.16);
+    color: #fff;
+    font-weight: 600;
+}
+.admin-nav-sublink[data-current='true']::before {
+    content: '';
+    position: absolute;
+    left: calc(-0.6rem - 1px);
+    top: 0.3rem;
+    bottom: 0.3rem;
+    width: 2px;
+    border-radius: 2px;
+    background: #E63946;
+}
+</style>

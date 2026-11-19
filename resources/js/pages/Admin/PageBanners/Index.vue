@@ -233,7 +233,7 @@ const remove = (p: BannerPage) => {
                                 </div>
                                 <p v-else-if="p.text_editor" class="text-sm text-gray-500">
                                     Le texte de cette bannière se modifie dans
-                                    <Link :href="p.text_editor.url" class="text-primary underline">{{ p.text_editor.label }}</Link>.
+                                    <Link :href="p.text_editor.url" class="font-medium underline" style="color: #E63946;">{{ p.text_editor.label }}</Link>.
                                 </p>
 
                                 <div class="flex flex-wrap items-center justify-end gap-3 pt-1">
