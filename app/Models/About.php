@@ -17,9 +17,6 @@ class About extends Model
 
     public const DEFAULT_OFFICES = [
         ['country' => "Côte d'Ivoire", 'city' => 'Abidjan', 'flag' => '🇨🇮', 'role' => 'Siège',           'address' => 'Plateau, Abidjan'],
-        ['country' => 'Sénégal',       'city' => 'Dakar',   'flag' => '🇸🇳', 'role' => 'Bureau régional', 'address' => 'Plateau, Dakar'],
-        ['country' => 'Mali',          'city' => 'Bamako',  'flag' => '🇲🇱', 'role' => 'Bureau régional', 'address' => 'ACI 2000, Bamako'],
-        ['country' => 'Cameroun',      'city' => 'Douala',  'flag' => '🇨🇲', 'role' => 'Bureau régional', 'address' => 'Bonanjo, Douala'],
     ];
 
     protected $casts = [

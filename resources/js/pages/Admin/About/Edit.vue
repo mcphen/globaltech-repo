@@ -76,11 +76,6 @@ const form = reactive({
     offices_subtitle: about.offices_subtitle || 'Une présence locale forte pour mieux servir nos clients partout sur le continent.',
     offices: about.offices || [
         { country: 'Côte d\'Ivoire', city: 'Abidjan',      flag: '🇨🇮', role: 'Siège Social',    address: 'Plateau, Abidjan' },
-        { country: 'Sénégal',        city: 'Dakar',         flag: '🇸🇳', role: 'Bureau Régional', address: 'Plateau, Dakar' },
-        { country: 'Mali',           city: 'Bamako',        flag: '🇲🇱', role: 'Bureau Régional', address: 'ACI 2000, Bamako' },
-        { country: 'Cameroun',       city: 'Douala',        flag: '🇨🇲', role: 'Bureau Régional', address: 'Bonanjo, Douala' },
-        { country: 'Burkina Faso',   city: 'Ouagadougou',   flag: '🇧🇫', role: 'Bureau Régional', address: 'Ouaga 2000' },
-        { country: 'Togo',           city: 'Lomé',          flag: '🇹🇬', role: 'Représentation',  address: 'Centre-ville, Lomé' },
     ],
     // CTA
     cta_title:    about.cta_title    || 'Faisons connaissance',
