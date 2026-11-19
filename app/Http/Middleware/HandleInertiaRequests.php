@@ -80,6 +80,10 @@ class HandleInertiaRequests extends Middleware
                     'blog_enabled' => true,
                     'theme_mode' => 'user',
                     'presence_countries' => Setting::DEFAULT_PRESENCE_COUNTRIES,
+                    'page_banner_meta' => array_map(
+                        fn ($text) => ['overlay' => Setting::PAGE_BANNER_DEFAULT_OVERLAY] + $text,
+                        Setting::PAGE_BANNER_TEXT_DEFAULTS
+                    ),
                 ]
             ),
             // Bureaux (gérés dans Admin > À Propos) — utilisés par la page Contact et le footer

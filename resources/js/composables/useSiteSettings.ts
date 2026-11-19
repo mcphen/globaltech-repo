@@ -21,8 +21,18 @@ export interface SiteSettings {
     presence_countries: PresenceCountry[];
     nav_menu: NavMenuItem[];
     page_banners: Partial<Record<PageBannerKey, string | null>>;
+    page_banner_meta: Partial<Record<PageBannerKey, PageBannerMeta>>;
     logo_url: string;
     favicon_url: string;
+}
+
+export interface PageBannerMeta {
+    /** Assombrissement de l'image, 0 à 100 */
+    overlay: number;
+    badge?: string;
+    title?: string;
+    highlight?: string;
+    subtitle?: string;
 }
 
 export type PageBannerKey = 'home' | 'about' | 'formations' | 'consulting' | 'masterclass' | 'portfolio' | 'blog' | 'contact';
@@ -41,6 +51,7 @@ export function useSiteSettings() {
         presence_countries: [],
         nav_menu: [],
         page_banners: {},
+        page_banner_meta: {},
         logo_url: '/images/logo_globaltech.png',
         favicon_url: '/images/favicon_globaltech.png',
         ...((page.props as any).siteSettings ?? {}),
@@ -57,8 +68,8 @@ export function useSiteSettings() {
 
 /**
  * Style de fond de la bannière d'une page : image choisie dans
- * Admin > Bannières des pages (avec un voile sombre pour garder le texte
- * lisible), sinon le dégradé bleu par défaut.
+ * Admin > Bannières des pages, sous un voile sombre réglable
+ * (« assombrissement »), sinon le dégradé bleu par défaut.
  */
 export function usePageBanner(key: PageBannerKey, fallback: string = DEFAULT_BANNER_BG) {
     const { site } = useSiteSettings();
@@ -66,6 +77,25 @@ export function usePageBanner(key: PageBannerKey, fallback: string = DEFAULT_BAN
         const path = site.value.page_banners?.[key];
         if (!path) return fallback;
         const url = `/storage/${path}`.replace(/"/g, '%22');
-        return `background: linear-gradient(135deg, rgba(6,12,34,0.88) 0%, rgba(11,20,55,0.72) 50%, rgba(9,24,48,0.55) 100%), url("${url}") center / cover no-repeat;`;
+        const d = Math.max(0, Math.min(100, site.value.page_banner_meta?.[key]?.overlay ?? 88)) / 100;
+        const a = (f: number) => (d * f).toFixed(3);
+        return `background: linear-gradient(135deg, rgba(6,12,34,${a(1)}) 0%, rgba(11,20,55,${a(0.82)}) 50%, rgba(9,24,48,${a(0.63)}) 100%), url("${url}") center / cover no-repeat;`;
+    });
+}
+
+/**
+ * Texte de la bannière (badge, titre, mot en couleur, sous-titre) géré dans
+ * Admin > Bannières des pages, pour les pages qui n'ont pas leur propre écran.
+ */
+export function usePageBannerText(key: PageBannerKey) {
+    const { site } = useSiteSettings();
+    return computed(() => {
+        const m = site.value.page_banner_meta?.[key];
+        return {
+            badge: m?.badge ?? '',
+            title: m?.title ?? '',
+            highlight: m?.highlight ?? '',
+            subtitle: m?.subtitle ?? '',
+        };
     });
 }

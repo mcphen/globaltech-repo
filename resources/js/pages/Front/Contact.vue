@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link, useForm, usePage } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
-import { usePageBanner } from '@/composables/useSiteSettings';
+import { usePageBanner, usePageBannerText } from '@/composables/useSiteSettings';
 import { useDarkMode } from '@/composables/useDarkMode';
 import { useToast } from 'vue-toast-notification';
 import { computed } from 'vue';
@@ -9,6 +9,7 @@ import { computed } from 'vue';
 
 // Image de fond de la bannière (Admin > Bannières des pages)
 const bannerStyle = usePageBanner('contact');
+const bannerText = usePageBannerText('contact');
 const page = usePage();
 const $toast = useToast();
 const { isDark } = useDarkMode();
@@ -91,16 +92,16 @@ const pillInactive   = computed(() => isDark.value
         <section class="py-24 relative overflow-hidden" :style="bannerStyle">
             <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
                 <div class="max-w-2xl">
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-5"
+                    <div v-if="bannerText.badge" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-5"
                         style="background: rgba(230, 57, 70, 0.15); color: #E63946; border: 1px solid rgba(230, 57, 70, 0.3);">
                         <i class="bi bi-chat-dots-fill"></i>
-                        Parlons de votre projet
+                        {{ bannerText.badge }}
                     </div>
                     <h1 class="text-5xl lg:text-6xl font-black text-white mb-5 leading-tight" style="font-family: 'Plus Jakarta Sans', sans-serif;">
-                        Contactez-nous
+                        {{ bannerText.title }}<span v-if="bannerText.highlight" class="gt-text-gradient"> {{ bannerText.highlight }}</span>
                     </h1>
-                    <p class="text-xl text-white/70 leading-relaxed">
-                        Notre équipe est disponible pour répondre à toutes vos questions sur nos formations, consulting et projets.
+                    <p v-if="bannerText.subtitle" class="text-xl text-white/70 leading-relaxed">
+                        {{ bannerText.subtitle }}
                     </p>
                 </div>
             </div>

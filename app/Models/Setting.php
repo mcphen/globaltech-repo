@@ -143,6 +143,69 @@ class Setting extends Model
         return $banners;
     }
 
+    /** Assombrissement par défaut de l'image de bannière, en % */
+    public const PAGE_BANNER_DEFAULT_OVERLAY = 88;
+
+    /**
+     * Texte d'origine des bannières dont le texte est géré dans
+     * Admin > Bannières des pages (les autres pages ont leur propre écran).
+     */
+    public const PAGE_BANNER_TEXT_DEFAULTS = [
+        'formations' => [
+            'badge' => 'Centre accrédité PMI — Pearson VUE',
+            'title' => 'Formations',
+            'highlight' => 'certifiantes',
+            'subtitle' => 'Des programmes conçus par des experts pour vous mener à la certification internationale. IT, PMP, Management — choisissez votre filière.',
+        ],
+        'portfolio' => [
+            'badge' => 'Portfolio & Réalisations',
+            'title' => 'Nos projets',
+            'highlight' => "à travers l'Afrique",
+            'subtitle' => 'De Abidjan à Douala, en passant par Dakar et Bamako — découvrez les projets à impact que nous avons conduits pour nos clients.',
+        ],
+        'blog' => [
+            'badge' => 'Actualités & Insights',
+            'title' => 'Le blog',
+            'highlight' => 'GlobalTECH',
+            'subtitle' => 'Restez informé des dernières nouvelles, tendances et événements du monde de la formation professionnelle en Afrique.',
+        ],
+        'contact' => [
+            'badge' => 'Parlons de votre projet',
+            'title' => 'Contactez-nous',
+            'highlight' => '',
+            'subtitle' => 'Notre équipe est disponible pour répondre à toutes vos questions sur nos formations, consulting et projets.',
+        ],
+    ];
+
+    /**
+     * Réglages de bannière de chaque page : assombrissement (0-100) et,
+     * pour les pages de PAGE_BANNER_TEXT_DEFAULTS, le texte (valeur
+     * enregistrée, même vide, sinon texte d'origine).
+     */
+    public static function pageBannerMeta(): array
+    {
+        $stored = self::where('key', 'like', 'page_banner_%_meta')->pluck('value', 'key');
+        $meta = [];
+        foreach (array_keys(self::PAGE_BANNERS) as $key) {
+            $saved = json_decode((string) ($stored['page_banner_'.$key.'_meta'] ?? ''), true);
+            $saved = is_array($saved) ? $saved : [];
+
+            $item = [
+                'overlay' => isset($saved['overlay'])
+                    ? max(0, min(100, (int) $saved['overlay']))
+                    : self::PAGE_BANNER_DEFAULT_OVERLAY,
+            ];
+            if (isset(self::PAGE_BANNER_TEXT_DEFAULTS[$key])) {
+                foreach (self::PAGE_BANNER_TEXT_DEFAULTS[$key] as $field => $default) {
+                    $item[$field] = array_key_exists($field, $saved) ? (string) $saved[$field] : $default;
+                }
+            }
+            $meta[$key] = $item;
+        }
+
+        return $meta;
+    }
+
     /**
      * Logo et favicon du site : image envoyée dans Admin > Logo & favicon,
      * sinon les fichiers d'origine de public/images.
@@ -178,6 +241,7 @@ class Setting extends Model
             'presence_countries' => is_array($countries) ? $countries : self::DEFAULT_PRESENCE_COUNTRIES,
             'nav_menu' => self::navMenu(),
             'page_banners' => self::pageBanners(),
+            'page_banner_meta' => self::pageBannerMeta(),
             ...self::branding(),
         ];
     }

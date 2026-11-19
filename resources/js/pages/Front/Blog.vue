@@ -1,13 +1,14 @@
 <script setup lang="ts">
 import { Head, Link, router } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
-import { useSiteSettings, usePageBanner } from '@/composables/useSiteSettings';
+import { useSiteSettings, usePageBanner, usePageBannerText } from '@/composables/useSiteSettings';
 import { useDarkMode } from '@/composables/useDarkMode';
 import { ref, computed, watch } from 'vue';
 
 
 // Image de fond de la bannière (Admin > Bannières des pages)
 const bannerStyle = usePageBanner('blog');
+const bannerText = usePageBannerText('blog');
 const { contactEnabled } = useSiteSettings();
 
 interface Actualite {
@@ -82,16 +83,16 @@ const paginationInactive = computed(() => isDark.value ? 'color: #94A3B8;' : 'co
         <section class="py-24 relative overflow-hidden" :style="bannerStyle">
             <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
                 <div class="max-w-2xl">
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-5"
+                    <div v-if="bannerText.badge" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-5"
                         style="background: rgba(230, 57, 70, 0.15); color: #E63946; border: 1px solid rgba(230, 57, 70, 0.3);">
                         <i class="bi bi-newspaper"></i>
-                        Actualités & Insights
+                        {{ bannerText.badge }}
                     </div>
                     <h1 class="text-5xl lg:text-6xl font-black text-white mb-5 leading-tight" style="font-family: 'Plus Jakarta Sans', sans-serif;">
-                        Le blog <span class="gt-text-gradient">GlobalTECH</span>
+                        {{ bannerText.title }}<span v-if="bannerText.highlight" class="gt-text-gradient"> {{ bannerText.highlight }}</span>
                     </h1>
-                    <p class="text-xl text-white/70">
-                        Restez informé des dernières nouvelles, tendances et événements du monde de la formation professionnelle en Afrique.
+                    <p v-if="bannerText.subtitle" class="text-xl text-white/70">
+                        {{ bannerText.subtitle }}
                     </p>
                 </div>
             </div>

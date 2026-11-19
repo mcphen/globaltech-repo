@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Head, Link } from '@inertiajs/vue3';
 import LayoutFront from '@/layouts/Front/LayoutFront.vue';
-import { useSiteSettings, usePageBanner } from '@/composables/useSiteSettings';
+import { useSiteSettings, usePageBanner, usePageBannerText } from '@/composables/useSiteSettings';
 import { useDarkMode } from '@/composables/useDarkMode';
 import { ref, computed, onMounted } from 'vue';
 import axios from 'axios';
@@ -9,6 +9,7 @@ import axios from 'axios';
 
 // Image de fond de la bannière (Admin > Bannières des pages)
 const bannerStyle = usePageBanner('portfolio');
+const bannerText = usePageBannerText('portfolio');
 const { contactEnabled } = useSiteSettings();
 
 interface Photo { id: number; album_id: number; image_path: string; image_url?: string; caption?: string; is_banner?: boolean; }
@@ -117,16 +118,16 @@ const albumEmptyBg   = computed(() => isDark.value ? '#1E2D50' : '#F1F5F9');
         <section class="py-28 relative overflow-hidden" :style="bannerStyle">
             <div class="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
                 <div class="max-w-3xl">
-                    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6"
+                    <div v-if="bannerText.badge" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6"
                         style="background: rgba(230, 57, 70, 0.15); color: #E63946; border: 1px solid rgba(230, 57, 70, 0.3);">
                         <i class="bi bi-folder2-open-fill"></i>
-                        Portfolio & Réalisations
+                        {{ bannerText.badge }}
                     </div>
                     <h1 class="text-5xl lg:text-6xl font-black text-white mb-6 leading-tight" style="font-family: 'Plus Jakarta Sans', sans-serif;">
-                        Nos projets <span class="gt-text-gradient">à travers l'Afrique</span>
+                        {{ bannerText.title }}<span v-if="bannerText.highlight" class="gt-text-gradient"> {{ bannerText.highlight }}</span>
                     </h1>
-                    <p class="text-xl text-white/70 leading-relaxed">
-                        De Abidjan à Douala, en passant par Dakar et Bamako — découvrez les projets à impact que nous avons conduits pour nos clients.
+                    <p v-if="bannerText.subtitle" class="text-xl text-white/70 leading-relaxed">
+                        {{ bannerText.subtitle }}
                     </p>
                 </div>
             </div>

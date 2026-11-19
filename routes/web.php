@@ -277,6 +277,7 @@ Route::middleware(['auth'])->group(function () {
         // Image de bannière des pages publiques
         Route::get('page-banners', [\App\Http\Controllers\PageBannerController::class, 'index'])->name('admin.page-banners.index');
         Route::post('page-banners/{page}', [\App\Http\Controllers\PageBannerController::class, 'update'])->name('admin.page-banners.update');
+        Route::post('page-banners/{page}/settings', [\App\Http\Controllers\PageBannerController::class, 'settings'])->name('admin.page-banners.settings');
         Route::delete('page-banners/{page}', [\App\Http\Controllers\PageBannerController::class, 'destroy'])->name('admin.page-banners.destroy');
 
         // Banner management routes
