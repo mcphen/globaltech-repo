@@ -144,6 +144,24 @@ class Setting extends Model
     }
 
     /**
+     * Logo et favicon du site : image envoyée dans Admin > Logo & favicon,
+     * sinon les fichiers d'origine de public/images.
+     */
+    public const DEFAULT_LOGO = '/images/logo_globaltech.png';
+    public const DEFAULT_FAVICON = '/images/favicon_globaltech.png';
+
+    public static function branding(): array
+    {
+        $logo = self::get('site_logo');
+        $favicon = self::get('site_favicon');
+
+        return [
+            'logo_url' => $logo ? '/storage/'.$logo : self::DEFAULT_LOGO,
+            'favicon_url' => $favicon ? '/storage/'.$favicon : self::DEFAULT_FAVICON,
+        ];
+    }
+
+    /**
      * Site-wide front settings (pages visibility, theme, presence)
      *
      * @return array
@@ -160,6 +178,7 @@ class Setting extends Model
             'presence_countries' => is_array($countries) ? $countries : self::DEFAULT_PRESENCE_COUNTRIES,
             'nav_menu' => self::navMenu(),
             'page_banners' => self::pageBanners(),
+            ...self::branding(),
         ];
     }
 

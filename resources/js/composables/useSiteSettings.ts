@@ -21,6 +21,8 @@ export interface SiteSettings {
     presence_countries: PresenceCountry[];
     nav_menu: NavMenuItem[];
     page_banners: Partial<Record<PageBannerKey, string | null>>;
+    logo_url: string;
+    favicon_url: string;
 }
 
 export type PageBannerKey = 'home' | 'about' | 'formations' | 'consulting' | 'masterclass' | 'portfolio' | 'blog' | 'contact';
@@ -39,6 +41,8 @@ export function useSiteSettings() {
         presence_countries: [],
         nav_menu: [],
         page_banners: {},
+        logo_url: '/images/logo_globaltech.png',
+        favicon_url: '/images/favicon_globaltech.png',
         ...((page.props as any).siteSettings ?? {}),
     }));
 
@@ -46,6 +50,8 @@ export function useSiteSettings() {
         site,
         contactEnabled: computed(() => site.value.contact_enabled),
         blogEnabled: computed(() => site.value.blog_enabled),
+        logoUrl: computed(() => site.value.logo_url),
+        faviconUrl: computed(() => site.value.favicon_url),
     };
 }
 

@@ -1,4 +1,8 @@
 <script setup lang="ts">
+import { useSiteSettings } from '@/composables/useSiteSettings';
+
+const { faviconUrl } = useSiteSettings();
+
 defineOptions({
   inheritAttrs: false,
 });
@@ -6,7 +10,7 @@ defineOptions({
 
 <template>
   <img
-    src="/images/favicon_globaltech.png"
+    :src="faviconUrl"
     class="object-contain"
     v-bind="$attrs"
     alt="GlobalTECH EDUCATION Africa Logo"

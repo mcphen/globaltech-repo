@@ -37,11 +37,16 @@
             $siteName = 'GlobalTECH EDUCATION Africa';
             $siteDescription = 'Leader en formations certifiantes PMP, Informatique et Management en Afrique.';
             $shareImage = asset('images/og_globaltech.jpg');
-            $favicon = asset('images/favicon_globaltech.png');
+            // Favicon modifiable dans Admin > Logo & favicon
+            $favicon = url(rescue(
+                fn () => \App\Models\Setting::branding()['favicon_url'],
+                \App\Models\Setting::DEFAULT_FAVICON,
+                false
+            ));
         @endphp
         <meta name="description" content="{{ $siteDescription }}" />
-        <link rel="icon" type="image/png" href="{{ $favicon }}">
-        <link rel="shortcut icon" type="image/png" href="{{ $favicon }}">
+        <link rel="icon" href="{{ $favicon }}">
+        <link rel="shortcut icon" href="{{ $favicon }}">
         <link rel="apple-touch-icon" href="{{ $favicon }}">
 
         {{-- Rendered server-side: social crawlers (WhatsApp, Facebook, LinkedIn…) don't execute JS --}}

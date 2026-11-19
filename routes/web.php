@@ -269,6 +269,11 @@ Route::middleware(['auth'])->group(function () {
                 'destroy' => 'admin.hero-slides.destroy',
             ]);
 
+        // Logo et favicon du site
+        Route::get('branding', [\App\Http\Controllers\BrandingController::class, 'index'])->name('admin.branding.index');
+        Route::post('branding/{type}', [\App\Http\Controllers\BrandingController::class, 'update'])->name('admin.branding.update');
+        Route::delete('branding/{type}', [\App\Http\Controllers\BrandingController::class, 'destroy'])->name('admin.branding.destroy');
+
         // Image de bannière des pages publiques
         Route::get('page-banners', [\App\Http\Controllers\PageBannerController::class, 'index'])->name('admin.page-banners.index');
         Route::post('page-banners/{page}', [\App\Http\Controllers\PageBannerController::class, 'update'])->name('admin.page-banners.update');

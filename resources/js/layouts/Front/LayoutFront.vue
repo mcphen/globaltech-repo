@@ -41,7 +41,7 @@ const { isDark, isForced, theme, cycle, icon, label } = useDarkMode();
 type Theme = 'system' | 'light' | 'dark';
 const setTheme = (t: Theme) => { theme.value = t; };
 
-const { site, contactEnabled, blogEnabled } = useSiteSettings();
+const { site, contactEnabled, blogEnabled, logoUrl } = useSiteSettings();
 watch(() => site.value.theme_mode, (mode) => {
     setForcedTheme(mode === 'dark' || mode === 'light' ? mode : null);
 }, { immediate: true });
@@ -243,7 +243,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
 
                     <!-- Logo -->
                     <Link :href="route('home')" class="flex items-center flex-shrink-0" :class="isDark ? 'rounded-lg bg-white px-2 py-1' : ''">
-                        <img src="/images/logo_globaltech.png" alt="GlobalTECH EDUCATION Africa" class="h-12 md:h-20 w-auto object-contain" />
+                        <img :src="logoUrl" alt="GlobalTECH EDUCATION Africa" class="h-12 md:h-20 w-auto object-contain" />
                     </Link>
 
                     <!-- Desktop Nav -->
@@ -494,7 +494,7 @@ const mobileBg = computed(() => isDark.value ? '#0D1526' : '#FFFFFF');
                     <!-- Brand Column -->
                     <div class="lg:col-span-1">
                         <Link :href="route('home')" class="inline-flex items-center mb-5 rounded-xl bg-white px-3 py-2">
-                            <img src="/images/logo_globaltech.png" alt="GlobalTECH EDUCATION Africa" class="h-12 md:h-16 w-auto object-contain" />
+                            <img :src="logoUrl" alt="GlobalTECH EDUCATION Africa" class="h-12 md:h-16 w-auto object-contain" />
                         </Link>
                         <p class="text-sm leading-relaxed mb-6" style="color: #94A3B8;">
                             Leader en formations certifiantes et consulting en Afrique. Nous certifions l'excellence professionnelle depuis Abidjan.
