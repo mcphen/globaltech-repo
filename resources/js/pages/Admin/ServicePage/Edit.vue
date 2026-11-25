@@ -3,6 +3,7 @@ import { Head, usePage, router } from '@inertiajs/vue3';
 import AppLayout from '@/layouts/AppLayout.vue';
 import { type BreadcrumbItem } from '@/types';
 import { ref, reactive } from 'vue';
+import RichTextEditor from '@/components/RichTextEditor.vue';
 
 const breadcrumbs: BreadcrumbItem[] = [
     { title: 'Dashboard', href: '/dashboard' },
@@ -157,7 +158,7 @@ const tabs = [
 
                     <div>
                         <label class="gt-label">Sous-titre</label>
-                        <textarea v-model="form.hero_subtitle" rows="3" class="gt-input" placeholder="Nos experts vous accompagnent..."></textarea>
+                        <RichTextEditor v-model="form.hero_subtitle" placeholder="Nos experts vous accompagnent..." />
                     </div>
 
                     <!-- Mini stats -->
@@ -249,7 +250,7 @@ const tabs = [
                                 </div>
                                 <div>
                                     <label class="text-xs text-gray-500">Description</label>
-                                    <textarea v-model="offer.desc" rows="2" class="gt-input" placeholder="Accompagnement stratégique..."></textarea>
+                                    <RichTextEditor v-model="offer.desc" placeholder="Accompagnement stratégique..." />
                                 </div>
                                 <div>
                                     <div class="flex items-center justify-between mb-1">
@@ -324,7 +325,7 @@ const tabs = [
                     </div>
                     <div>
                         <label class="gt-label">Sous-titre</label>
-                        <textarea v-model="form.cta_subtitle" rows="3" class="gt-input" placeholder="Nos équipes sont prêtes à intervenir..."></textarea>
+                        <RichTextEditor v-model="form.cta_subtitle" placeholder="Nos équipes sont prêtes à intervenir..." />
                     </div>
                 </div>
 

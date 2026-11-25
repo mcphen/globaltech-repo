@@ -107,7 +107,7 @@ const ringOffset     = computed(() => isDark.value ? 'ring-offset-[#0B1437]' : '
                             {{ sp.hero_title }}
                             <span v-if="sp.hero_gradient_word" class="gt-text-gradient"> {{ sp.hero_gradient_word }}</span>
                         </h1>
-                        <p v-if="sp.hero_subtitle" class="text-xl text-white/70 leading-relaxed mb-8">{{ sp.hero_subtitle }}</p>
+                        <div v-if="sp.hero_subtitle" class="gt-rich text-xl text-white/70 leading-relaxed mb-8" v-html="sp.hero_subtitle"></div>
                         <div class="flex flex-wrap gap-4">
                             <Link v-if="contactEnabled" href="/contact" class="gt-btn-gold rounded-xl px-8 py-3.5">
                                 <i class="bi bi-telephone-fill"></i> Demander un devis
@@ -179,7 +179,7 @@ const ringOffset     = computed(() => isDark.value ? 'ring-offset-[#0B1437]' : '
                             <i :class="['bi', offer.icon, 'text-2xl']" :style="`color: ${offer.color};`"></i>
                         </div>
                         <h3 class="text-lg font-bold mb-3" :style="`color: ${titleColor};`">{{ offer.title }}</h3>
-                        <p class="text-sm leading-relaxed mb-5" :style="`color: ${descColor};`">{{ offer.desc }}</p>
+                        <div class="gt-rich text-sm leading-relaxed mb-5" :style="`color: ${descColor};`" v-html="offer.desc"></div>
                         <div v-if="offer.deliverables?.length" class="space-y-1.5">
                             <p class="text-xs font-bold uppercase tracking-wide mb-2" :style="`color: ${labelColor};`">Livrables</p>
                             <div v-for="d in offer.deliverables" :key="d" class="flex items-center gap-2 text-xs" :style="`color: ${descColor};`">
@@ -224,7 +224,7 @@ const ringOffset     = computed(() => isDark.value ? 'ring-offset-[#0B1437]' : '
                 <h2 class="text-3xl lg:text-4xl font-black text-white mb-4" style="font-family: 'Plus Jakarta Sans', sans-serif;">
                     {{ sp.cta_title }}
                 </h2>
-                <p v-if="sp.cta_subtitle" class="text-white/70 mb-8 text-lg">{{ sp.cta_subtitle }}</p>
+                <div v-if="sp.cta_subtitle" class="gt-rich text-white/70 mb-8 text-lg" v-html="sp.cta_subtitle"></div>
                 <div class="flex flex-wrap gap-4 justify-center">
                     <Link v-if="contactEnabled" href="/contact" class="gt-btn-gold px-8 py-4 rounded-xl text-base font-black">
                         <i class="bi bi-send-fill"></i> Demander un devis
